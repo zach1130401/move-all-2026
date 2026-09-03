@@ -393,15 +393,15 @@
       </div>
     </section>
 
-    <!-- 即時排行榜 (個人榜 vs 3人團隊累積點數榜) -->
+    <!-- 即時排行榜 (以 3人團隊點數總榜 為主) -->
     <section id="leaderboard" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone/15 pb-3">
         <div class="flex gap-4">
-          <button id="tabBtnIndivBoard" onclick="switchBoardTab('individual')" class="pb-2 text-lg font-bold border-b-2 border-ocean text-appleDark transition">
-            👤 個人步數與點數榜
+          <button id="tabBtnTeamBoard" onclick="switchBoardTab('team')" class="pb-2 text-lg font-bold border-b-2 border-ocean text-appleDark transition">
+            🏆 3人團隊點數總榜 (主要)
           </button>
-          <button id="tabBtnTeamBoard" onclick="switchBoardTab('team')" class="pb-2 text-lg font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
-            🏆 3人團隊點數總榜
+          <button id="tabBtnIndivBoard" onclick="switchBoardTab('individual')" class="pb-2 text-lg font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
+            👤 個人步數與點數榜
           </button>
         </div>
         <button onclick="fetchData()" class="text-xs font-semibold text-oceanDark hover:underline self-end sm:self-center">
@@ -409,8 +409,30 @@
         </button>
       </div>
 
-      <!-- 個人排行榜 -->
-      <div id="boardContentIndividual" class="bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
+      <!-- 3人團隊累積點數排行榜 (主要預設顯示) -->
+      <div id="boardContentTeam" class="bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-cloud text-stone text-xs uppercase border-b border-stone/15">
+              <tr>
+                <th class="p-3.5 w-12 text-center font-bold">名次</th>
+                <th class="p-3.5 font-bold">團隊名稱 (隊名)</th>
+                <th class="p-3.5 font-bold">隊員成員 (3人小組)</th>
+                <th class="p-3.5 text-right font-bold">團隊累積總步數</th>
+                <th class="p-3.5 text-center font-bold">團隊累積總點數</th>
+                <th class="p-3.5 text-center font-bold">現金獎金門檻</th>
+                <th class="p-3.5 text-right font-bold">團隊可得總獎金</th>
+              </tr>
+            </thead>
+            <tbody id="teamLeaderboardBody" class="divide-y divide-stone/10 text-appleDark">
+              <tr><td colspan="7" class="p-6 text-center text-stone">正在讀取團隊排行...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 個人排行榜 (次要頁籤) -->
+      <div id="boardContentIndividual" class="hidden bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="bg-cloud text-stone text-xs uppercase border-b border-stone/15">
@@ -427,28 +449,6 @@
             </thead>
             <tbody id="leaderboardBody" class="divide-y divide-stone/10 text-appleDark">
               <tr><td colspan="8" class="p-6 text-center text-stone">正在讀取排行...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 3人團隊累積點數排行榜 -->
-      <div id="boardContentTeam" class="hidden bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-cloud text-stone text-xs uppercase border-b border-stone/15">
-              <tr>
-                <th class="p-3.5 w-12 text-center font-bold">名次</th>
-                <th class="p-3.5 font-bold">團隊名稱 (隊名)</th>
-                <th class="p-3.5 font-bold">隊員成員 (3人小組)</th>
-                <th class="p-3.5 text-right font-bold">團隊累積總步數</th>
-                <th class="p-3.5 text-center font-bold">團隊累積總點數</th>
-                <th class="p-3.5 text-center font-bold">現金獎金門檻</th>
-                <th class="p-3.5 text-right font-bold">團隊可得總獎金</th>
-              </tr>
-            </thead>
-            <tbody id="teamLeaderboardBody" class="divide-y divide-stone/10 text-appleDark">
-              <tr><td colspan="7" class="p-6 text-center text-stone">正在讀取團隊排行...</td></tr>
             </tbody>
           </table>
         </div>
