@@ -664,7 +664,8 @@
                   <tr>
                     <th class="p-3">日期</th>
                     <th class="p-3">同仁 Email</th>
-                    <th class="p-3">自報步數</th>
+                    <th class="p-3">自報步數 / 內容</th>
+                    <th class="p-3 text-center">Pacer 累計點數</th>
                     <th class="p-3">截圖證明 (點擊放大)</th>
                     <th class="p-3">狀態</th>
                     <th class="p-3">操作</th>
@@ -1896,15 +1897,25 @@
       });
 
       if (validRecords.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前無需要審核的資料</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">目前無需要審核的資料</td></tr>';
         return;
       }
 
-      tbody.innerHTML = validRecords.map(item => `
+      tbody.innerHTML = validRecords.map(item => {
+        let pacerBadge = '<span class="text-stone font-normal text-xs">-</span>';
+        if (item.cleanEmail) {
+          const savedPts = localStorage.getItem('north_pacer_points_' + item.cleanEmail.toLowerCase());
+          if (savedPts !== null) {
+            pacerBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-oceanLight text-oceanDark border border-ocean/30">${savedPts} 點</span>`;
+          }
+        }
+
+        return `
         <tr class="hover:bg-oceanLight/20 transition">
           <td class="p-3 text-xs">${item.date}</td>
           <td class="p-3 text-xs font-semibold">${item.cleanName} <span class="text-stone font-normal">(${item.cleanEmail})</span></td>
-          <td class="p-3 font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()}</td>
+          <td class="p-3 font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()} 步</td>
+          <td class="p-3 text-center font-mono font-bold">${pacerBadge}</td>
           <td class="p-3">
             ${item.imageUrl ? `
               <div class="flex items-center gap-2">
@@ -1924,7 +1935,7 @@
             <button onclick="auditRecord(this, ${item.rowId}, '駁回', 0)" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold transition shadow-xs">駁回</button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
     }
 
     function auditRecord(btnEl, rowId, status, steps) {
