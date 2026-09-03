@@ -74,8 +74,10 @@
         <div id="headerLoggedOutArea" class="hidden"></div>
         <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
           <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0" id="userAvatarText">N</div>
-          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[100px] sm:max-w-[140px] truncate inline-block align-bottom">諾思夥伴</span>
+          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[90px] sm:max-w-[120px] truncate inline-block align-bottom">諾思夥伴</span>
           <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-0.5 shrink-0">改暱稱</button>
+          <span class="text-slate-300">|</span>
+          <button onclick="openTeamModal()" class="text-oceanDark hover:underline font-semibold shrink-0">組隊/隊名</button>
           <span class="text-slate-300">|</span>
           <button onclick="logoutUser()" class="text-appleGray hover:text-appleDark font-medium shrink-0">登出</button>
         </div>
@@ -391,19 +393,24 @@
       </div>
     </section>
 
-    <!-- 即時排行榜 -->
+    <!-- 即時排行榜 (個人榜 vs 3人團隊累積點數榜) -->
     <section id="leaderboard" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <h2 class="text-3xl font-black text-appleDark tracking-tight">同仁步數即時排行榜</h2>
-          <p class="text-appleGray text-sm mt-1">同步 Google Sheet 審核通過之有效數據</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone/15 pb-3">
+        <div class="flex gap-4">
+          <button id="tabBtnIndivBoard" onclick="switchBoardTab('individual')" class="pb-2 text-lg font-bold border-b-2 border-ocean text-appleDark transition">
+            👤 個人步數與點數榜
+          </button>
+          <button id="tabBtnTeamBoard" onclick="switchBoardTab('team')" class="pb-2 text-lg font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
+            🏆 3人團隊點數總榜
+          </button>
         </div>
-        <button onclick="fetchData()" class="text-sm font-semibold text-oceanDark hover:underline">
-          重新整理排行
+        <button onclick="fetchData()" class="text-xs font-semibold text-oceanDark hover:underline self-end sm:self-center">
+          重新整理排行 ↻
         </button>
       </div>
 
-      <div class="bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
+      <!-- 個人排行榜 -->
+      <div id="boardContentIndividual" class="bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="bg-cloud text-stone text-xs uppercase border-b border-stone/15">
@@ -420,6 +427,28 @@
             </thead>
             <tbody id="leaderboardBody" class="divide-y divide-stone/10 text-appleDark">
               <tr><td colspan="8" class="p-6 text-center text-stone">正在讀取排行...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3人團隊累積點數排行榜 -->
+      <div id="boardContentTeam" class="hidden bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-cloud text-stone text-xs uppercase border-b border-stone/15">
+              <tr>
+                <th class="p-3.5 w-12 text-center font-bold">名次</th>
+                <th class="p-3.5 font-bold">團隊名稱 (隊名)</th>
+                <th class="p-3.5 font-bold">隊員成員 (3人小組)</th>
+                <th class="p-3.5 text-right font-bold">團隊累積總步數</th>
+                <th class="p-3.5 text-center font-bold">團隊累積總點數</th>
+                <th class="p-3.5 text-center font-bold">現金獎金門檻</th>
+                <th class="p-3.5 text-right font-bold">團隊可得總獎金</th>
+              </tr>
+            </thead>
+            <tbody id="teamLeaderboardBody" class="divide-y divide-stone/10 text-appleDark">
+              <tr><td colspan="7" class="p-6 text-center text-stone">正在讀取團隊排行...</td></tr>
             </tbody>
           </table>
         </div>
@@ -582,6 +611,41 @@
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="closeNicknameModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-stone hover:bg-slate-100">取消</button>
         <button onclick="saveNewNickname()" class="px-5 py-2 rounded-full text-xs font-semibold bg-ocean hover:bg-oceanDark text-white shadow-xs">儲存覆蓋</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3人團隊與隊名設定 Modal -->
+  <div id="teamModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-[28px] max-w-md w-full p-7 space-y-4 shadow-xl border border-stone/20">
+      <div class="flex justify-between items-center border-b border-stone/15 pb-2">
+        <h4 class="font-bold text-appleDark text-base sm:text-lg">🏆 設定 3人團隊隊名與組員圈選</h4>
+        <button onclick="closeTeamModal()" class="text-stone hover:text-appleDark font-bold text-lg">✕</button>
+      </div>
+      <p class="text-xs text-stone leading-relaxed">請輸入您的 3 人小組隊名與成員，系統將自動累計團隊總步數與點數，並解鎖 NT$ 4,800 / NT$ 6,000 現金獎勵！</p>
+      
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-bold text-appleDark mb-1">團隊隊名 <span class="text-rose-500">*</span></label>
+          <input id="teamNameInput" type="text" placeholder="例如：諾思勁跑隊" class="w-full border border-stone/20 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ocean">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-appleDark mb-1">隊員 1 (主要聯絡人 / 您的 Email)</label>
+          <input id="teamMember1Input" type="text" readonly class="w-full border border-stone/20 bg-stone/5 rounded-xl px-4 py-2 text-xs text-stone">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-appleDark mb-1">隊員 2 (Email 或暱稱) <span class="text-rose-500">*</span></label>
+          <input id="teamMember2Input" type="text" placeholder="輸入隊員 2 Email 或暱稱" class="w-full border border-stone/20 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ocean">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-appleDark mb-1">隊員 3 (Email 或暱稱) <span class="text-rose-500">*</span></label>
+          <input id="teamMember3Input" type="text" placeholder="輸入隊員 3 Email 或暱稱" class="w-full border border-stone/20 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ocean">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeTeamModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-stone hover:bg-slate-100">取消</button>
+        <button onclick="saveTeamInfo()" class="px-5 py-2 rounded-full text-xs font-semibold bg-ocean hover:bg-oceanDark text-white shadow-xs">儲存團隊設定</button>
       </div>
     </div>
   </div>
@@ -793,6 +857,7 @@
             document.getElementById('adminSection').classList.add('hidden');
           }
           renderLeaderboard(data.leaderboard);
+          renderTeamLeaderboard(data.leaderboard, data.teams);
           renderFeed(data.records);
           renderChatMessages(data.chatMessages);
         })
@@ -1020,6 +1085,152 @@
           <td class="p-3.5 text-center font-mono font-black text-sunrise text-sm sm:text-base">${user.points} 點</td>
           <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || (user.points >= 20 ? 'Gold' : user.points >= 10 ? 'Silver' : 'Bronze')}</span></td>
           <td class="p-3.5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : (user.points >= 15 ? 'NT$ 2,000' : user.points >= 10 ? 'NT$ 1,600' : '參加獎')}</td>
+        </tr>
+      `).join('');
+    }
+
+    function switchBoardTab(tab) {
+      if (tab === 'individual') {
+        document.getElementById('boardContentIndividual').classList.remove('hidden');
+        document.getElementById('boardContentTeam').classList.add('hidden');
+        document.getElementById('tabBtnIndivBoard').className = "pb-2 text-lg font-bold border-b-2 border-ocean text-appleDark transition";
+        document.getElementById('tabBtnTeamBoard').className = "pb-2 text-lg font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
+      } else {
+        document.getElementById('boardContentIndividual').classList.add('hidden');
+        document.getElementById('boardContentTeam').classList.remove('hidden');
+        document.getElementById('tabBtnIndivBoard').className = "pb-2 text-lg font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
+        document.getElementById('tabBtnTeamBoard').className = "pb-2 text-lg font-bold border-b-2 border-ocean text-appleDark transition";
+      }
+    }
+
+    function openTeamModal() {
+      if (!currentEmail) return alert("請先完成 Google 登入！");
+      document.getElementById('teamMember1Input').value = currentEmail;
+      
+      const saved = localStorage.getItem('north_team_' + currentEmail);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          document.getElementById('teamNameInput').value = parsed.teamName || "";
+          document.getElementById('teamMember2Input').value = parsed.members[1] || "";
+          document.getElementById('teamMember3Input').value = parsed.members[2] || "";
+        } catch(e){}
+      }
+      document.getElementById('teamModal').classList.remove('hidden');
+    }
+
+    function closeTeamModal() {
+      document.getElementById('teamModal').classList.add('hidden');
+    }
+
+    function saveTeamInfo() {
+      const teamName = document.getElementById('teamNameInput').value.trim();
+      const m2 = document.getElementById('teamMember2Input').value.trim();
+      const m3 = document.getElementById('teamMember3Input').value.trim();
+
+      if (!teamName) return alert("請輸入團隊隊名！");
+      if (!m2 || !m3) return alert("請填寫完整的 3 人小組成員資訊！");
+
+      const teamData = {
+        teamName: teamName,
+        members: [currentEmail, m2, m3]
+      };
+
+      localStorage.setItem('north_team_' + currentEmail, JSON.stringify(teamData));
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'setTeam',
+          operatorEmail: currentEmail,
+          teamName: teamName,
+          members: [currentEmail, m2, m3]
+        })
+      });
+
+      alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
+      closeTeamModal();
+      fetchData();
+    }
+
+    function renderTeamLeaderboard(individualList, serverTeams) {
+      const tbody = document.getElementById('teamLeaderboardBody');
+      if (!tbody) return;
+
+      const localTeam = localStorage.getItem('north_team_' + currentEmail);
+      let teams = serverTeams || [];
+
+      if (localTeam) {
+        try {
+          const parsed = JSON.parse(localTeam);
+          if (parsed && parsed.teamName) {
+            if (!teams.find(t => t.teamName === parsed.teamName)) {
+              teams.push(parsed);
+            }
+          }
+        } catch(e){}
+      }
+
+      if (!teams || teams.length === 0) {
+        teams = [
+          { teamName: "諾思衝鋒隊 01", members: ["Zach Yang", "欣庭 Eunice", "Alice"] },
+          { teamName: "健康勇士隊 02", members: ["Bob", "Carol", "David"] }
+        ];
+      }
+
+      const processedTeams = teams.map(t => {
+        let teamSteps = 0;
+        let teamPoints = 0;
+
+        if (individualList && individualList.length > 0) {
+          individualList.forEach(user => {
+            const info = cleanUserInfo(user);
+            const isMember = t.members.some(m => 
+              (m && typeof m === 'string') && 
+              (m.toLowerCase().includes(info.email.toLowerCase()) || 
+               info.name.toLowerCase().includes(m.toLowerCase()) || 
+               m.toLowerCase().includes(info.name.toLowerCase()))
+            );
+            if (isMember) {
+              const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
+              const sports = user.sportCount || user.sports || 0;
+              teamSteps += (user.totalSteps || user.steps || 0);
+              teamPoints += (user.points || user.totalPoints || (days + sports));
+            }
+          });
+        }
+
+        if (t.extraPoints) teamPoints += t.extraPoints;
+
+        let statusBadge = "尚未達標";
+        let rewardText = "參加獎 (公益禮盒)";
+        if (teamPoints >= 15) {
+          statusBadge = "🏆 解鎖最高門檻 (≥15點)";
+          rewardText = "NT$ 6,000";
+        } else if (teamPoints >= 10) {
+          statusBadge = "🎯 解鎖第一門檻 (≥10點)";
+          rewardText = "NT$ 4,800";
+        }
+
+        return {
+          teamName: t.teamName,
+          membersStr: t.members.join(', '),
+          teamSteps: teamSteps,
+          teamPoints: teamPoints,
+          statusBadge: statusBadge,
+          rewardText: rewardText
+        };
+      }).sort((a, b) => b.teamPoints - a.teamPoints);
+
+      tbody.innerHTML = processedTeams.map((team, idx) => `
+        <tr class="hover:bg-oceanLight/30 transition text-xs sm:text-sm">
+          <td class="p-3.5 text-center font-bold">${idx + 1}</td>
+          <td class="p-3.5 font-bold text-appleDark">${team.teamName}</td>
+          <td class="p-3.5 font-medium text-stone">${team.membersStr}</td>
+          <td class="p-3.5 text-right font-mono font-bold text-appleDark">${team.teamSteps.toLocaleString()} 步</td>
+          <td class="p-3.5 text-center font-mono font-black text-sunrise text-base">${team.teamPoints} 點</td>
+          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${team.teamPoints >= 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-stone/10 text-stone'}">${team.statusBadge}</span></td>
+          <td class="p-3.5 text-right font-black text-oceanDark">${team.rewardText}</td>
         </tr>
       `).join('');
     }
