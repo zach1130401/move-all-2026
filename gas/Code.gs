@@ -407,10 +407,21 @@ function submitCheckIn(payload) {
     try {
       const folderIterator = DriveApp.getFoldersByName("MOVE_ALL_2026_運動截圖");
       let folder = folderIterator.hasNext() ? folderIterator.next() : DriveApp.createFolder("MOVE_ALL_2026_運動截圖");
+      folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
       let base64Data = payload.base64Image;
       if (base64Data.includes(",")) base64Data = base64Data.split(",")[1];
       const decodedData = Utilities.base64Decode(base64Data);
-      const blob = Utilities.newBlob(decodedData, "image/png", `${payload.email}_${payload.date}.png`);
+
+      // 清理檔名與結構化命名：[日期]_[同仁暱稱]_[Email帳號]_[精確時間].png
+      const cleanName = String(payload.name || "諾思夥伴").replace(/[^\w\u4e00-\u9fa5]/g, "");
+      const emailPrefix = String(payload.email || "user").split("@")[0];
+      const dateStr = String(payload.date || Utilities.formatDate(new Date(), "Asia/Taipei", "yyyy-MM-dd")).replace(/\//g, "-");
+      const timeStr = Utilities.formatDate(new Date(), "Asia/Taipei", "HHmmss");
+
+      const fileName = `${dateStr}_${cleanName}_${emailPrefix}_${timeStr}.png`;
+
+      const blob = Utilities.newBlob(decodedData, "image/png", fileName);
       const file = folder.createFile(blob);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       fileUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
