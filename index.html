@@ -74,10 +74,9 @@
         <div id="headerLoggedOutArea" class="hidden"></div>
         <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
           <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0" id="userAvatarText">N</div>
-          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[90px] sm:max-w-[120px] truncate inline-block align-bottom">諾思夥伴</span>
+          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[90px] sm:max-w-[110px] truncate inline-block align-bottom">諾思夥伴</span>
+          <span id="userTeamBadgeDisplay" onclick="openTeamModal()" title="點擊檢視/設定團隊" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0 cursor-pointer hover:bg-amber-200 transition">🏆 未組隊</span>
           <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-0.5 shrink-0">改暱稱</button>
-          <span class="text-slate-300">|</span>
-          <button onclick="openTeamModal()" class="text-oceanDark hover:underline font-semibold shrink-0">組隊/隊名</button>
           <span class="text-slate-300">|</span>
           <button onclick="logoutUser()" class="text-appleGray hover:text-appleDark font-medium shrink-0">登出</button>
         </div>
@@ -914,9 +913,16 @@
           const rawNick = data.userNickname || currentNickname || "諾思夥伴";
           const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
           currentNickname = nickInfo.name || currentEmail.split('@')[0] || "諾思夥伴";
-          document.getElementById('userNicknameDisplay').innerText = currentNickname;
-          document.getElementById('formName').value = currentNickname;
-          document.getElementById('userAvatarText').innerText = (currentNickname || "諾")[0].toUpperCase();
+          let userTeamName = "未組隊";
+          const localTeam = localStorage.getItem('north_team_' + currentEmail);
+          if (localTeam) {
+            try {
+              const parsed = JSON.parse(localTeam);
+              if (parsed && parsed.teamName) userTeamName = parsed.teamName;
+            } catch(e){}
+          }
+          const badgeEl = document.getElementById('userTeamBadgeDisplay');
+          if (badgeEl) badgeEl.innerText = "🏆 " + userTeamName;
 
           if (data.isAdmin) {
             document.getElementById('adminNavLink').classList.remove('hidden');
