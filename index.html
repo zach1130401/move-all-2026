@@ -1031,22 +1031,30 @@
       fetchData();
     }
 
-    // 接收 Google 官方登入成功憑證
+    // 接收 Google 官方登入成功憑證 (綁定全域 window 確保 100% 觸發)
     function handleCredentialResponse(response) {
       console.log("Google Credential Response:", response);
+      const hintEl = document.getElementById('loginLoadingHint');
+      if (hintEl) hintEl.classList.remove('hidden');
+
       try {
-        const payload = decodeJwt(response);
-        console.log("Decoded Payload:", payload);
+        let payload = decodeJwt(response);
         if (!payload || !payload.email) {
-          console.error("未能解析出 email, payload:", payload);
-          alert("登入處理失敗：未能解析出有效 Google Email！\n請按 Ctrl+F5 (Cmd+Shift+R) 強制更新網頁以套用最新修正。");
+          if (response && response.credential) {
+            payload = decodeJwt(response.credential);
+          }
+        }
+
+        if (!payload || !payload.email) {
+          console.error("未能解析出 email, response:", response);
+          alert("登入處理失敗：未能解析出有效 Google Email！\n請按 Ctrl+F5 強制刷新再試一次。");
+          if (hintEl) hintEl.classList.add('hidden');
           return;
         }
 
         currentEmail = String(payload.email).toLowerCase().trim();
-        const userName = payload.name || currentEmail.split('@')[0];
+        const userName = payload.name || currentEmail.split('@')[0] || "諾思夥伴";
 
-        // 寫入本機持久化記憶
         localStorage.setItem('north_user', JSON.stringify({
           email: currentEmail,
           name: userName,
@@ -1058,8 +1066,10 @@
       } catch (err) {
         console.error("登入解析攔截錯誤:", err);
         alert("登入處理失敗：" + err.message);
+        if (hintEl) hintEl.classList.add('hidden');
       }
     }
+    window.handleCredentialResponse = handleCredentialResponse;
 
     function logoutUser() {
       localStorage.removeItem('north_user');
