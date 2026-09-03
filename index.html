@@ -521,14 +521,21 @@
               <label class="block text-stone text-xs font-semibold uppercase mb-1">Google Email</label>
               <input id="formEmail" type="email" readonly class="w-full border border-stone/20 bg-stone/5 rounded-xl px-3.5 py-2 outline-none text-stone text-sm">
             </div>
+            <div>
+              <label class="block text-stone text-xs font-semibold uppercase mb-1">回報類型 <span class="text-rose-500 font-bold">*</span></label>
+              <select id="formCategory" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm font-semibold text-appleDark bg-cloud/50">
+                <option value="【每日步數】8,000 步達標">🏃【每日步數】Pacer / 手環 8,000 步達標</option>
+                <option value="【規律運動】30 分鐘以上自主運動">🚴【規律運動】30分鐘以上運動 (慢跑/健走/瑜伽/GPS ART等)</option>
+              </select>
+            </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-stone text-xs font-semibold uppercase mb-1">運動 / 步數日期</label>
+                <label class="block text-stone text-xs font-semibold uppercase mb-1">運動 / 步數日期 <span class="text-rose-500 font-bold">*</span></label>
                 <input id="formDate" type="date" required class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
               </div>
               <div>
-                <label class="block text-stone text-xs font-semibold uppercase mb-1">當日精確步數</label>
-                <input id="formSteps" type="number" step="1" min="1" required placeholder="如 8421" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
+                <label class="block text-stone text-xs font-semibold uppercase mb-1">當日精確步數 (可填 0)</label>
+                <input id="formSteps" type="number" step="1" min="0" value="8000" placeholder="步數如 8421 (純運動可填0)" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
               </div>
             </div>
             <div>
@@ -536,8 +543,8 @@
               <input id="formFile" type="file" accept="image/*" required class="w-full text-xs text-stone file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-oceanLight file:text-oceanDark hover:file:bg-ocean/20 cursor-pointer">
             </div>
             <div>
-              <label class="block text-stone text-xs font-semibold uppercase mb-1">心得留言 / GPS 路線理念</label>
-              <textarea id="formMessage" rows="2" placeholder="今日完成慢跑與核心訓練，大家一起堅持！" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm"></textarea>
+              <label class="block text-stone text-xs font-semibold uppercase mb-1">運動項目 / 心得 / GPS 路線理念</label>
+              <textarea id="formMessage" rows="2" placeholder="例如：慢跑 35 分鐘、健身房核心訓練、或繪製 GPS 企鵝圖案..." class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm"></textarea>
             </div>
             <button id="formSubmitBtn" type="submit" class="w-full bg-ocean hover:bg-oceanDark text-white font-bold py-3 rounded-full transition shadow-xs text-sm">
               送出回報
@@ -1981,6 +1988,10 @@
         base64Image = base64Image.split(',')[1];
       }
 
+      const category = document.getElementById('formCategory').value || "【每日步數】8,000 步達標";
+      const rawMsg = document.getElementById('formMessage').value.trim();
+      const fullMsg = rawMsg ? `${category} - ${rawMsg}` : category;
+
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -1988,8 +1999,8 @@
           email: currentEmail,
           name: document.getElementById('formName').value.trim() || currentNickname || "諾思夥伴",
           date: document.getElementById('formDate').value,
-          steps: document.getElementById('formSteps').value,
-          message: document.getElementById('formMessage').value,
+          steps: Number(document.getElementById('formSteps').value) || 0,
+          message: fullMsg,
           base64Image: base64Image
         })
       })
