@@ -799,12 +799,16 @@
           <input id="teamMember1Input" type="text" readonly class="w-full border border-stone/20 bg-stone/5 rounded-xl px-4 py-2 text-xs text-stone font-semibold">
         </div>
         <div>
-          <label class="block text-xs font-bold text-appleDark mb-1">隊員 2 (Email 或暱稱) <span class="text-rose-500">*</span></label>
-          <input id="teamMember2Input" type="text" placeholder="輸入隊員 2 Email 或暱稱" class="w-full border border-stone/20 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ocean">
+          <label class="block text-xs font-bold text-appleDark mb-1">隊員 2 (選擇已註冊/回報同仁) <span class="text-rose-500">*</span></label>
+          <select id="teamMember2Input" class="w-full border border-stone/20 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean bg-cloud/30 font-medium text-appleDark">
+            <option value="">-- 請選擇隊員 2 --</option>
+          </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-appleDark mb-1">隊員 3 (Email 或暱稱) <span class="text-rose-500">*</span></label>
-          <input id="teamMember3Input" type="text" placeholder="輸入隊員 3 Email 或暱稱" class="w-full border border-stone/20 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ocean">
+          <label class="block text-xs font-bold text-appleDark mb-1">隊員 3 (選擇已註冊/回報同仁) <span class="text-rose-500">*</span></label>
+          <select id="teamMember3Input" class="w-full border border-stone/20 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean bg-cloud/30 font-medium text-appleDark">
+            <option value="">-- 請選擇隊員 3 --</option>
+          </select>
         </div>
       </div>
 
@@ -1071,6 +1075,18 @@
           const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
           currentNickname = nickInfo.name || currentEmail.split('@')[0] || "諾思夥伴";
           window.latestTeamsData = data.teams || [];
+          window.latestLeaderboardData = data.leaderboard || [];
+          window.latestRecordsData = data.records || [];
+          
+          const elNameDisp = document.getElementById('userNicknameDisplay');
+          if (elNameDisp) elNameDisp.innerText = currentNickname;
+
+          const elFormName = document.getElementById('formName');
+          if (elFormName) elFormName.value = currentNickname;
+
+          const elAvatar = document.getElementById('userAvatarText');
+          if (elAvatar) elAvatar.innerText = (currentNickname || "諾")[0].toUpperCase();
+
           let userTeamName = "未組隊";
 
           if (data.teams && Array.isArray(data.teams)) {
@@ -1341,14 +1357,19 @@
       let email = typeof user.email === "string" ? user.email : "";
       let name = typeof user.name === "string" ? user.name : "";
 
+      if (user.userNickname && typeof user.userNickname === 'string' && user.userNickname.trim()) {
+        name = user.userNickname.trim();
+      } else if (user.nickname && typeof user.nickname === 'string' && user.nickname.trim()) {
+        name = user.nickname.trim();
+      }
+
       if (Array.isArray(user.email)) {
         const found = user.email.find(item => typeof item === "string" && item.includes("@"));
         if (found) email = found;
       }
 
-      const rawStr = (name.includes(",") ? name : "") || (email.includes(",") ? email : "");
-      if (rawStr) {
-        const parts = rawStr.split(",").map(p => p.trim());
+      if (name && name.includes(",")) {
+        const parts = name.split(",").map(p => p.trim());
         const foundEmail = parts.find(p => p.includes("@"));
         if (foundEmail) email = foundEmail;
 
@@ -1362,7 +1383,6 @@
 
       email = email.trim();
       name = name.trim();
-      if (name.includes(",")) name = name.split(",")[0].trim();
       if (!name && email) name = email.split("@")[0];
       if (!name) name = "諾思夥伴";
 
@@ -1481,6 +1501,53 @@
         }
       }
 
+      // 動態彙整所有已登入/已回報之同仁名單供隊長選擇
+      const userMap = new Map();
+      if (window.latestLeaderboardData && Array.isArray(window.latestLeaderboardData)) {
+        window.latestLeaderboardData.forEach(u => {
+          const info = cleanUserInfo(u);
+          if (info.email && info.email.toLowerCase() !== currentEmail.toLowerCase()) {
+            userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+          }
+        });
+      }
+      if (window.latestRecordsData && Array.isArray(window.latestRecordsData)) {
+        window.latestRecordsData.forEach(r => {
+          const info = cleanUserInfo(r);
+          if (info.email && info.email.toLowerCase() !== currentEmail.toLowerCase()) {
+            if (!userMap.has(info.email.toLowerCase())) {
+              userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+            }
+          }
+        });
+      }
+
+      // 備用示範選單名單
+      if (!userMap.has('jerri0912@gmail.com') && currentEmail !== 'jerri0912@gmail.com') userMap.set('jerri0912@gmail.com', 'Jerri (jerri0912@gmail.com)');
+      if (!userMap.has('fongyum080501@gmail.com') && currentEmail !== 'fongyum080501@gmail.com') userMap.set('fongyum080501@gmail.com', 'Fong (fongyum080501@gmail.com)');
+      if (!userMap.has('test1@example.com')) userMap.set('test1@example.com', 'Alice (test1@example.com)');
+      if (!userMap.has('test2@example.com')) userMap.set('test2@example.com', 'Bob (test2@example.com)');
+
+      const m2Selected = existingTeam && existingTeam.members ? existingTeam.members[1] || '' : '';
+      const m3Selected = existingTeam && existingTeam.members ? existingTeam.members[2] || '' : '';
+
+      const buildOptions = (selectedVal) => {
+        let opts = '<option value="">-- 請選擇同仁 --</option>';
+        userMap.forEach((label, val) => {
+          const isSelected = (selectedVal && (selectedVal.toLowerCase().includes(val) || val.includes(selectedVal.toLowerCase()))) ? 'selected' : '';
+          opts += `<option value="${val}" ${isSelected}>${label}</option>`;
+        });
+        if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
+          opts += `<option value="${selectedVal}" selected>${selectedVal}</option>`;
+        }
+        return opts;
+      };
+
+      const m2Select = document.getElementById('teamMember2Input');
+      const m3Select = document.getElementById('teamMember3Input');
+      if (m2Select) m2Select.innerHTML = buildOptions(m2Selected);
+      if (m3Select) m3Select.innerHTML = buildOptions(m3Selected);
+
       if (existingTeam) {
         document.getElementById('teamNameInput').value = existingTeam.teamName || "";
         captainEmail = existingTeam.captainEmail || (existingTeam.members ? existingTeam.members[0] : currentEmail);
@@ -1488,22 +1555,14 @@
           isCaptain = false;
         }
         document.getElementById('teamMember1Input').value = captainEmail;
-        if (existingTeam.members) {
-          document.getElementById('teamMember2Input').value = existingTeam.members[1] || "";
-          document.getElementById('teamMember3Input').value = existingTeam.members[2] || "";
-        }
       } else {
         document.getElementById('teamMember1Input').value = currentEmail;
         document.getElementById('teamNameInput').value = "";
-        document.getElementById('teamMember2Input').value = "";
-        document.getElementById('teamMember3Input').value = "";
       }
 
       const noticeEl = document.getElementById('teamPermissionNotice');
       const saveBtn = document.getElementById('teamSaveBtn');
       const nameInput = document.getElementById('teamNameInput');
-      const m2Input = document.getElementById('teamMember2Input');
-      const m3Input = document.getElementById('teamMember3Input');
 
       if (!isCaptain) {
         if (noticeEl) {
@@ -1512,14 +1571,14 @@
         }
         if (saveBtn) saveBtn.classList.add('hidden');
         nameInput.readOnly = true;
-        m2Input.readOnly = true;
-        m3Input.readOnly = true;
+        if (m2Select) m2Select.disabled = true;
+        if (m3Select) m3Select.disabled = true;
       } else {
         if (noticeEl) noticeEl.classList.add('hidden');
         if (saveBtn) saveBtn.classList.remove('hidden');
         nameInput.readOnly = false;
-        m2Input.readOnly = false;
-        m3Input.readOnly = false;
+        if (m2Select) m2Select.disabled = false;
+        if (m3Select) m3Select.disabled = false;
       }
 
       document.getElementById('teamModal').classList.remove('hidden');
