@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>north co 諾思 2026 員工健康計劃</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google 官方登入 SDK -->
@@ -1004,7 +1007,7 @@
     }
 
     function fetchData() {
-      const url = `${API_URL}?action=getData&email=${encodeURIComponent(currentEmail)}`;
+      const url = `${API_URL}?action=getData&email=${encodeURIComponent(currentEmail)}&_t=${Date.now()}`;
       fetch(url)
         .then(res => res.json())
         .then(data => {
