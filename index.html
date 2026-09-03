@@ -1,6 +1,5 @@
     <!-- const GOOGLE_CLIENT_ID = "922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com";
     const API_URL = "https://script.google.com/macros/s/AKfycbywDSzb2oTVhU5CXzd8SbxBkwxG_CWEwcqxr4YhbOTcJQdNQpEYJszwK04YKIEZltCp/exec"; -->
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -8,20 +7,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>north co 諾思 2026 員工健康計劃</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google 官方登入 SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            ocean: '#82BDCC',   // 專業 清海藍
-            stone: '#9F9992',   // 誠信 磐石灰
-            cloud: '#F7F7F9',   // 團隊 共融白
-            sunrise: '#F2A65A', // 創新 曙光橘
-            appleDark: '#1d1d1f',
-            appleGray: '#86868b',
-            appleBg: '#f5f5f7',
+            ocean: '#82BDCC',     // 專業 清海藍 (主要主色調)
+            oceanDark: '#64A1B1', // 清海藍加深
+            stone: '#9F9992',     // 誠信 磐石灰
+            cloud: '#F7F7F9',     // 團隊 共融白
+            sunrise: '#F2A65A',   // 創新 曙光橘
+            appleDark: '#1d1d1f', // 蘋果深黑
+            appleGray: '#86868b', // 蘋果中性灰
+          },
+          backgroundImage: {
+            'ocean-gradient': 'radial-gradient(120% 120% at 50% 0%, rgba(130, 189, 204, 0.18) 0%, rgba(247, 247, 249, 1) 100%)',
           }
         }
       }
@@ -32,41 +33,55 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang TC", "Helvetica Neue", sans-serif;
       letter-spacing: -0.015em;
     }
+    /* 平滑自定義捲軸 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
-<body class="bg-appleBg text-appleDark antialiased selection:bg-sunrise/20 selection:text-orange-700">
+<body class="bg-cloud bg-ocean-gradient text-appleDark min-h-screen antialiased selection:bg-ocean/30 selection:text-slate-900">
 
-  <!-- ==================== 頂部毛玻璃導覽列 (Apple Navbar 風格) ==================== -->
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/[0.06]">
-    <div class="max-w-6xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="bg-appleDark text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-lg tracking-widest uppercase">north co</span>
-        <span class="font-bold text-appleDark text-base sm:text-lg hidden md:inline">諾思 2026 健康生活挑戰</span>
+  <!-- ==================== 頂部毛玻璃導覽列 ==================== -->
+  <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-lg border-b border-stone/15">
+    <div class="max-w-6xl mx-auto px-4 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
+      
+      <!-- 諾思官方 Logo [source: 2] -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-ocean flex items-center justify-center shadow-xs overflow-hidden">
+          <svg viewBox="0 0 100 100" class="w-6 h-6 fill-white">
+            <path d="M 24 64 C 18 58 18 48 24 42 L 44 22 C 48 18 54 22 52 27 L 46 44 C 45 46 47 48 49 47 L 76 22 C 82 16 92 16 98 22 C 104 28 104 38 98 44 L 78 64 C 74 68 68 64 70 59 L 76 42 C 77 40 75 38 73 39 L 46 64 C 40 70 30 70 24 64 Z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-extrabold text-appleDark text-lg tracking-tight">north co</span>
+          <span class="text-xs text-appleGray block font-medium">諾思健康生活挑戰</span>
+        </div>
       </div>
-      <nav class="hidden md:flex items-center gap-8 text-sm sm:text-base font-medium text-appleGray">
-        <a href="#mission" class="hover:text-appleDark transition">健康任務</a>
-        <a href="#rewards" class="hover:text-appleDark transition">獎金與公益</a>
-        <a href="#calc" class="hover:text-appleDark transition">點數試算</a>
-        <a href="#gpsart" class="hover:text-appleDark transition">GPS ART</a>
-        <a href="#leaderboard" class="hover:text-appleDark transition font-semibold text-appleDark">🏆 排行榜</a>
-        <a href="#checkin" class="hover:text-appleDark transition">打卡留言</a>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-appleGray">
+        <a href="#mission" class="hover:text-oceanDark transition">任務機制</a>
+        <a href="#rewards" class="hover:text-oceanDark transition">獎勵與公益</a>
+        <a href="#calc" class="hover:text-oceanDark transition">點數試算</a>
+        <a href="#gpsart" class="hover:text-oceanDark transition">GPS ART</a>
+        <a href="#leaderboard" class="hover:text-oceanDark transition font-semibold text-appleDark">即時排行</a>
+        <a href="#interactionSection" class="hover:text-oceanDark transition">交流與回報</a>
         <a id="adminNavLink" href="#adminSection" class="hidden text-rose-600 font-bold hover:text-rose-700 transition">
-          🛡️ 管理後台
+          管理後台
         </a>
       </nav>
       
-      <!-- 右上角登入/身分膠囊 -->
+      <!-- 右上角身分操作 -->
       <div class="flex items-center gap-3">
-        <!-- 未登入狀態按鈕 -->
-        <div id="headerLoggedOutArea" class="flex items-center gap-2">
-          <div id="googleLoginBtnHeader"></div>
-          <button onclick="scrollToLogin()" class="sm:hidden px-3 py-1.5 rounded-full bg-appleDark text-white text-xs font-semibold">登入</button>
+        <div id="headerLoggedOutArea">
+          <button onclick="scrollToLogin()" class="px-5 py-2.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-xs sm:text-sm font-semibold transition shadow-xs">
+            登入帳號
+          </button>
         </div>
-        <!-- 已登入狀態膠囊 -->
-        <div id="headerLoggedInArea" class="hidden flex items-center gap-2.5 bg-white px-3.5 py-1.5 rounded-full border border-black/[0.08] shadow-xs text-xs sm:text-sm">
-          <img id="userAvatar" src="" class="w-6 h-6 rounded-full border border-slate-200">
-          <span id="userNicknameDisplay" class="font-bold text-appleDark">諾思</span>
-          <button onclick="openNicknameModal()" class="text-sunrise hover:text-orange-600 font-bold ml-1">改暱稱</button>
+        <div id="headerLoggedInArea" class="hidden flex items-center gap-2.5 bg-white px-4 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
+          <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs" id="userAvatarText">N</div>
+          <span id="userNicknameDisplay" class="font-bold text-appleDark">諾思夥伴</span>
+          <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-1">改暱稱</button>
           <span class="text-slate-300">|</span>
           <button onclick="logoutUser()" class="text-appleGray hover:text-appleDark font-medium">登出</button>
         </div>
@@ -76,281 +91,303 @@
 
   <!-- ==================== 1. 登入門檻畫面 (未登入時置頂展示) ==================== -->
   <div id="loginGate" class="max-w-4xl mx-auto px-4 sm:px-6 pt-12 pb-6">
-    <div class="bg-white p-8 sm:p-14 rounded-[32px] border border-black/[0.06] shadow-sm text-center space-y-6">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sunrise/15 text-orange-800 text-xs sm:text-sm font-bold uppercase tracking-wider">
-        🏃 2026 員工健康生活挑戰
+    <div class="bg-white p-8 sm:p-14 rounded-[32px] border border-stone/15 shadow-sm text-center space-y-6">
+      
+      <div class="flex justify-center">
+        <div class="w-16 h-16 rounded-2xl bg-ocean flex items-center justify-center shadow-md">
+          <svg viewBox="0 0 100 100" class="w-10 h-10 fill-white">
+            <path d="M 24 64 C 18 58 18 48 24 42 L 44 22 C 48 18 54 22 52 27 L 46 44 C 45 46 47 48 49 47 L 76 22 C 82 16 92 16 98 22 C 104 28 104 38 98 44 L 78 64 C 74 68 68 64 70 59 L 76 42 C 77 40 75 38 73 39 L 46 64 C 40 70 30 70 24 64 Z" />
+          </svg>
+        </div>
       </div>
+      
       <div class="space-y-3 max-w-2xl mx-auto">
-        <h1 class="text-4xl sm:text-6xl font-black text-appleDark tracking-tight leading-tight">
-          一起動起來，<br class="hidden sm:inline">
-          <span class="text-sunrise">把健康變成日常。</span>
+        <div class="inline-block px-4 py-1.5 rounded-full bg-ocean/15 text-oceanDark text-xs font-bold uppercase tracking-wider">
+          2026 EMPLOYEE WELLNESS PROGRAM
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black text-appleDark tracking-tight leading-tight">
+          一起動起來，把健康變成日常。
         </h1>
-        <p class="text-appleGray text-base sm:text-xl leading-relaxed pt-2">
-          「不需要成為最厲害的人，只要成為願意一起完成的團隊。」<br class="hidden sm:inline">
-          本活動採達標制而非競賽排名制，三人一組集點領取團隊現金獎金與公益禮盒。
+        <p class="text-appleGray text-base sm:text-lg leading-relaxed pt-1">
+          不需要成為最厲害的人，只要成為願意一起完成的團隊。<br>
+          本活動採達標制而非競賽排名制，三人一組集點領取團隊現金獎金。
         </p>
       </div>
 
-      <!-- 居中大登入按鈕 -->
-      <div class="pt-6 flex flex-col items-center justify-center space-y-4">
-        <div id="googleLoginBtnGate" class="min-h-[44px]"></div>
-        <div id="loginLoadingHint" class="hidden text-sm text-sunrise font-semibold animate-pulse">
-          登入驗證中，載入活動系統...
+      <!-- 登入卡片：支援快速 Email 登入 + Google 一鍵登入 -->
+      <div class="max-w-md mx-auto pt-4 space-y-4">
+        <div class="p-6 rounded-2xl bg-slate-50 border border-stone/20 space-y-3 text-left">
+          <label class="block text-xs font-bold text-appleDark uppercase tracking-wider">同仁 / 管理員 Email 登入</label>
+          <div class="flex gap-2">
+            <input id="directEmailInput" type="email" placeholder="輸入您的公司或個人 Email" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean">
+            <button onclick="handleDirectLogin()" class="px-6 py-2.5 rounded-xl bg-ocean hover:bg-oceanDark text-white text-sm font-bold whitespace-nowrap transition shadow-xs">
+              登入進入
+            </button>
+          </div>
+          <p class="text-[11px] text-appleGray">輸入 Email 即可直接存取活動儀表板，管理者將自動獲取審核權限。</p>
         </div>
-        <p class="text-xs text-appleGray">點擊即可使用 Google 帳號安全登入，重整網頁自動維持登入狀態</p>
+
+        <div class="flex items-center gap-3">
+          <div class="h-px bg-slate-200 flex-1"></div>
+          <span class="text-xs text-appleGray">或使用 Google 帳號驗證</span>
+          <div class="h-px bg-slate-200 flex-1"></div>
+        </div>
+
+        <div class="flex justify-center">
+          <div id="googleLoginBtnGate"></div>
+        </div>
       </div>
 
-      <!-- 四大價值觀卡片 (Apple Bento Grid 風格) [source: 1] -->
+      <!-- 四大價值觀卡片 (Apple Bento Grid) [source: 1] -->
       <div class="pt-10 border-t border-slate-100 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
         <div class="p-5 rounded-2xl bg-cloud border border-stone/20 space-y-1.5">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-ocean inline-block"></span> 專業 Clear Ocean
+          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-ocean inline-block"></span> 專業 Clear Ocean
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">清晰的判斷與穩定的能力，航向更開闊的藍海。</p>
+          <p class="text-xs text-appleGray leading-relaxed">清晰判斷與穩定能力，航向更開闊的藍海。</p>
         </div>
         <div class="p-5 rounded-2xl bg-cloud border border-stone/20 space-y-1.5">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-stone inline-block"></span> 誠信 Stone
+          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-stone inline-block"></span> 誠信 Stone
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">言行一致、守住原則，讓合作關係穩定前行。</p>
+          <p class="text-xs text-appleGray leading-relaxed">言行一致、守住原則，合作關係穩定前行。</p>
         </div>
         <div class="p-5 rounded-2xl bg-cloud border border-stone/20 space-y-1.5">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-slate-300 inline-block"></span> 團隊 Cloud
+          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block"></span> 團隊 Cloud
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">彼此支持、共同協作，讓每個人發揮專長價值。</p>
+          <p class="text-xs text-appleGray leading-relaxed">彼此支持、共同協作，讓每個人發揮價值。</p>
         </div>
         <div class="p-5 rounded-2xl bg-cloud border border-stone/20 space-y-1.5">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-sunrise inline-block"></span> 創新 Sunrise
+          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-sunrise inline-block"></span> 創新 Sunrise
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">在變化中看見新的可能，讓想法成為前進的曙光。</p>
+          <p class="text-xs text-appleGray leading-relaxed">在變化中看見可能，讓想法成為前進曙光。</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 2. 主內容區塊 (登入後完整解鎖) ==================== -->
+  <!-- ==================== 2. 主活動儀表板 (已登入展示) ==================== -->
   <main id="mainApp" class="space-y-16 sm:space-y-24">
     
-    <!-- Hero 核心亮點數據 (Apple 巨幅數字風格) -->
-    <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-10">
+    <!-- 核心亮點數據 (Apple 巨幅數字風格) -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-black/[0.06] shadow-xs text-center space-y-1">
-          <div class="text-xs sm:text-sm font-semibold text-appleGray uppercase">組隊模式</div>
+        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-stone/15 shadow-xs text-center space-y-1">
+          <div class="text-xs font-semibold text-appleGray uppercase tracking-wider">團隊機制</div>
           <div class="text-4xl sm:text-5xl font-black text-appleDark">3 人</div>
-          <div class="text-xs sm:text-sm text-appleGray mt-1">團隊互助集點</div>
+          <div class="text-xs text-appleGray mt-1">互助累積集點</div>
         </div>
-        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-black/[0.06] shadow-xs text-center space-y-1">
-          <div class="text-xs sm:text-sm font-semibold text-appleGray uppercase">個人目標</div>
+        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-stone/15 shadow-xs text-center space-y-1">
+          <div class="text-xs font-semibold text-appleGray uppercase tracking-wider">個人目標</div>
           <div class="text-4xl sm:text-5xl font-black text-ocean">8,000</div>
-          <div class="text-xs sm:text-sm text-appleGray mt-1">平日每日步數</div>
+          <div class="text-xs text-appleGray mt-1">平日每日目標步數</div>
         </div>
-        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-black/[0.06] shadow-xs text-center space-y-1">
-          <div class="text-xs sm:text-sm font-semibold text-appleGray uppercase">最高獎金</div>
-          <div class="text-4xl sm:text-5xl font-black text-sunrise">NT$6K</div>
-          <div class="text-xs sm:text-sm text-appleGray mt-1">團隊現金獎勵</div>
+        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-stone/15 shadow-xs text-center space-y-1">
+          <div class="text-xs font-semibold text-appleGray uppercase tracking-wider">最高獎金</div>
+          <div class="text-4xl sm:text-5xl font-black text-oceanDark">NT$6,000</div>
+          <div class="text-xs text-appleGray mt-1">團隊解鎖現金獎勵</div>
         </div>
-        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-black/[0.06] shadow-xs text-center space-y-1">
-          <div class="text-xs sm:text-sm font-semibold text-appleGray uppercase">公益回饋</div>
-          <div class="text-4xl sm:text-5xl font-black text-emerald-600">人人有獎</div>
-          <div class="text-xs sm:text-sm text-appleGray mt-1">社福團體點心盒</div>
+        <div class="bg-white p-6 sm:p-8 rounded-[28px] border border-stone/15 shadow-xs text-center space-y-1">
+          <div class="text-xs font-semibold text-appleGray uppercase tracking-wider">社會回饋</div>
+          <div class="text-4xl sm:text-5xl font-black text-emerald-600">全體參加獎</div>
+          <div class="text-xs text-appleGray mt-1">社福烘焙公益禮盒</div>
         </div>
       </div>
     </section>
 
     <!-- 四大健康任務說明 (Apple 大卡片 Bento Grid) -->
     <section id="mission" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
-      <div class="text-center max-w-2xl mx-auto space-y-3">
-        <h2 class="text-3xl sm:text-5xl font-black text-appleDark tracking-tight">四大團隊健康任務</h2>
-        <p class="text-appleGray text-base sm:text-lg">不比極限、只比習慣。團隊成員一起完成健康任務、累積點數！</p>
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">四大團隊健康任務</h2>
+        <p class="text-appleGray text-base">採達標制而非競賽排名制，每位隊員都能貢獻團隊點數。</p>
       </div>
 
       <div class="grid sm:grid-cols-2 gap-6 sm:gap-8">
-        <div class="bg-white p-8 sm:p-10 rounded-[32px] border border-black/[0.06] shadow-xs space-y-4 hover:shadow-md transition">
-          <div class="w-12 h-12 rounded-2xl bg-ocean/15 text-slate-800 flex items-center justify-center text-2xl font-bold">🚶</div>
-          <h3 class="text-2xl font-bold text-appleDark">【每日步數】</h3>
-          <div class="inline-block px-3 py-1 rounded-full bg-ocean/20 text-slate-900 text-xs font-bold tracking-wide">每達標 1 人 +1 點</div>
-          <p class="text-appleGray text-base leading-relaxed">每位團員當週累積 4 天達 8,000 步，每達標 1 人團隊即得 1 點（依 Pacer 群組認列）。</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-3 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">01</div>
+          <h3 class="text-xl font-bold text-appleDark">【每日步數】</h3>
+          <div class="inline-block px-3 py-1 rounded-full bg-ocean/15 text-oceanDark text-xs font-bold">每達標 1 人 +1 點</div>
+          <p class="text-appleGray text-sm leading-relaxed">每位團員當週累積 4 天達 8,000 步，每達標 1 人團隊即獲得 1 點（依 Pacer 認列）。</p>
         </div>
 
-        <div class="bg-white p-8 sm:p-10 rounded-[32px] border border-black/[0.06] shadow-xs space-y-4 hover:shadow-md transition">
-          <div class="w-12 h-12 rounded-2xl bg-sunrise/15 text-slate-800 flex items-center justify-center text-2xl font-bold">🏃</div>
-          <h3 class="text-2xl font-bold text-appleDark">【規律運動】</h3>
-          <div class="inline-block px-3 py-1 rounded-full bg-sunrise/20 text-orange-900 text-xs font-bold tracking-wide">每位團員達標 +1 點</div>
-          <p class="text-appleGray text-base leading-relaxed">每位團員當週完成 2 次、每次 30 分鐘以上運動，團隊獲得 1 點（網頁打卡或內網回報）。</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-3 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">02</div>
+          <h3 class="text-xl font-bold text-appleDark">【規律運動】</h3>
+          <div class="inline-block px-3 py-1 rounded-full bg-ocean/15 text-oceanDark text-xs font-bold">每位團員達標 +1 點</div>
+          <p class="text-appleGray text-sm leading-relaxed">每位團員當週完成 2 次、每次 30 分鐘以上運動，團隊獲得 1 點（內網回報與打卡）。</p>
         </div>
 
-        <div class="bg-white p-8 sm:p-10 rounded-[32px] border border-black/[0.06] shadow-xs space-y-4 hover:shadow-md transition">
-          <div class="w-12 h-12 rounded-2xl bg-ocean/15 text-slate-800 flex items-center justify-center text-2xl font-bold">🎯</div>
-          <h3 class="text-2xl font-bold text-appleDark">【持續達標】</h3>
-          <div class="inline-block px-3 py-1 rounded-full bg-ocean/20 text-slate-900 text-xs font-bold tracking-wide">全員達標 額外加碼 +1 點</div>
-          <p class="text-appleGray text-base leading-relaxed">團隊當週全員皆完成至少一項健康任務，團隊額外獲得 1 點加碼獎勵（由福委審核）。</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-3 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">03</div>
+          <h3 class="text-xl font-bold text-appleDark">【持續達標】</h3>
+          <div class="inline-block px-3 py-1 rounded-full bg-ocean/15 text-oceanDark text-xs font-bold">全員達標 額外加碼 +1 點</div>
+          <p class="text-appleGray text-sm leading-relaxed">團隊當週全員皆完成至少一項健康任務，團隊額外獲得 1 點加碼（福委審核檢核）。</p>
         </div>
 
-        <div class="bg-white p-8 sm:p-10 rounded-[32px] border border-black/[0.06] shadow-xs space-y-4 hover:shadow-md transition">
-          <div class="w-12 h-12 rounded-2xl bg-sunrise/15 text-slate-800 flex items-center justify-center text-2xl font-bold">🤝</div>
-          <h3 class="text-2xl font-bold text-appleDark">【一起動起來】</h3>
-          <div class="inline-block px-3 py-1 rounded-full bg-sunrise/20 text-orange-900 text-xs font-bold tracking-wide">共同運動 額外加碼 +1 點</div>
-          <p class="text-appleGray text-base leading-relaxed">團隊成員共同運動合照打卡，團隊額外獲得 1 點獎勵！個人最高 44 點，3 人團隊最高可累計 132 點。</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-3 hover:shadow-md transition">
+          <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">04</div>
+          <h3 class="text-xl font-bold text-appleDark">【一起動起來】</h3>
+          <div class="inline-block px-3 py-1 rounded-full bg-ocean/15 text-oceanDark text-xs font-bold">共同運動 額外加碼 +1 點</div>
+          <p class="text-appleGray text-sm leading-relaxed">團隊成員相約共同運動並合照記錄，團隊額外獲得 1 點！個人全期最高 44 點，團隊最高 132 點。</p>
         </div>
       </div>
     </section>
 
-    <!-- 獎金解鎖與公益專區 -->
-    <section id="rewards" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-12">
-      <div class="text-center max-w-2xl mx-auto space-y-3">
-        <h2 class="text-3xl sm:text-5xl font-black text-appleDark tracking-tight">🏆 獎金解鎖與公益加碼</h2>
-        <p class="text-appleGray text-base sm:text-lg">團隊點數越高，團隊現金獎勵越高，同時把永續帶進日常！</p>
+    <!-- 獎金解鎖與公益加碼專區 -->
+    <section id="rewards" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">獎金門檻與公益夥伴</h2>
+        <p class="text-appleGray text-base">團隊點數累積越高，團隊現金獎金越高，並支持友善庇護機構。</p>
       </div>
 
-      <!-- 獎金門檻大卡片 -->
       <div class="grid sm:grid-cols-3 gap-6 sm:gap-8">
-        <div class="bg-white p-8 rounded-[32px] border border-black/[0.06] shadow-xs text-center space-y-3 hover:border-slate-300 transition">
-          <div class="text-sm font-semibold text-appleGray">團隊累積達 10 點</div>
-          <div class="text-4xl sm:text-5xl font-black text-appleDark">NT$ 3,000</div>
-          <p class="text-sm text-appleGray">團隊現金獎勵</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs text-center space-y-2">
+          <div class="text-xs font-semibold text-appleGray">團隊累積達 10 點</div>
+          <div class="text-4xl font-black text-appleDark">NT$ 3,000</div>
+          <p class="text-xs text-appleGray">團隊獎金（解鎖門檻一）</p>
         </div>
-        <div class="bg-white p-8 rounded-[32px] border border-ocean/40 shadow-xs text-center space-y-3 hover:border-ocean transition">
-          <div class="text-sm font-semibold text-ocean">團隊累積達 15 點</div>
-          <div class="text-4xl sm:text-5xl font-black text-appleDark">NT$ 4,500</div>
-          <p class="text-sm text-appleGray">團隊現金獎勵</p>
+        <div class="bg-white p-8 rounded-[32px] border border-ocean/50 shadow-xs text-center space-y-2">
+          <div class="text-xs font-semibold text-oceanDark">團隊累積達 15 點</div>
+          <div class="text-4xl font-black text-appleDark">NT$ 4,500</div>
+          <p class="text-xs text-appleGray">團隊獎金（解鎖門檻二）</p>
         </div>
-        <div class="bg-white p-8 rounded-[32px] border border-sunrise/50 shadow-md text-center space-y-3 hover:border-sunrise transition">
-          <div class="text-sm font-semibold text-sunrise">團隊累積達 20 點</div>
-          <div class="text-4xl sm:text-5xl font-black text-sunrise">NT$ 6,000</div>
-          <p class="text-sm text-appleGray">最高團隊榮譽獎金</p>
+        <div class="bg-white p-8 rounded-[32px] border-2 border-ocean shadow-md text-center space-y-2">
+          <div class="text-xs font-semibold text-oceanDark">團隊累積達 20 點</div>
+          <div class="text-4xl font-black text-oceanDark">NT$ 6,000</div>
+          <p class="text-xs text-appleGray">最高團隊榮譽獎金</p>
         </div>
       </div>
 
-      <!-- 參加獎公益禮盒清單 -->
-      <div class="bg-white p-8 sm:p-12 rounded-[32px] border border-black/[0.06] shadow-xs space-y-6">
-        <div class="space-y-1">
-          <h3 class="text-2xl font-bold text-appleDark">❤️ 參加獎：人人有獎！採購友善團體公益禮盒</h3>
-          <p class="text-appleGray text-sm sm:text-base">讓你的每一步都為社會帶來溫暖，點擊連結可直接預覽各機構故事：</p>
+      <!-- 參加獎禮盒清單 -->
+      <div class="bg-white p-8 sm:p-12 rounded-[32px] border border-stone/15 shadow-xs space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-appleDark">參加獎：全體有獎・採購友善團體公益產品</h3>
+          <p class="text-appleGray text-sm mt-1">支持身障與友善機構，點擊可直接參閱各基金會產品：</p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-          <a href="https://www.sefunnet.com/Goods/Detail?id=f113559d-5d0e-4528-993f-21dc33d3c099" target="_blank" class="p-5 rounded-2xl bg-appleBg hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
-            <div class="font-bold text-appleDark text-base group-hover:text-sunrise">喜憨兒基金會</div>
+          <a href="https://www.sefunnet.com/Goods/Detail?id=f113559d-5d0e-4528-993f-21dc33d3c099" target="_blank" class="p-5 rounded-2xl bg-cloud hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
+            <div class="font-bold text-appleDark group-hover:text-oceanDark">喜憨兒基金會</div>
             <div class="text-appleGray text-xs mt-1">波堤點心盒・餅乾餐盒</div>
-            <div class="font-extrabold text-sunrise text-base mt-2">NT$ 125</div>
+            <div class="font-bold text-oceanDark text-base mt-2">NT$ 125</div>
           </a>
-          <a href="https://eshop.syinlu.org.tw/product/detail/cookies/74" target="_blank" class="p-5 rounded-2xl bg-appleBg hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
-            <div class="font-bold text-appleDark text-base group-hover:text-sunrise">心路基金會</div>
+          <a href="https://eshop.syinlu.org.tw/product/detail/cookies/74" target="_blank" class="p-5 rounded-2xl bg-cloud hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
+            <div class="font-bold text-appleDark group-hover:text-oceanDark">心路基金會</div>
             <div class="text-appleGray text-xs mt-1">幸福樂手・手工餅乾提盒</div>
-            <div class="font-extrabold text-sunrise text-base mt-2">NT$ 200</div>
+            <div class="font-bold text-oceanDark text-base mt-2">NT$ 200</div>
           </a>
-          <a href="https://www.deaf.com.tw/productslist/products/133?category=3&type=6" target="_blank" class="p-5 rounded-2xl bg-appleBg hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
-            <div class="font-bold text-appleDark text-base group-hover:text-sunrise">蒙恩聽障烘焙坊</div>
+          <a href="https://www.deaf.com.tw/productslist/products/133?category=3&type=6" target="_blank" class="p-5 rounded-2xl bg-cloud hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
+            <div class="font-bold text-appleDark group-hover:text-oceanDark">蒙恩聽障烘焙坊</div>
             <div class="text-appleGray text-xs mt-1">精緻餅乾獨享包</div>
-            <div class="font-extrabold text-sunrise text-base mt-2">NT$ 90</div>
+            <div class="font-bold text-oceanDark text-base mt-2">NT$ 90</div>
           </a>
-          <a href="https://www.downdown.tw/products/%E6%84%9B%E7%9A%82%E4%BA%8B-%EF%BD%9C%E8%8A%B1%E9%B3%A5%E7%B2%BE%E6%B2%B9%E6%89%8B%E5%B7%A5%E7%9A%82%E7%95%AB%E4%BD%9C%E6%AC%BE" target="_blank" class="p-5 rounded-2xl bg-appleBg hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
-            <div class="font-bold text-appleDark text-base group-hover:text-sunrise">唐氏症基金會</div>
+          <a href="https://www.downdown.tw/products/%E6%84%9B%E7%9A%82%E4%BA%8B-%EF%BD%9C%E8%8A%B1%E9%B3%A5%E7%B2%BE%E6%B2%B9%E6%89%8B%E5%B7%A5%E7%9A%82%E7%95%AB%E4%BD%9C%E6%AC%BE" target="_blank" class="p-5 rounded-2xl bg-cloud hover:bg-slate-100 transition group border border-transparent hover:border-slate-200">
+            <div class="font-bold text-appleDark group-hover:text-oceanDark">唐氏症基金會</div>
             <div class="text-appleGray text-xs mt-1">愛皂事・花鳥精油手工皂</div>
-            <div class="font-extrabold text-sunrise text-base mt-2">NT$ 130</div>
+            <div class="font-bold text-oceanDark text-base mt-2">NT$ 130</div>
           </a>
         </div>
       </div>
     </section>
 
-    <!-- 🎨 GPS ART 創意路跑專區 -->
-    <section id="gpsart" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
-      <div class="text-center max-w-2xl mx-auto space-y-3">
-        <h2 class="text-3xl sm:text-5xl font-black text-appleDark tracking-tight">🎨 GPS ART 創意路跑挑戰</h2>
-        <p class="text-appleGray text-base sm:text-lg">使用 Strava、Relive 或 Map My Run，步行或跑步畫出屬於你的 GPS 軌跡！</p>
+    <!-- GPS ART 創意路跑專區 -->
+    <section id="gpsart" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-8">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">GPS ART 創意路跑挑戰</h2>
+        <p class="text-appleGray text-base">使用 Strava、Relive 或 Map My Run 走出圖案，全體票選最佳創意獎！</p>
       </div>
 
       <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
-        <div class="bg-white p-8 rounded-[32px] border border-black/[0.06] shadow-xs space-y-3">
-          <div class="text-xs font-bold text-ocean uppercase">STEP 1</div>
-          <h4 class="text-xl font-bold text-appleDark">繪製軌跡並上傳</h4>
-          <p class="text-appleGray text-sm leading-relaxed">自由參加，可找夥伴協作。於打卡區上傳「GPS 路線圖截圖」、「步數」與「創作理念」。</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-2">
+          <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟一</div>
+          <h4 class="text-lg font-bold text-appleDark">繪製軌跡並上傳</h4>
+          <p class="text-appleGray text-sm leading-relaxed">自由參加或尋找夥伴協作，上傳 GPS 路線圖截圖、步數與創作理念。</p>
         </div>
-        <div class="bg-white p-8 rounded-[32px] border border-black/[0.06] shadow-xs space-y-3">
-          <div class="text-xs font-bold text-ocean uppercase">STEP 2</div>
-          <h4 class="text-xl font-bold text-appleDark">全體同仁點讚票選</h4>
-          <p class="text-appleGray text-sm leading-relaxed">活動結束前開放全體同仁為最具創意的 GPS 路線投票，票選最佳創意大獎！</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-2">
+          <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟二</div>
+          <h4 class="text-lg font-bold text-appleDark">全體同仁點讚票選</h4>
+          <p class="text-appleGray text-sm leading-relaxed">活動期間開放所有同仁為最具有創意的路線投票，選出最佳創意大獎。</p>
         </div>
-        <div class="bg-white p-8 rounded-[32px] border border-black/[0.06] shadow-xs space-y-3">
-          <div class="text-xs font-bold text-sunrise uppercase">STEP 3</div>
-          <h4 class="text-xl font-bold text-appleDark">公司提撥相對應捐款</h4>
-          <p class="text-appleGray text-sm leading-relaxed">每跑一步都算數！公司將依同仁創作成果提撥公益善款，將健康與永續結合。</p>
+        <div class="bg-white p-8 rounded-[32px] border border-stone/15 shadow-xs space-y-2">
+          <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟三</div>
+          <h4 class="text-lg font-bold text-appleDark">公司提撥相對應捐款</h4>
+          <p class="text-appleGray text-sm leading-relaxed">每一步都有價值！公司將依同仁創作成果提撥公益基金回饋社會。</p>
         </div>
       </div>
     </section>
 
-    <!-- 互動式團隊點數計算機 (Apple 風格左右分欄) -->
-    <section id="calc" class="max-w-5xl mx-auto px-4 sm:px-8 space-y-8">
+    <!-- 互動式團隊點數計算機 -->
+    <section id="calc" class="max-w-5xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="text-center max-w-lg mx-auto space-y-2">
-        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">團隊點數與獎金試算</h2>
-        <p class="text-appleGray text-sm sm:text-base">即時換算小組進度與獎勵等級</p>
+        <h2 class="text-3xl font-black text-appleDark tracking-tight">團隊點數試算</h2>
+        <p class="text-appleGray text-sm">即時試算 3 位隊員達標進度與獎勵等級</p>
       </div>
 
-      <div class="bg-white p-8 sm:p-12 rounded-[32px] border border-black/[0.06] shadow-sm grid md:grid-cols-12 gap-10 items-center">
+      <div class="bg-white p-8 sm:p-12 rounded-[32px] border border-stone/15 shadow-sm grid md:grid-cols-12 gap-8 items-center">
         <div class="md:col-span-7 space-y-4 text-base">
-          <div class="flex justify-between items-center p-4 rounded-2xl bg-appleBg">
+          <div class="flex justify-between items-center p-4 rounded-2xl bg-slate-50">
             <div>
-              <div class="font-bold text-appleDark">【每日步數】達標人次</div>
+              <div class="font-bold text-appleDark text-sm">【每日步數】達標人次</div>
               <div class="text-xs text-appleGray">當週 4 天達 8,000 步 (每人次 1 點)</div>
             </div>
             <div class="flex items-center gap-3">
-              <button onclick="changeCalc('stepPoints', -1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
+              <button onclick="changeCalc('stepPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
               <span id="calcStepPoints" class="font-mono font-bold text-lg w-8 text-center">8</span>
-              <button onclick="changeCalc('stepPoints', 1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
+              <button onclick="changeCalc('stepPoints', 1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
             </div>
           </div>
 
-          <div class="flex justify-between items-center p-4 rounded-2xl bg-appleBg">
+          <div class="flex justify-between items-center p-4 rounded-2xl bg-slate-50">
             <div>
-              <div class="font-bold text-appleDark">【規律運動】達標人次</div>
+              <div class="font-bold text-appleDark text-sm">【規律運動】達標人次</div>
               <div class="text-xs text-appleGray">每週 2 次 30 分鐘運動 (每人次 1 點)</div>
             </div>
             <div class="flex items-center gap-3">
-              <button onclick="changeCalc('sportPoints', -1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
+              <button onclick="changeCalc('sportPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
               <span id="calcSportPoints" class="font-mono font-bold text-lg w-8 text-center">4</span>
-              <button onclick="changeCalc('sportPoints', 1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
+              <button onclick="changeCalc('sportPoints', 1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
             </div>
           </div>
 
-          <div class="flex justify-between items-center p-4 rounded-2xl bg-appleBg">
+          <div class="flex justify-between items-center p-4 rounded-2xl bg-slate-50">
             <div>
-              <div class="font-bold text-appleDark">【持續達標】加碼週數</div>
+              <div class="font-bold text-appleDark text-sm">【持續達標】加碼週數</div>
               <div class="text-xs text-appleGray">全員皆完成至少 1 項任務 (每週加碼 1 點)</div>
             </div>
             <div class="flex items-center gap-3">
-              <button onclick="changeCalc('teamExtra', -1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
+              <button onclick="changeCalc('teamExtra', -1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
               <span id="calcTeamExtra" class="font-mono font-bold text-lg w-8 text-center">2</span>
-              <button onclick="changeCalc('teamExtra', 1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
+              <button onclick="changeCalc('teamExtra', 1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
             </div>
           </div>
 
-          <div class="flex justify-between items-center p-4 rounded-2xl bg-appleBg">
+          <div class="flex justify-between items-center p-4 rounded-2xl bg-slate-50">
             <div>
-              <div class="font-bold text-appleDark">【一起動起來】共同運動</div>
+              <div class="font-bold text-appleDark text-sm">【一起動起來】共同運動</div>
               <div class="text-xs text-appleGray">團隊成員運動合照 (每次加碼 1 點)</div>
             </div>
             <div class="flex items-center gap-3">
-              <button onclick="changeCalc('coSport', -1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
+              <button onclick="changeCalc('coSport', -1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">-</button>
               <span id="calcCoSport" class="font-mono font-bold text-lg w-8 text-center">2</span>
-              <button onclick="changeCalc('coSport', 1)" class="w-10 h-10 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
+              <button onclick="changeCalc('coSport', 1)" class="w-9 h-9 rounded-full bg-white border border-slate-200 font-bold hover:bg-slate-100 shadow-xs">+</button>
             </div>
           </div>
         </div>
 
-        <div class="md:col-span-5 bg-appleDark text-white p-8 sm:p-10 rounded-[28px] space-y-6 text-center shadow-lg">
+        <div class="md:col-span-5 bg-appleDark text-white p-8 rounded-[28px] space-y-6 text-center shadow-lg">
           <div class="space-y-1">
             <span class="text-xs text-appleGray uppercase font-semibold">團隊累計總點數</span>
-            <div id="calcTotalPoints" class="text-6xl font-black text-sunrise font-mono">16 點</div>
+            <div id="calcTotalPoints" class="text-6xl font-black text-ocean font-mono">16 點</div>
           </div>
-          <div class="pt-4 border-t border-slate-700/80 space-y-2.5 text-left text-sm text-slate-300">
+          <div class="pt-4 border-t border-slate-700 space-y-2.5 text-left text-sm text-slate-300">
             <div class="flex justify-between">
               <span>獎金解鎖狀態：</span>
               <span id="calcTierBadge" class="font-bold text-emerald-400">已達標 15 點門檻</span>
             </div>
             <div class="flex justify-between">
               <span>團隊可得獎金：</span>
-              <span id="calcTeamReward" class="font-bold text-sunrise text-xl">NT$ 4,500</span>
+              <span id="calcTeamReward" class="font-bold text-ocean text-xl">NT$ 4,500</span>
             </div>
             <div class="flex justify-between">
               <span>每位隊員均分：</span>
@@ -361,107 +398,140 @@
       </div>
     </section>
 
-    <!-- 🏆 即時排行榜 (Apple Clean Table) -->
+    <!-- 即時排行榜 -->
     <section id="leaderboard" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">🏆 同仁步數即時榜</h2>
-          <p class="text-appleGray text-base mt-1">即時同步 Google Sheet 審核通過之有效數據</p>
+          <h2 class="text-3xl font-black text-appleDark tracking-tight">同仁步數即時排行榜</h2>
+          <p class="text-appleGray text-sm mt-1">同步 Google Sheet 審核通過之有效數據</p>
         </div>
-        <button onclick="fetchData()" class="text-base font-semibold text-sunrise hover:text-orange-600">
-          🔄 重新整理排行
+        <button onclick="fetchData()" class="text-sm font-semibold text-oceanDark hover:underline">
+          重新整理排行
         </button>
       </div>
 
-      <div class="bg-white rounded-[32px] border border-black/[0.06] overflow-hidden shadow-xs">
+      <div class="bg-white rounded-[32px] border border-stone/15 overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-base">
-            <thead class="bg-appleBg text-appleGray text-xs uppercase border-b border-black/[0.04]">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-appleGray text-xs uppercase border-b border-black/[0.04]">
               <tr>
-                <th class="p-5 w-20 text-center font-bold">名次</th>
-                <th class="p-5 font-bold">參加同仁 (暱稱)</th>
-                <th class="p-5 text-center font-bold">達標天數</th>
-                <th class="p-5 text-right font-bold">累計有效步數</th>
-                <th class="p-5 text-center font-bold">目前段位</th>
-                <th class="p-5 text-right font-bold">獲得獎勵</th>
+                <th class="p-4 w-16 text-center font-bold">名次</th>
+                <th class="p-4 font-bold">參加同仁 (暱稱)</th>
+                <th class="p-4 text-center font-bold">達標天數</th>
+                <th class="p-4 text-right font-bold">累計有效步數</th>
+                <th class="p-4 text-center font-bold">目前段位</th>
+                <th class="p-4 text-right font-bold">獲得獎勵</th>
               </tr>
             </thead>
             <tbody id="leaderboardBody" class="divide-y divide-slate-100 text-appleDark">
-              <tr><td colspan="6" class="p-8 text-center text-appleGray">正在讀取排行...</td></tr>
+              <tr><td colspan="6" class="p-6 text-center text-appleGray">正在讀取排行...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- 打卡回報與留言牆 (含縮圖點擊放大) -->
-    <section id="checkin" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-8 pb-16">
-      <div class="grid md:grid-cols-12 gap-8">
-        
-        <!-- 左欄：打卡表單 -->
-        <div class="md:col-span-5">
-          <div class="bg-white p-8 rounded-[32px] border border-black/[0.06] shadow-xs sticky top-24 space-y-5">
-            <h3 class="text-xl font-bold text-appleDark flex items-center gap-2">
-              <span>📸</span> 每日運動 / GPS ART 回報
-            </h3>
-            <form onsubmit="handleCheckIn(event)" class="space-y-4 text-base">
+    <!-- ==================== 互動雙分頁：【運動回報牆】與【同仁交流聊天室】 ==================== -->
+    <section id="interactionSection" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6 pb-20">
+      
+      <!-- 分頁標籤切換 -->
+      <div class="flex items-center justify-between border-b border-stone/20 pb-2">
+        <div class="flex gap-4">
+          <button id="tabBtnFeed" onclick="switchTab('feed')" class="pb-2 text-base font-bold border-b-2 border-ocean text-appleDark transition">
+            運動回報紀錄牆
+          </button>
+          <button id="tabBtnChat" onclick="switchTab('chat')" class="pb-2 text-base font-bold border-b-2 border-transparent text-appleGray hover:text-appleDark transition">
+            同仁交流聊天室
+          </button>
+        </div>
+        <span class="text-xs text-appleGray hidden sm:inline">動態內容支援自定義捲動</span>
+      </div>
+
+      <!-- 分頁 1：運動打卡回報區 -->
+      <div id="tabContentFeed" class="grid md:grid-cols-12 gap-8 items-start">
+        <!-- 左欄：打卡回報表單 -->
+        <div class="md:col-span-5 bg-white p-7 rounded-[28px] border border-stone/15 shadow-xs space-y-4">
+          <h3 class="text-lg font-bold text-appleDark">每日運動 / GPS ART 回報</h3>
+          <form onsubmit="handleCheckIn(event)" class="space-y-4 text-sm">
+            <div>
+              <label class="block text-appleGray text-xs font-semibold uppercase mb-1">認證帳號</label>
+              <input id="formEmail" type="email" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-appleDark font-medium cursor-not-allowed text-xs">
+            </div>
+            <div>
+              <label class="block text-appleGray text-xs font-semibold uppercase mb-1">打卡暱稱 (可隨時修改)</label>
+              <input id="formName" type="text" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-appleGray text-xs font-semibold uppercase mb-1">認證帳號</label>
-                <input id="formEmail" type="email" readonly class="w-full bg-appleBg border border-slate-200 rounded-xl px-4 py-2.5 text-appleDark font-medium cursor-not-allowed text-sm">
+                <label class="block text-appleGray text-xs font-semibold uppercase mb-1">運動日期</label>
+                <input id="formDate" type="date" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-xs">
               </div>
               <div>
-                <label class="block text-appleGray text-xs font-semibold uppercase mb-1">打卡暱稱 (可點右上角修改)</label>
-                <input id="formName" type="text" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-sunrise text-base">
+                <label class="block text-appleGray text-xs font-semibold uppercase mb-1">當日精確步數</label>
+                <input id="formSteps" type="number" step="1" min="1" required placeholder="如 8421" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
               </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-appleGray text-xs font-semibold uppercase mb-1">運動日期</label>
-                  <input id="formDate" type="date" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-sunrise text-sm">
-                </div>
-                <div>
-                  <label class="block text-appleGray text-xs font-semibold uppercase mb-1">當日步數</label>
-                  <input id="formSteps" type="number" required min="1000" placeholder="8500" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-sunrise text-base">
-                </div>
-              </div>
-              <div>
-                <label class="block text-appleGray text-xs font-semibold uppercase mb-1">截圖證明 / GPS 路線圖</label>
-                <input id="formFile" type="file" accept="image/*" class="w-full text-xs text-appleGray file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sunrise/15 file:text-orange-900 hover:file:bg-sunrise/25 cursor-pointer">
-              </div>
-              <div>
-                <label class="block text-appleGray text-xs font-semibold uppercase mb-1">心得留言 / GPS ART 創作理念</label>
-                <textarea id="formMessage" rows="3" placeholder="今天下班多走了三千步，大家一起加油！" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-sunrise text-base"></textarea>
-              </div>
-              <button id="formSubmitBtn" type="submit" class="w-full bg-appleDark hover:bg-black text-white font-bold py-3.5 rounded-full transition shadow-sm text-base">
-                送出回報
-              </button>
-            </form>
-          </div>
+            </div>
+            <div>
+              <label class="block text-appleGray text-xs font-semibold uppercase mb-1">證明截圖 / GPS 路線圖</label>
+              <input id="formFile" type="file" accept="image/*" class="w-full text-xs text-appleGray file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-ocean/15 file:text-oceanDark hover:file:bg-ocean/25 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-appleGray text-xs font-semibold uppercase mb-1">心得留言 / GPS 路線理念</label>
+              <textarea id="formMessage" rows="2" placeholder="今日完成慢跑與核心訓練，大家一起堅持！" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm"></textarea>
+            </div>
+            <button id="formSubmitBtn" type="submit" class="w-full bg-ocean hover:bg-oceanDark text-white font-bold py-3 rounded-full transition shadow-xs text-sm">
+              送出回報
+            </button>
+          </form>
         </div>
 
-        <!-- 右欄：同仁動態牆 -->
-        <div class="md:col-span-7 space-y-4">
-          <h3 class="text-xl font-bold text-appleDark flex items-center gap-2 pb-2 border-b border-black/[0.06]">
-            💬 諾思夥伴運動動態牆
-          </h3>
-          <div id="feedList" class="space-y-4">
-            <div class="text-center py-12 text-appleGray text-base">正在載入動態牆...</div>
+        <!-- 右欄：運動回報動態牆 (獨立捲動) -->
+        <div class="md:col-span-7 bg-white p-6 rounded-[28px] border border-stone/15 shadow-xs space-y-4">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <span class="text-sm font-bold text-appleDark">回報動態牆</span>
+            <span class="text-xs text-appleGray">最新紀錄排在前</span>
+          </div>
+          <div id="feedList" class="space-y-4 max-h-[560px] overflow-y-auto pr-2">
+            <div class="text-center py-10 text-appleGray text-sm">正在載入紀錄...</div>
           </div>
         </div>
       </div>
+
+      <!-- 分頁 2：同仁交流聊天室 (獨立聊天，非回報) -->
+      <div id="tabContentChat" class="hidden bg-white p-6 sm:p-8 rounded-[28px] border border-stone/15 shadow-xs space-y-6">
+        <div>
+          <h3 class="text-lg font-bold text-appleDark">同仁健康交流討論區</h3>
+          <p class="text-xs text-appleGray mt-0.5">可以在此自由留言、相約慢跑健走、揪團運動或討論 GPS ART 創作。</p>
+        </div>
+
+        <!-- 聊天訊息串 (獨立捲動) -->
+        <div id="chatMessageList" class="space-y-3.5 max-h-[460px] overflow-y-auto p-4 rounded-2xl bg-slate-50 border border-slate-100">
+          <div class="text-center py-10 text-appleGray text-sm">目前還沒有留言，快來發出第一則交流訊息！</div>
+        </div>
+
+        <!-- 留言輸入框 -->
+        <form onsubmit="handleSendChat(event)" class="flex gap-2">
+          <input id="chatInputText" type="text" required placeholder="分享運動心得、找夥伴跑步..." class="w-full border border-slate-200 rounded-full px-5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean">
+          <button type="submit" class="px-6 py-2.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-sm font-bold whitespace-nowrap transition shadow-xs">
+            發布留言
+          </button>
+        </form>
+      </div>
+
     </section>
 
-    <!-- 🛡️ 管理後台 (只有 Admin 看得到) -->
-    <section id="adminSection" class="hidden max-w-6xl mx-auto px-4 sm:px-8 py-14 border border-rose-200 bg-rose-50/20 rounded-[32px] space-y-8">
-      <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+    <!-- 管理後台 (支援獨立捲動) -->
+    <section id="adminSection" class="hidden max-w-6xl mx-auto px-4 sm:px-8 py-10 border border-rose-200 bg-rose-50/20 rounded-[32px] space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3 pb-3 border-b border-slate-100">
           <div>
-            <h3 class="text-lg font-bold text-appleDark">👥 管理員權限名單 (Super Admin 授權)</h3>
-            <p class="text-xs text-appleGray mt-0.5">只有名單內之管理員可授權其他同仁</p>
+            <h3 class="text-base font-bold text-appleDark">管理員名單維護 (Super Admin 授權)</h3>
+            <p class="text-xs text-appleGray">名單內管理員皆具備審核權限</p>
           </div>
           <div class="flex gap-2 w-full sm:w-auto">
-            <input id="newAdminEmailInput" type="email" placeholder="輸入新管理員 Email" class="text-sm border border-slate-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-rose-500 w-full sm:w-64">
-            <button onclick="addNewAdmin()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl whitespace-nowrap">
-              新增管理員
+            <input id="newAdminEmailInput" type="email" placeholder="輸入新管理員 Email" class="text-xs border border-slate-200 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-rose-500 w-full sm:w-60">
+            <button onclick="addNewAdmin()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg whitespace-nowrap">
+              新增
             </button>
           </div>
         </div>
@@ -472,19 +542,19 @@
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-        <div class="p-5 border-b border-slate-200 bg-appleBg">
-          <h3 class="text-base font-bold text-appleDark">🛡️ 運動步數與 GPS 路線審核</h3>
+        <div class="p-4 border-b border-slate-200 bg-slate-50">
+          <h3 class="text-sm font-bold text-appleDark">運動步數與 GPS 路線審核</h3>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-appleBg text-appleGray text-xs border-b border-slate-200">
+        <div class="overflow-x-auto max-h-[480px] overflow-y-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-appleGray border-b border-slate-200 sticky top-0">
               <tr>
-                <th class="p-4">日期</th>
-                <th class="p-4">同仁 Email</th>
-                <th class="p-4">自報步數</th>
-                <th class="p-4">截圖 (點擊放大)</th>
-                <th class="p-4">狀態</th>
-                <th class="p-4">操作</th>
+                <th class="p-3">日期</th>
+                <th class="p-3">同仁 Email</th>
+                <th class="p-3">自報步數</th>
+                <th class="p-3">截圖證明 (點擊放大)</th>
+                <th class="p-3">狀態</th>
+                <th class="p-3">操作</th>
               </tr>
             </thead>
             <tbody id="auditTableBody" class="divide-y divide-slate-100 text-appleDark">
@@ -496,32 +566,32 @@
     </section>
 
     <!-- 頁尾 -->
-    <footer class="bg-white border-t border-black/[0.06] py-14 text-center text-appleGray text-xs sm:text-sm space-y-2">
-      <div class="font-bold text-appleDark text-base tracking-wider">north co 諾思</div>
+    <footer class="bg-white border-t border-stone/15 py-12 text-center text-appleGray text-xs space-y-2">
+      <div class="font-bold text-appleDark text-sm tracking-wider">north co 諾思</div>
       <p>專業 Clear Ocean ｜ 誠信 Stone ｜ 團隊 Cloud ｜ 創新 Sunrise</p>
-      <p class="text-xs text-appleGray/80">健康不是競賽，是我們一起照顧自己的方式。</p>
+      <p class="text-[11px] text-stone">健康不是競賽，是我們一起照顧自己的方式。</p>
     </footer>
 
   </main>
 
-  <!-- ==================== 3. 圖片放大 Lightbox Modal ==================== -->
+  <!-- ==================== 圖片放大 Lightbox Modal ==================== -->
   <div id="imageLightbox" class="hidden fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out" onclick="closeLightbox()">
     <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
-      <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white hover:text-sunrise text-3xl font-bold p-1">✕</button>
+      <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white hover:text-ocean text-2xl font-bold p-1">✕</button>
       <img id="lightboxImg" src="" class="max-h-[85vh] max-w-full rounded-2xl shadow-2xl object-contain bg-black/40 border border-white/10" alt="放大截圖">
-      <div class="text-xs text-white/70 mt-3">點擊背景任意處或 ✕ 即可關閉</div>
+      <div class="text-xs text-white/70 mt-2">點擊背景任意處即可關閉</div>
     </div>
   </div>
 
   <!-- 暱稱修改彈窗 (覆蓋 Google Sheet) -->
-  <div id="nicknameModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-[28px] max-w-sm w-full p-8 space-y-5 shadow-2xl border border-black/[0.06]">
-      <h4 class="font-bold text-appleDark text-xl">修改個人活動暱稱</h4>
-      <p class="text-xs text-appleGray leading-relaxed">修改後的暱稱將直接同步覆蓋至 Google Sheet 後台與排行榜。</p>
-      <input id="modalNicknameInput" type="text" placeholder="輸入新暱稱" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-base outline-none focus:ring-2 focus:ring-sunrise">
-      <div class="flex justify-end gap-3 pt-2">
-        <button onclick="closeNicknameModal()" class="px-4 py-2 rounded-full text-sm font-semibold text-appleGray hover:bg-slate-100">取消</button>
-        <button onclick="saveNewNickname()" class="px-5 py-2 rounded-full text-sm font-semibold bg-sunrise hover:bg-orange-500 text-white shadow-sm">儲存並覆蓋</button>
+  <div id="nicknameModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-[28px] max-w-sm w-full p-7 space-y-4 shadow-xl border border-stone/20">
+      <h4 class="font-bold text-appleDark text-lg">修改個人活動暱稱</h4>
+      <p class="text-xs text-appleGray">修改後將直接同步覆蓋至 Google Sheet 後台、打卡與排行榜。</p>
+      <input id="modalNicknameInput" type="text" placeholder="輸入新暱稱" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean">
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeNicknameModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-appleGray hover:bg-slate-100">取消</button>
+        <button onclick="saveNewNickname()" class="px-5 py-2 rounded-full text-xs font-semibold bg-ocean hover:bg-oceanDark text-white shadow-xs">儲存覆蓋</button>
       </div>
     </div>
   </div>
@@ -531,24 +601,26 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbywDSzb2oTVhU5CXzd8SbxBkwxG_CWEwcqxr4YhbOTcJQdNQpEYJszwK04YKIEZltCp/exec";
 
     let currentEmail = "";
-    let currentNickname = "諾思";
+    let currentNickname = "諾思夥伴";
     let isCurrentAdmin = false;
-
     let calcState = { stepPoints: 8, sportPoints: 4, teamExtra: 2, coSport: 2 };
 
-    // 啟動與登入狀態記憶
     window.onload = function() {
       document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
       recomputeNorthCalculator();
 
-      // 檢查 localStorage 避免重新整理被登出
+      // 檢查持久化登入狀態
       const savedUser = localStorage.getItem('north_user');
       if (savedUser) {
         try {
           const user = JSON.parse(savedUser);
-          currentEmail = user.email;
-          showLoggedInUI(user.name, user.picture);
-          fetchData();
+          currentEmail = user.email || "";
+          if (currentEmail) {
+            showLoggedInUI(user.name);
+            fetchData();
+          } else {
+            showLoggedOutUI();
+          }
         } catch (e) {
           showLoggedOutUI();
         }
@@ -556,80 +628,78 @@
         showLoggedOutUI();
       }
 
-      // 初始化 Google 登入 (含重試防呆)
       initGoogleSignIn();
     };
 
     function scrollToLogin() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      const el = document.getElementById('directEmailInput');
+      if (el) el.focus();
+    }
+
+    // 快速 Email 登入
+    function handleDirectLogin() {
+      const email = document.getElementById('directEmailInput').value.trim();
+      if (!email || !email.includes('@')) return alert("請輸入有效的 Email！");
+
+      currentEmail = email;
+      const defaultName = email.split('@')[0] || "諾思夥伴";
+
+      localStorage.setItem('north_user', JSON.stringify({ email: email, name: defaultName }));
+      showLoggedInUI(defaultName);
+      fetchData();
     }
 
     function showLoggedOutUI() {
       document.getElementById('loginGate').classList.remove('hidden');
-      document.getElementById('mainApp').classList.remove('hidden'); // 未登入亦可瀏覽規則，打卡時提示登入
       document.getElementById('headerLoggedOutArea').classList.remove('hidden');
       document.getElementById('headerLoggedInArea').classList.add('hidden');
     }
 
-    function showLoggedInUI(name, picture) {
+    function showLoggedInUI(name) {
       document.getElementById('loginGate').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
       document.getElementById('headerLoggedOutArea').classList.add('hidden');
       document.getElementById('headerLoggedInArea').classList.remove('hidden');
 
-      document.getElementById('userAvatar').src = picture || "";
-      document.getElementById('formEmail').value = currentEmail;
-      document.getElementById('userNicknameDisplay').innerText = name || "諾思";
-      document.getElementById('formName').value = name || "諾思";
+      const elEmail = document.getElementById('formEmail');
+      if (elEmail) elEmail.value = currentEmail;
+
+      const elNameDisp = document.getElementById('userNicknameDisplay');
+      if (elNameDisp) elNameDisp.innerText = name || "諾思夥伴";
+
+      const elFormName = document.getElementById('formName');
+      if (elFormName) elFormName.value = name || "諾思夥伴";
+
+      const elAvatar = document.getElementById('userAvatarText');
+      if (elAvatar) elAvatar.innerText = (name || "諾")[0].toUpperCase();
     }
 
-    // Google 登入初始化 (附帶重試確保按鈕絕不消失)
     let gRetryCount = 0;
     function initGoogleSignIn() {
       if (typeof google !== 'undefined' && google.accounts) {
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse
-        });
-        
-        // 渲染登入門檻的大按鈕
-        const gateContainer = document.getElementById("googleLoginBtnGate");
-        if (gateContainer) {
-          google.accounts.id.renderButton(gateContainer, {
-            theme: "outline",
-            size: "large",
-            shape: "pill",
-            width: 280
+        try {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
           });
+          const gateContainer = document.getElementById("googleLoginBtnGate");
+          if (gateContainer) {
+            google.accounts.id.renderButton(gateContainer, { theme: "outline", size: "large", shape: "pill", width: 280 });
+          }
+        } catch (e) {
+          console.warn("GSI 初始化");
         }
-
-        // 渲染導覽列右側的按鈕
-        const headerContainer = document.getElementById("googleLoginBtnHeader");
-        if (headerContainer) {
-          google.accounts.id.renderButton(headerContainer, {
-            theme: "outline",
-            size: "medium",
-            shape: "pill"
-          });
-        }
-      } else if (gRetryCount < 10) {
+      } else if (gRetryCount < 6) {
         gRetryCount++;
-        setTimeout(initGoogleSignIn, 250); // 若 SDK 尚未載入完成，每 250ms 重試一次
+        setTimeout(initGoogleSignIn, 300);
       }
     }
 
     function handleCredentialResponse(response) {
-      document.getElementById('loginLoadingHint').classList.remove('hidden');
       const payload = parseJwt(response.credential);
       currentEmail = payload.email;
-
-      localStorage.setItem('north_user', JSON.stringify({
-        email: payload.email,
-        name: payload.name || "諾思",
-        picture: payload.picture || ""
-      }));
-
-      showLoggedInUI(payload.name, payload.picture);
+      localStorage.setItem('north_user', JSON.stringify({ email: payload.email, name: payload.name || "諾思夥伴" }));
+      showLoggedInUI(payload.name);
       fetchData();
     }
 
@@ -639,7 +709,6 @@
       isCurrentAdmin = false;
       showLoggedOutUI();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      initGoogleSignIn();
     }
 
     function parseJwt(token) {
@@ -657,9 +726,10 @@
         .then(res => res.json())
         .then(data => {
           isCurrentAdmin = data.isAdmin;
-          currentNickname = data.userNickname || "諾思";
+          currentNickname = data.userNickname || "諾思夥伴";
           document.getElementById('userNicknameDisplay').innerText = currentNickname;
           document.getElementById('formName').value = currentNickname;
+          document.getElementById('userAvatarText').innerText = (currentNickname || "諾")[0];
 
           if (data.isAdmin) {
             document.getElementById('adminNavLink').classList.remove('hidden');
@@ -672,8 +742,67 @@
           }
           renderLeaderboard(data.leaderboard);
           renderFeed(data.records);
+          renderChatMessages(data.chatMessages);
         })
         .catch(err => console.error("API 載入失敗:", err));
+    }
+
+    // ==================== 雙分頁切換 (回報動態牆 vs 交流聊天室) ====================
+    function switchTab(tab) {
+      if (tab === 'feed') {
+        document.getElementById('tabContentFeed').classList.remove('hidden');
+        document.getElementById('tabContentChat').classList.add('hidden');
+        document.getElementById('tabBtnFeed').className = "pb-2 text-base font-bold border-b-2 border-ocean text-appleDark transition";
+        document.getElementById('tabBtnChat').className = "pb-2 text-base font-bold border-b-2 border-transparent text-appleGray hover:text-appleDark transition";
+      } else {
+        document.getElementById('tabContentFeed').classList.add('hidden');
+        document.getElementById('tabContentChat').classList.remove('hidden');
+        document.getElementById('tabBtnFeed').className = "pb-2 text-base font-bold border-b-2 border-transparent text-appleGray hover:text-appleDark transition";
+        document.getElementById('tabBtnChat').className = "pb-2 text-base font-bold border-b-2 border-ocean text-appleDark transition";
+      }
+    }
+
+    // 發布聊天室訊息
+    function handleSendChat(e) {
+      e.preventDefault();
+      if (!currentEmail) return alert("請先登入帳號！");
+      const input = document.getElementById('chatInputText');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      input.value = "";
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'sendChat',
+          email: currentEmail,
+          name: currentNickname,
+          message: msg
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          renderChatMessages(res.chatMessages);
+        }
+      });
+    }
+
+    function renderChatMessages(list) {
+      const container = document.getElementById('chatMessageList');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div class="text-center py-10 text-appleGray text-sm">目前尚無交流留言</div>';
+        return;
+      }
+      container.innerHTML = list.map(item => `
+        <div class="p-3.5 rounded-xl bg-white border border-slate-100 shadow-xs space-y-1">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-appleDark">${item.name} <span class="text-appleGray font-normal">(${item.email})</span></span>
+            <span class="text-appleGray">${item.time}</span>
+          </div>
+          <p class="text-sm text-slate-700 leading-relaxed">${item.message}</p>
+        </div>
+      `).join('');
     }
 
     // 圖片放大 Lightbox
@@ -683,13 +812,12 @@
       document.getElementById('imageLightbox').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
-
     function closeLightbox() {
       document.getElementById('imageLightbox').classList.add('hidden');
       document.body.style.overflow = 'auto';
     }
 
-    // 暱稱設定與覆蓋
+    // 暱稱設定
     function openNicknameModal() {
       document.getElementById('modalNicknameInput').value = currentNickname;
       document.getElementById('nicknameModal').classList.remove('hidden');
@@ -698,7 +826,7 @@
       document.getElementById('nicknameModal').classList.add('hidden');
     }
     function saveNewNickname() {
-      const newName = document.getElementById('modalNicknameInput').value.trim() || "諾思";
+      const newName = document.getElementById('modalNicknameInput').value.trim() || "諾思夥伴";
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -713,7 +841,8 @@
           currentNickname = res.nickname;
           document.getElementById('userNicknameDisplay').innerText = currentNickname;
           document.getElementById('formName').value = currentNickname;
-          
+          document.getElementById('userAvatarText').innerText = (currentNickname || "諾")[0];
+
           const savedUser = JSON.parse(localStorage.getItem('north_user') || '{}');
           savedUser.name = currentNickname;
           localStorage.setItem('north_user', JSON.stringify(savedUser));
@@ -724,7 +853,6 @@
       });
     }
 
-    // 團隊點數試算機
     function changeCalc(field, diff) {
       calcState[field] = Math.max(0, calcState[field] + diff);
       document.getElementById('calcStepPoints').innerText = calcState.stepPoints;
@@ -740,9 +868,9 @@
 
       let reward = 0;
       let badge = "未達標門檻 (參加獎)";
-      if (totalPoints >= 20) { reward = 6000; badge = "🎉 達成 20 點最高門檻"; }
-      else if (totalPoints >= 15) { reward = 4500; badge = "✨ 達成 15 點門檻"; }
-      else if (totalPoints >= 10) { reward = 3000; badge = "🥉 達成 10 點門檻"; }
+      if (totalPoints >= 20) { reward = 6000; badge = "達成 20 點最高門檻"; }
+      else if (totalPoints >= 15) { reward = 4500; badge = "達成 15 點門檻"; }
+      else if (totalPoints >= 10) { reward = 3000; badge = "達成 10 點門檻"; }
 
       document.getElementById('calcTeamReward').innerText = "NT$ " + reward.toLocaleString();
       document.getElementById('calcPerPerson').innerText = "NT$ " + Math.round(reward / 3).toLocaleString();
@@ -752,17 +880,17 @@
     function renderLeaderboard(list) {
       const tbody = document.getElementById('leaderboardBody');
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-appleGray">目前尚無通過審核的排行榜數據</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-appleGray">目前尚無通過審核的排行榜數據</td></tr>';
         return;
       }
       tbody.innerHTML = list.map((user, idx) => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="p-5 text-center font-bold text-lg">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</td>
-          <td class="p-5 font-bold text-appleDark text-base">${user.name} <span class="text-xs text-appleGray font-normal">(${user.email})</span></td>
-          <td class="p-5 text-center font-mono font-semibold">${user.validDays} 天</td>
-          <td class="p-5 text-right font-mono font-black text-sunrise text-lg">${user.totalSteps.toLocaleString()} 步</td>
-          <td class="p-5 text-center"><span class="px-3 py-1 rounded-full text-xs font-bold bg-ocean/20 text-slate-900">${user.tier}</span></td>
-          <td class="p-5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : '—'}</td>
+          <td class="p-4 text-center font-bold">${idx + 1}</td>
+          <td class="p-4 font-bold text-appleDark">${user.name} <span class="text-xs text-appleGray font-normal">(${user.email})</span></td>
+          <td class="p-4 text-center font-mono font-semibold">${user.validDays} 天</td>
+          <td class="p-4 text-right font-mono font-black text-oceanDark text-base">${user.totalSteps.toLocaleString()} 步</td>
+          <td class="p-4 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-ocean/20 text-slate-800">${user.tier}</span></td>
+          <td class="p-4 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : '—'}</td>
         </tr>
       `).join('');
     }
@@ -770,32 +898,29 @@
     function renderFeed(records) {
       const container = document.getElementById('feedList');
       if (!records || records.length === 0) {
-        container.innerHTML = '<div class="text-center py-12 text-appleGray text-base">尚無打卡紀錄</div>';
+        container.innerHTML = '<div class="text-center py-10 text-appleGray text-sm">尚無回報紀錄</div>';
         return;
       }
       container.innerHTML = records.map(item => `
-        <div class="bg-white p-6 sm:p-7 rounded-[28px] border border-black/[0.06] shadow-xs space-y-3">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
           <div class="flex justify-between items-start">
             <div>
-              <span class="font-bold text-appleDark text-lg">${item.name}</span>
-              <span class="text-xs text-appleGray ml-1.5">(${item.email})</span>
+              <span class="font-bold text-appleDark text-sm">${item.name}</span>
+              <span class="text-xs text-appleGray ml-1">(${item.email})</span>
               <div class="text-xs text-appleGray mt-0.5">${item.date} 運動打卡</div>
             </div>
             <div class="text-right">
-              <span class="inline-block px-3 py-1 rounded-full text-xs font-bold ${
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                 item.status === '通過' ? 'bg-emerald-100 text-emerald-800' :
                 item.status === '駁回' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
               }">${item.status}</span>
-              <div class="font-mono font-black text-sunrise text-lg mt-1">${item.steps.toLocaleString()} 步</div>
+              <div class="font-mono font-black text-oceanDark text-sm mt-1">${item.steps.toLocaleString()} 步</div>
             </div>
           </div>
-          ${item.message ? `<p class="text-appleDark text-base bg-appleBg p-4 rounded-2xl leading-relaxed">${item.message}</p>` : ''}
+          ${item.message ? `<p class="text-appleDark text-xs bg-white p-2.5 rounded-xl border border-slate-100 leading-relaxed">${item.message}</p>` : ''}
           ${item.imageUrl ? `
             <div class="pt-1">
-              <div class="relative inline-block group">
-                <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="max-h-56 rounded-2xl border border-slate-200 object-cover cursor-zoom-in hover:opacity-95 transition shadow-sm" alt="截圖證明">
-                <div class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-xs px-2.5 py-1 rounded-lg backdrop-blur-sm pointer-events-none">🔍 點擊放大</div>
-              </div>
+              <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="max-h-40 rounded-xl border border-slate-200 object-cover cursor-zoom-in hover:opacity-95 transition" alt="截圖證明" title="點擊放大預覽">
             </div>
           ` : ''}
         </div>
@@ -806,23 +931,23 @@
       const tbody = document.getElementById('auditTableBody');
       tbody.innerHTML = records.map(item => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="p-4 text-xs">${item.date}</td>
-          <td class="p-4 text-xs font-semibold">${item.email} (${item.name})</td>
-          <td class="p-4 font-mono font-bold text-appleDark">${item.steps.toLocaleString()}</td>
-          <td class="p-4">
+          <td class="p-3 text-xs">${item.date}</td>
+          <td class="p-3 text-xs font-semibold">${item.email} (${item.name})</td>
+          <td class="p-3 font-mono font-bold text-appleDark">${item.steps.toLocaleString()}</td>
+          <td class="p-3">
             ${item.imageUrl ? `
-              <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="w-12 h-12 rounded-xl border border-slate-200 object-cover cursor-zoom-in hover:ring-2 hover:ring-sunrise transition shadow-xs" title="點擊放大預覽">
+              <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="w-10 h-10 rounded-lg border border-slate-200 object-cover cursor-zoom-in hover:ring-2 hover:ring-ocean transition" title="點擊放大預覽">
             ` : '<span class="text-xs text-appleGray">無截圖</span>'}
           </td>
-          <td class="p-4">
-            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${
+          <td class="p-3">
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${
               item.status === '通過' ? 'bg-emerald-100 text-emerald-800' :
               item.status === '駁回' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
             }">${item.status}</span>
           </td>
-          <td class="p-4 space-x-1.5">
-            <button onclick="auditRecord(${item.rowId}, '通過', ${item.steps})" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold">通過</button>
-            <button onclick="auditRecord(${item.rowId}, '駁回', 0)" class="px-3 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-semibold">駁回</button>
+          <td class="p-3 space-x-1">
+            <button onclick="auditRecord(${item.rowId}, '通過', ${item.steps})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold">通過</button>
+            <button onclick="auditRecord(${item.rowId}, '駁回', 0)" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold">駁回</button>
           </td>
         </tr>
       `).join('');
@@ -867,7 +992,7 @@
 
     function handleCheckIn(e) {
       e.preventDefault();
-      if (!currentEmail) return alert("請先完成 Google 登入！");
+      if (!currentEmail) return alert("請先完成登入！");
 
       const btn = document.getElementById('formSubmitBtn');
       btn.disabled = true;
@@ -889,7 +1014,7 @@
         body: JSON.stringify({
           action: 'checkIn',
           email: currentEmail,
-          name: document.getElementById('formName').value.trim() || "諾思",
+          name: document.getElementById('formName').value.trim() || "諾思夥伴",
           date: document.getElementById('formDate').value,
           steps: document.getElementById('formSteps').value,
           message: document.getElementById('formMessage').value,
@@ -897,7 +1022,7 @@
         })
       })
       .then(() => {
-        alert("🎉 打卡成功！已寫入試算表待審核。");
+        alert("回報成功！已寫入試算表待審核。");
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
         fetchData();
