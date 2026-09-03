@@ -304,15 +304,15 @@
     <section id="calc" class="max-w-5xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="text-center max-w-lg mx-auto space-y-2">
         <h2 class="text-3xl font-black text-appleDark tracking-tight">團隊點數試算</h2>
-        <p class="text-appleGray text-sm">即時試算 3 位隊員達標進度與獎勵等級</p>
+        <p class="text-appleGray text-sm">即時試算 3 位隊員在活動期間 (4 週共 28 天) 之達標進度與獎勵等級</p>
       </div>
 
       <div class="bg-white/95 backdrop-blur-md p-8 sm:p-12 rounded-[32px] border border-stone/20 shadow-sm grid md:grid-cols-12 gap-8 items-center">
         <div class="md:col-span-7 space-y-4 text-base">
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
-              <div class="font-bold text-appleDark text-sm">【每日步數】達標人次</div>
-              <div class="text-xs text-stone">當週 4 天達 8,000 步 (每人次 1 點)</div>
+              <div class="font-bold text-appleDark text-sm">【每日步數】達標總人次</div>
+              <div class="text-xs text-stone">每人當週 4 天達 8,000 步 (每人次 1 點，全期最高 12 人次)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('stepPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
@@ -323,12 +323,12 @@
 
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
-              <div class="font-bold text-appleDark text-sm">【規律運動】達標人次</div>
-              <div class="text-xs text-stone">每週 2 次 30 分鐘運動 (每人次 1 點)</div>
+              <div class="font-bold text-appleDark text-sm">【規律運動】達標總人次</div>
+              <div class="text-xs text-stone">每人每週 2 次 30 分鐘運動 (每人次 1 點，全期最高 12 人次)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('sportPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcSportPoints" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">4</span>
+              <span id="calcSportPoints" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">6</span>
               <button onclick="changeCalc('sportPoints', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
             </div>
           </div>
@@ -336,23 +336,23 @@
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
               <div class="font-bold text-appleDark text-sm">【持續達標】加碼週數</div>
-              <div class="text-xs text-stone">全員皆完成至少 1 項任務 (每週加碼 1 點)</div>
+              <div class="text-xs text-stone">當週全員皆完成至少 1 項任務 (每週加碼 1 點，全期最高 4 週)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('teamExtra', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcTeamExtra" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">2</span>
+              <span id="calcTeamExtra" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">3</span>
               <button onclick="changeCalc('teamExtra', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
             </div>
           </div>
 
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
-              <div class="font-bold text-appleDark text-sm">【一起動起來】共同運動</div>
-              <div class="text-xs text-stone">團隊成員運動合照 (每次加碼 1 點)</div>
+              <div class="font-bold text-appleDark text-sm">【一起動起來】共同運動合照</div>
+              <div class="text-xs text-stone">團隊成員運動合照記錄 (每次加碼 1 點，全期最高 4 次)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('coSport', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcCoSport" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">2</span>
+              <span id="calcCoSport" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">3</span>
               <button onclick="changeCalc('coSport', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
             </div>
           </div>
@@ -360,21 +360,21 @@
 
         <div class="md:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8 rounded-[28px] space-y-6 text-center shadow-lg border border-white/10">
           <div class="space-y-1">
-            <span class="text-xs text-stone uppercase font-semibold tracking-wider">團隊累計總點數</span>
-            <div id="calcTotalPoints" class="text-6xl font-black text-ocean font-mono">16 點</div>
+            <span class="text-xs text-stone uppercase font-semibold tracking-wider">團隊 4 週累計總點數</span>
+            <div id="calcTotalPoints" class="text-6xl font-black text-ocean font-mono">20 點</div>
           </div>
           <div class="pt-4 border-t border-slate-700 space-y-2.5 text-left text-sm text-slate-300">
             <div class="flex justify-between">
               <span>獎金解鎖狀態：</span>
-              <span id="calcTierBadge" class="font-bold text-emerald-400">已達標 15 點門檻</span>
+              <span id="calcTierBadge" class="font-bold text-emerald-400">達成 20 點最高門檻</span>
             </div>
             <div class="flex justify-between">
               <span>團隊可得獎金：</span>
-              <span id="calcTeamReward" class="font-bold text-sunrise text-xl">NT$ 4,500</span>
+              <span id="calcTeamReward" class="font-bold text-sunrise text-xl">NT$ 6,000</span>
             </div>
             <div class="flex justify-between">
               <span>每位隊員均分：</span>
-              <span id="calcPerPerson" class="font-bold text-white text-base">NT$ 1,500</span>
+              <span id="calcPerPerson" class="font-bold text-white text-base">NT$ 2,000</span>
             </div>
           </div>
         </div>
@@ -583,7 +583,7 @@
     let currentNickname = "諾思夥伴";
     let isCurrentAdmin = false;
     let isGsiInitialized = false; // 單次執行保護鎖
-    let calcState = { stepPoints: 8, sportPoints: 4, teamExtra: 2, coSport: 2 };
+    let calcState = { stepPoints: 8, sportPoints: 6, teamExtra: 3, coSport: 3 };
 
     window.onload = function() {
       document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
@@ -835,9 +835,22 @@
       }).join('');
     }
 
+    function formatImageUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      url = url.trim();
+      if (!url) return '';
+      if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([^\/]+)/) || url.match(/[?&]id=([^&]+)/);
+        if (match && match[1]) {
+          return `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+      }
+      return url;
+    }
+
     function openLightbox(src) {
       if (!src) return;
-      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxImg').src = formatImageUrl(src);
       document.getElementById('imageLightbox').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
@@ -881,8 +894,16 @@
       });
     }
 
+    const calcLimits = {
+      stepPoints: 12,
+      sportPoints: 12,
+      teamExtra: 4,
+      coSport: 4
+    };
+
     function changeCalc(field, diff) {
-      calcState[field] = Math.max(0, calcState[field] + diff);
+      const maxVal = calcLimits[field] || 99;
+      calcState[field] = Math.min(maxVal, Math.max(0, calcState[field] + diff));
       document.getElementById('calcStepPoints').innerText = calcState.stepPoints;
       document.getElementById('calcSportPoints').innerText = calcState.sportPoints;
       document.getElementById('calcTeamExtra').innerText = calcState.teamExtra;
@@ -1027,7 +1048,7 @@
           ${item.message ? `<p class="text-appleDark text-xs bg-white p-2.5 rounded-xl border border-stone/10 leading-relaxed">${item.message}</p>` : ''}
           ${item.imageUrl ? `
             <div class="pt-1">
-              <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="max-h-40 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="截圖證明" title="點擊放大預覽">
+              <img src="${formatImageUrl(item.imageUrl)}" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="max-h-40 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="截圖證明" title="點擊放大預覽">
             </div>
           ` : ''}
         </div>
@@ -1060,7 +1081,7 @@
           <td class="p-3 font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()}</td>
           <td class="p-3">
             ${item.imageUrl ? `
-              <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="w-10 h-10 rounded-lg border border-stone/20 object-cover cursor-zoom-in hover:ring-2 hover:ring-ocean transition" title="點擊放大預覽">
+              <img src="${formatImageUrl(item.imageUrl)}" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="w-10 h-10 rounded-lg border border-stone/20 object-cover cursor-zoom-in hover:ring-2 hover:ring-ocean transition" title="點擊放大預覽">
             ` : '<span class="text-xs text-stone">無截圖</span>'}
           </td>
           <td class="p-3">
