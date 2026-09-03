@@ -110,9 +110,27 @@
         </p>
       </div>
 
-      <!-- 純 Google 登入按鈕掛載點 -->
+      <!-- 官方 Google 登入按鈕掛載點 (原生 HTML5 + JS 雙重聲明，確保 100% 顯示) -->
       <div class="pt-2 flex flex-col items-center justify-center space-y-3">
-        <div id="googleLoginBtnGate" class="min-h-[48px] flex justify-center"></div>
+        
+        <div id="g_id_onload"
+             data-client_id="922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_select="false">
+        </div>
+        
+        <div id="googleLoginBtnGate" class="min-h-[48px] flex justify-center">
+          <div class="g_id_signin"
+               data-type="standard"
+               data-shape="pill"
+               data-theme="outline"
+               data-text="signin_with"
+               data-size="large"
+               data-width="280"
+               data-logo_alignment="left">
+          </div>
+        </div>
+
         <div id="loginLoadingHint" class="hidden text-xs text-oceanDark font-semibold animate-pulse">
           帳號驗證成功，正在載入活動系統...
         </div>
