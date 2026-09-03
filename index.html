@@ -1644,12 +1644,9 @@
         } catch(e){}
       }
 
-      // 4. 預設展示團隊
       if (teams.length === 0) {
-        teams = [
-          { teamName: "諾思健身社團", captainEmail: "zach.yang@north.com.tw", members: ["zach.yang@north.com.tw", "jerri0912@gmail.com", "fongyum080501@gmail.com"], teamPoints: 12 },
-          { teamName: "諾思勁跑隊 02", captainEmail: "欣庭 Eunice", members: ["欣庭 Eunice", "Alice", "Bob"], teamPoints: 10 }
-        ];
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，請於上方點擊按鈕新增或匯入團隊</td></tr>';
+        return;
       }
 
       const processedTeams = teams.map(t => {
@@ -1757,10 +1754,8 @@
       }
 
       if (!teams || teams.length === 0) {
-        teams = [
-          { teamName: "諾思衝鋒隊 01", members: ["Zach Yang", "欣庭 Eunice", "Alice"] },
-          { teamName: "健康勇士隊 02", members: ["Bob", "Carol", "David"] }
-        ];
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">目前尚無團隊資料，請由隊長點擊右上角「組隊」完成 3 人團隊建立</td></tr>';
+        return;
       }
 
       const processedTeams = teams.map(t => {
