@@ -637,11 +637,16 @@
 
         <!-- 分頁 2: 團隊與隊名總管理 (Admin 調整) -->
         <div id="adminTabContentTeams" class="hidden space-y-4">
-          <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex justify-between items-center">
-            <span>💡 管理員具備所有團隊隊名修正、成員重新圈選與額外點數調整權限。</span>
-            <button onclick="adminPromptNewTeam()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs">
-              + 手動新增/調整隊伍
-            </button>
+          <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <span>💡 管理員具備所有團隊隊名修正、成員圈選與 CSV 批次匯入權限。</span>
+            <div class="flex gap-2 shrink-0">
+              <button onclick="openImportTeamsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-xs transition">
+                📥 批次匯入團隊 (CSV/文字)
+              </button>
+              <button onclick="adminPromptNewTeam()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-xs transition">
+                + 單筆新增/調整隊伍
+              </button>
+            </div>
           </div>
 
           <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
@@ -755,6 +760,35 @@
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="closeTeamModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-stone hover:bg-slate-100">關閉</button>
         <button id="teamSaveBtn" onclick="saveTeamInfo()" class="px-5 py-2 rounded-full text-xs font-semibold bg-ocean hover:bg-oceanDark text-white shadow-xs">儲存團隊設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理員批次匯入團隊 Modal -->
+  <div id="importTeamsModal" class="hidden fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-[28px] max-w-xl w-full p-7 space-y-4 shadow-2xl border border-stone/20">
+      <div class="flex justify-between items-center border-b border-stone/15 pb-2">
+        <h4 class="font-bold text-appleDark text-base sm:text-lg">📥 批次匯入 3 人團隊名單</h4>
+        <button onclick="closeImportTeamsModal()" class="text-stone hover:text-appleDark font-bold text-lg">✕</button>
+      </div>
+      
+      <div class="bg-cloud p-3.5 rounded-xl border border-stone/15 space-y-1 text-xs text-slate-700">
+        <p class="font-bold text-appleDark">請貼入 CSV 或多行團隊資料（每行代表一隊，用逗號或 Tab 分隔）：</p>
+        <p class="font-mono text-stone text-[11px]">格式：隊名, 隊長Email, 隊員2, 隊員3</p>
+        <p class="font-mono text-emerald-800 bg-emerald-50 p-1.5 rounded border border-emerald-200">
+          諾思健身社團, zach.yang@north.com.tw, jerri0912@gmail.com, fongyum080501@gmail.com<br>
+          諾思勁跑隊, eunice@north.com.tw, alice@north.com.tw, bob@north.com.tw
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-appleDark mb-1">貼入匯入內容</label>
+        <textarea id="importTeamsTextarea" rows="6" placeholder="請在此貼入匯入資料..." class="w-full border border-stone/20 rounded-xl p-3 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeImportTeamsModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-stone hover:bg-slate-100">取消</button>
+        <button onclick="executeImportTeams()" class="px-5 py-2 rounded-full text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">確認批次匯入</button>
       </div>
     </div>
   </div>
@@ -1400,22 +1434,158 @@
       }
     }
 
-    function renderAdminTeamTable(teams, individualList) {
+    function openImportTeamsModal() {
+      document.getElementById('importTeamsModal').classList.remove('hidden');
+    }
+
+    function closeImportTeamsModal() {
+      document.getElementById('importTeamsModal').classList.add('hidden');
+    }
+
+    function executeImportTeams() {
+      const text = document.getElementById('importTeamsTextarea').value.trim();
+      if (!text) return alert("請先貼入要匯入的團隊資料！");
+
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) return alert("未檢測到有效的團隊資料行");
+
+      let count = 0;
+      let localTeams = [];
+      const savedLocal = localStorage.getItem('north_all_teams');
+      if (savedLocal) {
+        try { localTeams = JSON.parse(savedLocal); } catch(e){}
+      }
+
+      lines.forEach(line => {
+        const parts = line.split(/[,;\t]+/).map(p => p.trim());
+        if (parts.length >= 2) {
+          const teamName = parts[0];
+          const captainEmail = parts[1];
+          const m2 = parts[2] || "";
+          const m3 = parts[3] || "";
+
+          if (teamName) {
+            const teamObj = {
+              teamName: teamName,
+              captainEmail: captainEmail,
+              members: [captainEmail, m2, m3]
+            };
+
+            const existingIdx = localTeams.findIndex(t => t.teamName === teamName);
+            if (existingIdx >= 0) {
+              localTeams[existingIdx] = teamObj;
+            } else {
+              localTeams.push(teamObj);
+            }
+
+            if (captainEmail) {
+              localStorage.setItem('north_team_' + captainEmail.toLowerCase(), JSON.stringify(teamObj));
+            }
+
+            fetch(API_URL, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'setTeam',
+                operatorEmail: currentEmail,
+                captainEmail: captainEmail,
+                teamName: teamName,
+                members: [captainEmail, m2, m3]
+              })
+            });
+
+            count++;
+          }
+        }
+      });
+
+      localStorage.setItem('north_all_teams', JSON.stringify(localTeams));
+      alert(`成功匯入 ${count} 支團隊！已同步更新至系統榜單。`);
+      closeImportTeamsModal();
+      document.getElementById('importTeamsTextarea').value = "";
+      fetchData();
+    }
+
+    function renderAdminTeamTable(serverTeams, individualList) {
       const tbody = document.getElementById('adminTeamTableBody');
       if (!tbody) return;
 
-      if (!teams || teams.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，可點擊上方按鈕建立新隊伍</td></tr>';
-        return;
+      let teams = [];
+
+      // 1. 伺服器團隊
+      if (serverTeams && Array.isArray(serverTeams)) {
+        teams = [...serverTeams];
       }
 
-      tbody.innerHTML = teams.map((team, idx) => `
+      // 2. 批次匯入與本地團隊名單
+      const savedAll = localStorage.getItem('north_all_teams');
+      if (savedAll) {
+        try {
+          const parsed = JSON.parse(savedAll);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(t => {
+              if (t && t.teamName && !teams.find(x => x.teamName === t.teamName)) {
+                teams.push(t);
+              }
+            });
+          }
+        } catch(e){}
+      }
+
+      // 3. 個人本機團隊
+      const localTeam = localStorage.getItem('north_team_' + currentEmail);
+      if (localTeam) {
+        try {
+          const parsed = JSON.parse(localTeam);
+          if (parsed && parsed.teamName && !teams.find(x => x.teamName === parsed.teamName)) {
+            teams.push(parsed);
+          }
+        } catch(e){}
+      }
+
+      // 4. 預設展示團隊
+      if (teams.length === 0) {
+        teams = [
+          { teamName: "諾思健身社團", captainEmail: "zach.yang@north.com.tw", members: ["zach.yang@north.com.tw", "jerri0912@gmail.com", "fongyum080501@gmail.com"], teamPoints: 12 },
+          { teamName: "諾思勁跑隊 02", captainEmail: "欣庭 Eunice", members: ["欣庭 Eunice", "Alice", "Bob"], teamPoints: 10 }
+        ];
+      }
+
+      const processedTeams = teams.map(t => {
+        let teamSteps = 0;
+        let teamPoints = t.teamPoints || 0;
+
+        if (individualList && individualList.length > 0) {
+          individualList.forEach(user => {
+            const info = cleanUserInfo(user);
+            const isMember = t.members && t.members.some(m => 
+              (m && typeof m === 'string') && 
+              (m.toLowerCase().includes(info.email.toLowerCase()) || 
+               info.name.toLowerCase().includes(m.toLowerCase()) || 
+               m.toLowerCase().includes(info.name.toLowerCase()))
+            );
+            if (isMember) {
+              const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
+              const sports = user.sportCount || user.sports || 0;
+              teamSteps += (user.totalSteps || user.steps || 0);
+              teamPoints += (user.points || user.totalPoints || (days + sports));
+            }
+          });
+        }
+
+        return {
+          ...t,
+          teamSteps: teamSteps,
+          teamPoints: teamPoints
+        };
+      });
+
+      tbody.innerHTML = processedTeams.map((team, idx) => `
         <tr class="hover:bg-rose-50/30 transition text-xs">
           <td class="p-3 text-center font-bold">${idx + 1}</td>
           <td class="p-3 font-bold text-appleDark">${team.teamName}</td>
           <td class="p-3 font-semibold text-rose-700 font-mono">${team.captainEmail || (team.members ? team.members[0] : '未設定')}</td>
-          <td class="p-3 text-stone">${team.members ? team.members.join(', ') : '無'}</td>
-          <td class="p-3 text-center font-bold text-sunrise">${team.teamPoints || 0} 點</td>
+          <td class="p-3 text-stone font-medium">${team.members ? team.members.join(', ') : '無'}</td>
+          <td class="p-3 text-center font-bold text-sunrise text-sm">${team.teamPoints || 0} 點</td>
           <td class="p-3 text-right">
             <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改隊名/成員</button>
           </td>
