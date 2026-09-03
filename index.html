@@ -111,11 +111,18 @@
         </p>
       </div>
 
-      <!-- 唯一 Google 登入按鈕掛載點 -->
+      <!-- Google 登入按鈕掛載點 + 備用 Email 登入入口 -->
       <div class="pt-4 flex flex-col items-center justify-center space-y-4">
         <div id="googleLoginBtnGate" class="min-h-[48px] flex justify-center"></div>
         <div id="loginLoadingHint" class="hidden text-sm text-oceanDark font-semibold animate-pulse">
           Google 帳號驗證成功，正在載入活動系統...
+        </div>
+
+        <!-- 備用 Email 登入按鈕 (防止 Google OAuth 網域鎖定時影響登入) -->
+        <div class="pt-2">
+          <button type="button" onclick="promptFallbackEmailLogin()" class="text-xs text-stone hover:text-appleDark font-semibold underline underline-offset-4 transition">
+            無法顯示 Google 按鈕？點此輸入 Email 快速登入 ↗
+          </button>
         </div>
       </div>
     </div>
@@ -981,6 +988,25 @@
         console.error("JWT 解析失敗:", err);
         return null;
       }
+    }
+
+    function promptFallbackEmailLogin() {
+      const input = prompt("請輸入您的公司 Google Email (例如: zach.yang@north.com.tw)：");
+      if (!input) return;
+      const cleanE = input.trim().toLowerCase();
+      if (!cleanE.includes("@")) return alert("請輸入有效的 Email 格式！");
+
+      currentEmail = cleanE;
+      const userName = currentEmail.split('@')[0];
+
+      localStorage.setItem('north_user', JSON.stringify({
+        email: currentEmail,
+        name: userName,
+        picture: ""
+      }));
+
+      showLoggedInUI(userName);
+      fetchData();
     }
 
     // 接收 Google 官方登入成功憑證
