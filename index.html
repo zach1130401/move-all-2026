@@ -1005,16 +1005,36 @@
           const rawNick = data.userNickname || currentNickname || "諾思夥伴";
           const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
           currentNickname = nickInfo.name || currentEmail.split('@')[0] || "諾思夥伴";
+          window.latestTeamsData = data.teams || [];
           let userTeamName = "未組隊";
-          const localTeam = localStorage.getItem('north_team_' + currentEmail);
-          if (localTeam) {
-            try {
-              const parsed = JSON.parse(localTeam);
-              if (parsed && parsed.teamName) userTeamName = parsed.teamName;
-            } catch(e){}
+
+          if (data.teams && Array.isArray(data.teams)) {
+            const foundTeam = data.teams.find(t => {
+              if (!t || !t.members) return false;
+              return t.members.some(m => 
+                (m && typeof m === 'string') && 
+                (m.toLowerCase().includes(currentEmail.toLowerCase()) || 
+                 currentEmail.toLowerCase().includes(m.toLowerCase()) ||
+                 (currentNickname && m.toLowerCase().includes(currentNickname.toLowerCase())))
+              );
+            });
+            if (foundTeam && foundTeam.teamName) {
+              userTeamName = foundTeam.teamName;
+            }
           }
+
+          if (userTeamName === "未組隊") {
+            const localTeam = localStorage.getItem('north_team_' + currentEmail);
+            if (localTeam) {
+              try {
+                const parsed = JSON.parse(localTeam);
+                if (parsed && parsed.teamName) userTeamName = parsed.teamName;
+              } catch(e){}
+            }
+          }
+
           const badgeEl = document.getElementById('userTeamBadgeDisplay');
-          if (badgeEl) badgeEl.innerText = "🏆 " + userTeamName;
+          if (badgeEl) badgeEl.innerText = userTeamName;
 
           if (data.isAdmin) {
             document.getElementById('adminNavLink').classList.remove('hidden');
@@ -1377,23 +1397,41 @@
 
     function openTeamModal() {
       if (!currentEmail) return alert("請先完成 Google 登入！");
-      document.getElementById('teamMember1Input').value = currentEmail;
       
-      const saved = localStorage.getItem('north_team_' + currentEmail);
       let isCaptain = true;
       let captainEmail = currentEmail;
+      let existingTeam = null;
 
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          document.getElementById('teamNameInput').value = parsed.teamName || "";
-          document.getElementById('teamMember2Input').value = parsed.members[1] || "";
-          document.getElementById('teamMember3Input').value = parsed.members[2] || "";
-          captainEmail = parsed.captainEmail || parsed.members[0] || currentEmail;
-          if (captainEmail.toLowerCase() !== currentEmail.toLowerCase()) {
-            isCaptain = false;
-          }
-        } catch(e){}
+      if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
+        existingTeam = window.latestTeamsData.find(t => t.members && t.members.some(m => 
+          (m && typeof m === 'string') && 
+          (m.toLowerCase().includes(currentEmail.toLowerCase()) || currentEmail.toLowerCase().includes(m.toLowerCase()))
+        ));
+      }
+
+      if (!existingTeam) {
+        const saved = localStorage.getItem('north_team_' + currentEmail);
+        if (saved) {
+          try { existingTeam = JSON.parse(saved); } catch(e){}
+        }
+      }
+
+      if (existingTeam) {
+        document.getElementById('teamNameInput').value = existingTeam.teamName || "";
+        captainEmail = existingTeam.captainEmail || (existingTeam.members ? existingTeam.members[0] : currentEmail);
+        if (captainEmail.toLowerCase() !== currentEmail.toLowerCase()) {
+          isCaptain = false;
+        }
+        document.getElementById('teamMember1Input').value = captainEmail;
+        if (existingTeam.members) {
+          document.getElementById('teamMember2Input').value = existingTeam.members[1] || "";
+          document.getElementById('teamMember3Input').value = existingTeam.members[2] || "";
+        }
+      } else {
+        document.getElementById('teamMember1Input').value = currentEmail;
+        document.getElementById('teamNameInput').value = "";
+        document.getElementById('teamMember2Input').value = "";
+        document.getElementById('teamMember3Input').value = "";
       }
 
       const noticeEl = document.getElementById('teamPermissionNotice');
