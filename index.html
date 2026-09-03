@@ -677,11 +677,17 @@
     // 重構 JWT 解密核心：支援物件與字串、位元填充，徹底解決 replace is not a function
     function decodeJwt(input) {
       if (!input) return null;
-      let token = input;
-      if (typeof input === 'object' && input !== null) {
-        token = input.credential || input.id_token || input.token || '';
+      if (typeof input === 'object' && input !== null && input.email) {
+        return input;
+      }
+      let token = "";
+      if (typeof input === 'string') {
+        token = input;
+      } else if (typeof input === 'object' && input !== null) {
+        token = input.credential || input.id_token || input.token || (input.detail && input.detail.credential) || '';
       }
       if (typeof token !== 'string' || !token.includes('.')) {
+        console.warn("decodeJwt 收到無效 Token 格式:", input);
         return null;
       }
       const parts = token.split('.');
@@ -693,12 +699,16 @@
           base64 += '=';
         }
         const decoded = atob(base64);
-        const jsonPayload = decodeURIComponent(
-          decoded.split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-          }).join('')
-        );
-        return JSON.parse(jsonPayload);
+        try {
+          const jsonPayload = decodeURIComponent(
+            decoded.split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')
+          );
+          return JSON.parse(jsonPayload);
+        } catch (e1) {
+          return JSON.parse(decoded);
+        }
       } catch (err) {
         console.error("JWT 解析失敗:", err);
         return null;
@@ -707,10 +717,13 @@
 
     // 接收 Google 官方登入成功憑證
     function handleCredentialResponse(response) {
+      console.log("Google Credential Response:", response);
       try {
         const payload = decodeJwt(response);
+        console.log("Decoded Payload:", payload);
         if (!payload || !payload.email) {
-          alert("登入處理失敗：未能解析出有效 Google Email，請重試！");
+          console.error("未能解析出 email, payload:", payload);
+          alert("登入處理失敗：未能解析出有效 Google Email！\n請按 Ctrl+F5 (Cmd+Shift+R) 強制更新網頁以套用最新修正。");
           return;
         }
 
