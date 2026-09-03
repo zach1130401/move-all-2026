@@ -218,39 +218,9 @@
           <div class="absolute bottom-0 left-0 right-0 h-2 bg-sunrise rounded-b-[36px]"></div>
         </div>
 
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== 2. 主活動儀表板 (未登入時 100% 強制 hidden，絕不重疊) ==================== -->
-  <main id="mainApp" class="hidden space-y-16 sm:space-y-24">
+  <!-- ==================== 2. 公開活動說明、獎金門檻與點數計算機 (所有人皆可自由瀏覽) ==================== -->
+  <div id="publicContent" class="space-y-16 sm:space-y-24 py-8">
     
-    <!-- 核心數據 (修復折行) -->
-    <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-6">
-        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
-          <div class="text-xs font-semibold text-stone uppercase tracking-wider">團隊機制</div>
-          <div class="text-xl sm:text-3xl lg:text-4xl font-black text-appleDark">3 人</div>
-          <div class="text-[11px] sm:text-xs text-appleGray mt-1">互助累積集點</div>
-        </div>
-        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-ocean/40 shadow-xs text-center space-y-1">
-          <div class="text-xs font-semibold text-oceanDark uppercase tracking-wider">個人目標</div>
-          <div class="text-xl sm:text-3xl lg:text-4xl font-black text-ocean">8,000</div>
-          <div class="text-[11px] sm:text-xs text-appleGray mt-1">平日每日目標步數</div>
-        </div>
-        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-sunrise/40 shadow-xs text-center space-y-1">
-          <div class="text-xs font-semibold text-sunrise uppercase tracking-wider">最高獎金</div>
-          <div class="text-base min-[360px]:text-lg sm:text-3xl lg:text-4xl font-black text-sunrise tracking-tighter shrink-0">NT$6,000</div>
-          <div class="text-[11px] sm:text-xs text-appleGray mt-1">團隊解鎖現金獎勵</div>
-        </div>
-        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
-          <div class="text-xs font-semibold text-stone uppercase tracking-wider">社會回饋</div>
-          <div class="text-base min-[360px]:text-lg sm:text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">全體參加獎</div>
-          <div class="text-[11px] sm:text-xs text-appleGray mt-1">社福烘焙公益禮盒</div>
-        </div>
-      </div>
-    </section>
-
     <!-- 四大健康任務說明 -->
     <section id="mission" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
       <div class="text-center max-w-2xl mx-auto space-y-2">
@@ -299,18 +269,18 @@
       <div class="grid sm:grid-cols-3 gap-6 sm:gap-8">
         <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs text-center space-y-2">
           <div class="text-xs font-semibold text-stone">團隊累積達 10 點</div>
-          <div class="text-4xl font-black text-appleDark">NT$ 4,800</div>
-          <p class="text-xs text-appleGray">團隊獎金（解鎖第一階段門檻）</p>
+          <div class="text-4xl font-black text-appleDark">NT$ 3,000</div>
+          <p class="text-xs text-appleGray">團隊總獎金（每人分得 NT$ 1,000）</p>
         </div>
         <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-ocean/50 shadow-xs text-center space-y-2">
           <div class="text-xs font-semibold text-oceanDark">團隊累積達 15 點</div>
-          <div class="text-4xl font-black text-oceanDark">NT$ 6,000</div>
-          <p class="text-xs text-appleGray">團隊獎金（解鎖第二階段門檻）</p>
+          <div class="text-4xl font-black text-oceanDark">NT$ 4,800</div>
+          <p class="text-xs text-appleGray">團隊總獎金（每人分得 NT$ 1,600）</p>
         </div>
         <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border-2 border-sunrise shadow-md text-center space-y-2">
           <div class="text-xs font-semibold text-sunrise">團隊累積達 20 點以上</div>
-          <div class="text-4xl font-black text-sunrise">最高榮譽</div>
-          <p class="text-xs text-appleGray">最高團隊獎勵與榮譽勳章</p>
+          <div class="text-4xl font-black text-sunrise">NT$ 6,000</div>
+          <p class="text-xs text-appleGray">最高團隊獎金（每人分得 NT$ 2,000）</p>
         </div>
       </div>
 
@@ -459,10 +429,13 @@
               <span id="calcPerPerson" class="font-bold text-white text-base">NT$ 2,000</span>
             </div>
           </div>
-        </div>
       </div>
     </section>
+  </div>
 
+  <!-- ==================== 3. 主活動個人儀表板 (登入後解鎖排行榜、回報表單與控制台) ==================== -->
+  <main id="mainApp" class="hidden space-y-16 sm:space-y-24 py-8">
+    
     <!-- 即時排行榜 (以 3人團隊點數總榜 為主) -->
     <section id="leaderboard" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone/15 pb-3">
