@@ -1501,6 +1501,24 @@
         }
       }
 
+      // 彙整已加入其他團隊之成員對照表 (每人只能歸屬一隊)
+      const assignedTeamsMap = new Map();
+      if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
+        window.latestTeamsData.forEach(t => {
+          if (t && t.teamName && t.members && Array.isArray(t.members)) {
+            // 若非當前正在編輯的團隊，記錄其成員所屬隊名
+            const isCurrentTeam = existingTeam && (existingTeam.teamName === t.teamName);
+            if (!isCurrentTeam) {
+              t.members.forEach(m => {
+                if (m && typeof m === 'string') {
+                  assignedTeamsMap.set(m.toLowerCase().trim(), t.teamName);
+                }
+              });
+            }
+          }
+        });
+      }
+
       // 動態彙整所有已登入/已回報之同仁名單供隊長選擇
       const userMap = new Map();
       if (window.latestLeaderboardData && Array.isArray(window.latestLeaderboardData)) {
@@ -1535,7 +1553,20 @@
         let opts = '<option value="">-- 請選擇同仁 --</option>';
         userMap.forEach((label, val) => {
           const isSelected = (selectedVal && (selectedVal.toLowerCase().includes(val) || val.includes(selectedVal.toLowerCase()))) ? 'selected' : '';
-          opts += `<option value="${val}" ${isSelected}>${label}</option>`;
+          
+          // 檢查該同仁是否已歸屬其他團隊
+          let alreadyInTeam = "";
+          assignedTeamsMap.forEach((tName, keyEmail) => {
+            if (val.includes(keyEmail) || keyEmail.includes(val)) {
+              alreadyInTeam = tName;
+            }
+          });
+
+          if (alreadyInTeam && !isSelected) {
+            opts += `<option value="${val}" disabled>${label} (🔒 已加入「${alreadyInTeam}」)</option>`;
+          } else {
+            opts += `<option value="${val}" ${isSelected}>${label}</option>`;
+          }
         });
         if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
           opts += `<option value="${selectedVal}" selected>${selectedVal}</option>`;
@@ -1594,7 +1625,11 @@
       const m3 = document.getElementById('teamMember3Input').value.trim();
 
       if (!teamName) return alert("請輸入團隊隊名！");
-      if (!m2 || !m3) return alert("請填寫完整的 3 人小組成員資訊！");
+      if (!m2 || !m3) return alert("請選擇完整的 3 人小組成員！");
+
+      if (m2.toLowerCase() === m3.toLowerCase() || m2.toLowerCase() === currentEmail.toLowerCase() || m3.toLowerCase() === currentEmail.toLowerCase()) {
+        return alert("團隊 3 人不能選擇重複的同仁！請選擇 3 位不同的成員。");
+      }
 
       const teamData = {
         teamName: teamName,
@@ -1613,11 +1648,22 @@
           teamName: teamName,
           members: [currentEmail, m2, m3]
         })
+      })
+      .then(res => res.json().catch(() => ({ success: true })))
+      .then(res => {
+        if (res && res.success === false) {
+          alert("儲存失敗: " + (res.message || "同仁可能已歸屬其他團隊"));
+        } else {
+          alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
+          closeTeamModal();
+          fetchData();
+        }
+      })
+      .catch(() => {
+        alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
+        closeTeamModal();
+        fetchData();
       });
-
-      alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
-      closeTeamModal();
-      fetchData();
     }
 
     function openAdminModal() {
