@@ -885,10 +885,12 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 關鍵：未登入強制隱藏 mainApp，登入後強制隱藏 loginGate，絕不重疊跑版！
+    // 關鍵：未登入 100% 強制隱藏主儀表板與所有公開活動內容，登入後方可解鎖！
     function showLoggedOutUI() {
       document.getElementById('loginGate').classList.remove('hidden');
       document.getElementById('mainApp').classList.add('hidden');
+      const pub = document.getElementById('publicContent');
+      if (pub) pub.classList.add('hidden');
       document.getElementById('headerLoggedOutArea').classList.remove('hidden');
       document.getElementById('headerLoggedInArea').classList.add('hidden');
     }
@@ -896,6 +898,8 @@
     function showLoggedInUI(name) {
       document.getElementById('loginGate').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
+      const pub = document.getElementById('publicContent');
+      if (pub) pub.classList.remove('hidden');
       document.getElementById('headerLoggedOutArea').classList.add('hidden');
       document.getElementById('headerLoggedInArea').classList.remove('hidden');
 
