@@ -821,15 +821,18 @@
         container.innerHTML = '<div class="text-center py-10 text-stone text-sm">目前尚無交流留言</div>';
         return;
       }
-      container.innerHTML = list.map(item => `
-        <div class="p-3.5 rounded-2xl bg-white border border-stone/15 shadow-xs space-y-1">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-appleDark">${item.name} <span class="text-stone font-normal">(${item.email})</span></span>
-            <span class="text-stone">${item.time}</span>
+      container.innerHTML = list.map(item => {
+        const info = cleanUserInfo(item);
+        return `
+          <div class="p-3.5 rounded-2xl bg-white border border-stone/15 shadow-xs space-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-appleDark">${info.name} <span class="text-stone font-normal">(${info.email})</span></span>
+              <span class="text-stone">${item.time || ''}</span>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed">${item.message || ''}</p>
           </div>
-          <p class="text-sm text-slate-700 leading-relaxed">${item.message}</p>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function openLightbox(src) {
@@ -991,7 +994,14 @@
       const validRecords = records.map(item => {
         const info = cleanUserInfo(item);
         return { ...item, cleanName: info.name, cleanEmail: info.email };
-      }).filter(item => item.date && (item.cleanEmail || item.steps > 0));
+      })
+      .filter(item => item.date && (item.cleanEmail || item.steps > 0))
+      .sort((a, b) => {
+        if (b.rowId && a.rowId) return b.rowId - a.rowId;
+        const timeA = new Date(a.timestamp || a.date).getTime() || 0;
+        const timeB = new Date(b.timestamp || b.date).getTime() || 0;
+        return timeB - timeA;
+      });
 
       if (validRecords.length === 0) {
         container.innerHTML = '<div class="text-center py-10 text-stone text-sm">尚無有效的回報紀錄</div>';
@@ -1029,7 +1039,14 @@
       const validRecords = records.map(item => {
         const info = cleanUserInfo(item);
         return { ...item, cleanName: info.name, cleanEmail: info.email };
-      }).filter(item => item.date && (item.cleanEmail || item.steps > 0));
+      })
+      .filter(item => item.date && (item.cleanEmail || item.steps > 0))
+      .sort((a, b) => {
+        if (b.rowId && a.rowId) return b.rowId - a.rowId;
+        const timeA = new Date(a.timestamp || a.date).getTime() || 0;
+        const timeB = new Date(b.timestamp || b.date).getTime() || 0;
+        return timeB - timeA;
+      });
 
       if (validRecords.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前無需要審核的資料</td></tr>';
