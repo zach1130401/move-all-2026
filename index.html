@@ -1041,8 +1041,11 @@
           </div>
           ${item.message ? `<p class="text-appleDark text-xs bg-white p-2.5 rounded-xl border border-stone/10 leading-relaxed">${item.message}</p>` : ''}
           ${item.imageUrl ? `
-            <div class="pt-1">
-              <img src="${formatImageUrl(item.imageUrl)}" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="max-h-40 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="截圖證明" title="點擊放大預覽">
+            <div class="pt-1 space-y-1">
+              <img src="${formatImageUrl(item.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="max-h-48 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="截圖證明" title="點擊放大預覽">
+              <div class="hidden text-xs text-stone bg-white/90 p-2 rounded-xl border border-stone/10">
+                ⚠️ 截圖受 Google 雲端權限限制，<a href="${item.imageUrl}" target="_blank" class="text-oceanDark font-bold underline">點此在新分頁查看原圖 ↗</a>
+              </div>
             </div>
           ` : ''}
         </div>
@@ -1075,7 +1078,10 @@
           <td class="p-3 font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()}</td>
           <td class="p-3">
             ${item.imageUrl ? `
-              <img src="${formatImageUrl(item.imageUrl)}" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="w-10 h-10 rounded-lg border border-stone/20 object-cover cursor-zoom-in hover:ring-2 hover:ring-ocean transition" title="點擊放大預覽">
+              <div class="flex items-center gap-2">
+                <img src="${formatImageUrl(item.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="w-10 h-10 rounded-lg border border-stone/20 object-cover cursor-zoom-in hover:ring-2 hover:ring-ocean transition" title="點擊放大預覽">
+                <a href="${item.imageUrl}" target="_blank" class="text-xs text-oceanDark font-bold hover:underline shrink-0">原圖↗</a>
+              </div>
             ` : '<span class="text-xs text-stone">無截圖</span>'}
           </td>
           <td class="p-3">
@@ -1085,15 +1091,20 @@
             }">${item.status || '待審核'}</span>
           </td>
           <td class="p-3 space-x-1">
-            <button onclick="auditRecord(${item.rowId}, '通過', ${item.steps})" class="px-2.5 py-1 bg-ocean hover:bg-oceanDark text-white rounded-md text-xs font-semibold transition">通過</button>
-            <button onclick="auditRecord(${item.rowId}, '駁回', 0)" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold transition">駁回</button>
+            <button onclick="auditRecord(this, ${item.rowId}, '通過', ${item.steps})" class="px-2.5 py-1 bg-ocean hover:bg-oceanDark text-white rounded-md text-xs font-semibold transition shadow-xs">通過</button>
+            <button onclick="auditRecord(this, ${item.rowId}, '駁回', 0)" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold transition shadow-xs">駁回</button>
           </td>
         </tr>
       `).join('');
     }
 
-    function auditRecord(rowId, status, steps) {
+    function auditRecord(btnEl, rowId, status, steps) {
       if (!confirm(`確認將此筆標記為「${status}」？`)) return;
+
+      if (btnEl && btnEl.parentElement) {
+        btnEl.parentElement.innerHTML = `<span class="text-xs font-bold text-oceanDark animate-pulse">審核寫入中...</span>`;
+      }
+
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -1103,7 +1114,14 @@
           status: status,
           approvedSteps: steps
         })
-      }).then(() => fetchData());
+      })
+      .then(() => {
+        setTimeout(fetchData, 1000);
+      })
+      .catch(err => {
+        console.error("審核寫入失敗:", err);
+        setTimeout(fetchData, 1000);
+      });
     }
 
     function addNewAdmin() {
