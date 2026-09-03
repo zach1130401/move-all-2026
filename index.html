@@ -614,6 +614,25 @@
         
         <!-- 分頁 1: 運動步數與截圖審核 -->
         <div id="adminTabContentAudit" class="space-y-4">
+          
+          <!-- Pacer APP 每日累計點數快速填報區 -->
+          <div class="bg-gradient-to-r from-oceanLight/60 via-cloud to-white p-5 rounded-2xl border border-ocean/30 space-y-3 shadow-2xs">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h4 class="text-sm font-bold text-appleDark">Pacer APP 每日累計點數快速填報</h4>
+                <p class="text-xs text-stone">輸入同仁 Email 與 Pacer APP 今日最新累計點數，系統將自動覆蓋更新並即時計算 3 人團隊總分。</p>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-ocean text-white shrink-0">Daily Pacer Sync</span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="pacerUserEmailInput" type="email" placeholder="輸入同仁 Email (如: zach.yang@north.com.tw)" class="text-xs border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean flex-1">
+              <input id="pacerUserPointsInput" type="number" min="0" placeholder="Pacer 累計總點數" class="text-xs border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean w-full sm:w-36">
+              <button onclick="adminUpdatePacerPoints()" class="bg-ocean hover:bg-oceanDark text-white font-bold px-5 py-2 rounded-xl text-xs whitespace-nowrap shadow-xs transition">
+                更新 Pacer 點數
+              </button>
+            </div>
+          </div>
+
           <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
             <div class="overflow-x-auto max-h-[480px]">
               <table class="w-full text-left text-xs">
@@ -1265,8 +1284,35 @@
       return { email, name };
     }
 
+    function adminUpdatePacerPoints() {
+      const email = document.getElementById('pacerUserEmailInput').value.trim();
+      const points = parseInt(document.getElementById('pacerUserPointsInput').value, 10);
+
+      if (!email) return alert("請輸入同仁 Email");
+      if (isNaN(points) || points < 0) return alert("請輸入有效的 Pacer 累計點數");
+
+      const localKey = 'north_pacer_points_' + email.toLowerCase();
+      localStorage.setItem(localKey, points);
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'updatePacerPoints',
+          operatorEmail: currentEmail,
+          targetEmail: email,
+          points: points
+        })
+      });
+
+      alert(`成功將 ${email} 的 Pacer 累計點數更新為 ${points} 點！已同步至 3 人團隊總榜。`);
+      document.getElementById('pacerUserEmailInput').value = "";
+      document.getElementById('pacerUserPointsInput').value = "";
+      fetchData();
+    }
+
     function renderLeaderboard(list) {
       const tbody = document.getElementById('leaderboardBody');
+      if (!tbody) return;
       if (!list || list.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-stone">目前尚無通過審核的排行榜數據</td></tr>';
         return;
@@ -1275,15 +1321,23 @@
         const info = cleanUserInfo(item);
         const validDays = item.validDays || item.days || Math.min(30, Math.floor((item.totalSteps || 0) / 8000));
         const sportCount = item.sportCount || item.sports || (item.sportsCount || 0);
-        const totalSteps = item.totalSteps || item.steps || 0;
-        const points = item.points || item.totalPoints || (validDays + sportCount);
+        let points = item.points || item.totalPoints || (validDays + sportCount);
+
+        // 檢查是否有 Pacer 手動填報累計覆蓋點數
+        if (info.email) {
+          const pacerOverride = localStorage.getItem('north_pacer_points_' + info.email.toLowerCase());
+          if (pacerOverride !== null) {
+            points = parseInt(pacerOverride, 10);
+          }
+        }
+
         return {
           ...item,
           cleanName: info.name,
           cleanEmail: info.email,
           validDays: validDays,
           sportCount: sportCount,
-          totalSteps: totalSteps,
+          totalSteps: item.totalSteps || item.steps || 0,
           points: points
         };
       }).filter(item => item.cleanEmail || item.totalSteps > 0 || item.points > 0);
