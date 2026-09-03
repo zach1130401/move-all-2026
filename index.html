@@ -905,19 +905,48 @@
 
     function renderChatMessages(list) {
       const container = document.getElementById('chatMessageList');
+      if (!container) return;
       if (!list || list.length === 0) {
-        container.innerHTML = '<div class="text-center py-10 text-stone text-sm">目前尚無交流留言</div>';
+        container.innerHTML = '<div class="text-center py-10 text-stone text-sm">目前尚無交流留言，快來發出第一則社群訊息吧！</div>';
         return;
       }
-      container.innerHTML = list.map(item => {
+
+      // 依最新時間倒序排列
+      const sortedList = [...list].reverse();
+
+      container.innerHTML = sortedList.map((item, idx) => {
         const info = cleanUserInfo(item);
+        const initial = (info.name || "諾")[0].toUpperCase();
         return `
-          <div class="p-3.5 rounded-2xl bg-white border border-stone/15 shadow-xs space-y-1">
-            <div class="flex justify-between items-center text-xs">
-              <span class="font-bold text-appleDark">${info.name} <span class="text-stone font-normal">(${info.email})</span></span>
-              <span class="text-stone">${item.time || ''}</span>
+          <div class="p-4 rounded-2xl bg-white/95 border border-stone/15 shadow-2xs space-y-2 hover:border-ocean/40 transition">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-ocean to-oceanDark text-white font-bold flex items-center justify-center text-xs shadow-2xs shrink-0">
+                  ${initial}
+                </div>
+                <div>
+                  <div class="font-bold text-appleDark text-xs sm:text-sm leading-tight">${info.name}</div>
+                  <div class="text-[11px] text-stone font-normal leading-tight">${info.email}</div>
+                </div>
+              </div>
+              <span class="text-[11px] text-stone bg-cloud px-2 py-0.5 rounded-full border border-stone/10 font-mono shrink-0">${item.time || '剛剛'}</span>
             </div>
-            <p class="text-sm text-slate-700 leading-relaxed">${item.message || ''}</p>
+            
+            <div class="pl-10 text-xs sm:text-sm text-slate-800 leading-relaxed font-normal whitespace-pre-line">
+              ${item.message || ''}
+            </div>
+
+            <div class="pl-10 pt-1 flex items-center gap-3 text-[11px] text-stone border-t border-stone/10">
+              <button onclick="this.classList.toggle('text-rose-500'); this.classList.toggle('font-bold');" class="hover:text-rose-500 flex items-center gap-1 transition">
+                <span>❤️</span> 讚
+              </button>
+              <button onclick="this.classList.toggle('text-amber-600'); this.classList.toggle('font-bold');" class="hover:text-amber-600 flex items-center gap-1 transition">
+                <span>👏</span> 加油
+              </button>
+              <button onclick="this.classList.toggle('text-oceanDark'); this.classList.toggle('font-bold');" class="hover:text-oceanDark flex items-center gap-1 transition">
+                <span>🔥</span> 衝起來
+              </button>
+            </div>
           </div>
         `;
       }).join('');
