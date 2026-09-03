@@ -7,6 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>north co 諾思 2026 員工健康計劃</title>
+  <link rel="icon" href="https://web.northapp.online/img/company-logo.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google 官方登入 SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
@@ -2086,6 +2087,8 @@
         setTimeout(fetchData, 1000);
       });
     }
+
+    function previewFormImage(e) {
       const file = e.target.files[0];
       const previewBox = document.getElementById('formImagePreviewBox');
       const previewImg = document.getElementById('formImagePreview');
