@@ -148,26 +148,26 @@
     
     <!-- 核心數據 (修復折行) -->
     <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
-        <div class="bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-[24px] sm:rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-6">
+        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-stone uppercase tracking-wider">團隊機制</div>
-          <div class="text-2xl sm:text-4xl lg:text-5xl font-black text-appleDark">3 人</div>
-          <div class="text-xs text-appleGray mt-1">互助累積集點</div>
+          <div class="text-xl sm:text-3xl lg:text-4xl font-black text-appleDark">3 人</div>
+          <div class="text-[11px] sm:text-xs text-appleGray mt-1">互助累積集點</div>
         </div>
-        <div class="bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-[24px] sm:rounded-[30px] border border-ocean/40 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-ocean/40 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-oceanDark uppercase tracking-wider">個人目標</div>
-          <div class="text-2xl sm:text-4xl lg:text-5xl font-black text-ocean">8,000</div>
-          <div class="text-xs text-appleGray mt-1">平日每日目標步數</div>
+          <div class="text-xl sm:text-3xl lg:text-4xl font-black text-ocean">8,000</div>
+          <div class="text-[11px] sm:text-xs text-appleGray mt-1">平日每日目標步數</div>
         </div>
-        <div class="bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-[24px] sm:rounded-[30px] border border-sunrise/40 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-sunrise/40 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-sunrise uppercase tracking-wider">最高獎金</div>
-          <div class="text-xl xs:text-2xl sm:text-4xl lg:text-5xl font-black text-sunrise tracking-tight whitespace-nowrap">NT$6,000</div>
-          <div class="text-xs text-appleGray mt-1">團隊解鎖現金獎勵</div>
+          <div class="text-base min-[360px]:text-lg sm:text-3xl lg:text-4xl font-black text-sunrise tracking-tighter shrink-0">NT$6,000</div>
+          <div class="text-[11px] sm:text-xs text-appleGray mt-1">團隊解鎖現金獎勵</div>
         </div>
-        <div class="bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-[24px] sm:rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-3 sm:p-6 rounded-[22px] sm:rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-stone uppercase tracking-wider">社會回饋</div>
-          <div class="text-lg xs:text-xl sm:text-3xl lg:text-4xl font-black text-emerald-600">全體參加獎</div>
-          <div class="text-xs text-appleGray mt-1">社福烘焙公益禮盒</div>
+          <div class="text-base min-[360px]:text-lg sm:text-2xl lg:text-3xl font-black text-emerald-600 tracking-tight">全體參加獎</div>
+          <div class="text-[11px] sm:text-xs text-appleGray mt-1">社福烘焙公益禮盒</div>
         </div>
       </div>
     </section>
@@ -585,9 +585,15 @@
       if (savedUser) {
         try {
           const user = JSON.parse(savedUser);
-          currentEmail = user.email || "";
+          const cleaned = cleanUserInfo({ email: user.email, name: user.name });
+          currentEmail = cleaned.email || user.email || "";
           if (currentEmail) {
-            showLoggedInUI(user.name);
+            localStorage.setItem('north_user', JSON.stringify({
+              email: currentEmail,
+              name: cleaned.name,
+              picture: user.picture || ""
+            }));
+            showLoggedInUI(cleaned.name);
             fetchData();
           } else {
             showLoggedOutUI();
@@ -620,17 +626,20 @@
       document.getElementById('headerLoggedOutArea').classList.add('hidden');
       document.getElementById('headerLoggedInArea').classList.remove('hidden');
 
+      const cleaned = cleanUserInfo({ email: currentEmail, name: name });
+      const cleanName = cleaned.name || currentEmail.split('@')[0] || "諾思夥伴";
+
       const elEmail = document.getElementById('formEmail');
       if (elEmail) elEmail.value = currentEmail;
 
       const elNameDisp = document.getElementById('userNicknameDisplay');
-      if (elNameDisp) elNameDisp.innerText = name || "諾思夥伴";
+      if (elNameDisp) elNameDisp.innerText = cleanName;
 
       const elFormName = document.getElementById('formName');
-      if (elFormName) elFormName.value = name || "諾思夥伴";
+      if (elFormName) elFormName.value = cleanName;
 
       const elAvatar = document.getElementById('userAvatarText');
-      if (elAvatar) elAvatar.innerText = (name || "諾")[0].toUpperCase();
+      if (elAvatar) elAvatar.innerText = (cleanName || "諾")[0].toUpperCase();
     }
 
     // Google 登入初始化 (附帶單次保護鎖)
@@ -922,49 +931,30 @@
 
     function cleanUserInfo(user) {
       if (!user) return { email: "", name: "諾思夥伴" };
-      let email = user.email;
-      let name = user.name;
+      let email = typeof user.email === "string" ? user.email : "";
+      let name = typeof user.name === "string" ? user.name : "";
 
-      if (Array.isArray(email)) {
-        const foundEmail = email.find(item => typeof item === "string" && item.includes("@"));
-        if (foundEmail) {
-          const idx = email.indexOf(foundEmail);
-          const emailStr = foundEmail.trim();
-          const nameStr = (email[idx + 1] && typeof email[idx + 1] === "string") ? email[idx + 1].trim() : "";
-          email = emailStr;
-          if (nameStr && (!name || typeof name !== "string" || name.includes(","))) {
-            name = nameStr;
-          }
+      if (Array.isArray(user.email)) {
+        const found = user.email.find(item => typeof item === "string" && item.includes("@"));
+        if (found) email = found;
+      }
+
+      const rawStr = (name.includes(",") ? name : "") || (email.includes(",") ? email : "");
+      if (rawStr) {
+        const parts = rawStr.split(",").map(p => p.trim());
+        const foundEmail = parts.find(p => p.includes("@"));
+        if (foundEmail) email = foundEmail;
+
+        const nickPart = parts.find(p => p && !p.includes("@") && !p.includes("GMT") && !p.includes("2026") && !p.includes("2025") && !/^\d{4}/.test(p));
+        if (nickPart) {
+          name = nickPart;
+        } else if (email) {
+          name = email.split("@")[0];
         }
       }
 
-      if (typeof name === "string" && name.includes(",")) {
-        const parts = name.split(",");
-        const foundEmail = parts.find(p => p.trim().includes("@"));
-        if (foundEmail) {
-          const idx = parts.indexOf(foundEmail);
-          if (!email || typeof email !== "string" || email.includes(",")) {
-            email = foundEmail.trim();
-          }
-          name = (parts[idx + 1] && parts[idx + 1].trim()) || (typeof email === "string" ? email.split("@")[0] : "");
-        }
-      }
-
-      if (typeof email === "string" && email.includes(",")) {
-        const parts = email.split(",");
-        const foundEmail = parts.find(p => p.trim().includes("@"));
-        if (foundEmail) {
-          const idx = parts.indexOf(foundEmail);
-          email = foundEmail.trim();
-          if (!name || typeof name !== "string" || name.includes(",")) {
-            name = (parts[idx + 1] && parts[idx + 1].trim()) || email.split("@")[0];
-          }
-        }
-      }
-
-      email = typeof email === "string" ? email.trim() : "";
-      name = typeof name === "string" ? name.trim() : "";
-
+      email = email.trim();
+      name = name.trim();
       if (name.includes(",")) name = name.split(",")[0].trim();
       if (!name && email) name = email.split("@")[0];
       if (!name) name = "諾思夥伴";
