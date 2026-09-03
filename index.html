@@ -13,294 +13,330 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-orange-100 selection:text-orange-600">
 
-  <!-- 導覽列 -->
-  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="bg-orange-500 text-white font-extrabold text-sm px-2.5 py-1 rounded-lg tracking-wider">MOVE ALL</span>
-        <span class="font-bold text-slate-900 text-lg hidden sm:inline">2026 健走挑戰</span>
+  <!-- ==================== 1. 第一頁：未登入畫面 (Login Gate) ==================== -->
+  <div id="loginGate" class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl text-center space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider">
+        🏃 2026 員工健康計劃
       </div>
-      <nav class="flex items-center gap-6 text-sm font-medium text-slate-600">
-        <a href="#rules" class="hover:text-orange-600 transition">活動設計</a>
-        <a href="#calc" class="hover:text-orange-600 transition">計分試算</a>
-        <a href="#leaderboard" class="hover:text-orange-600 transition font-bold text-slate-900">🏆 排行榜</a>
-        <a href="#checkin" class="hover:text-orange-600 transition">打卡留言</a>
-        <a id="adminNavLink" href="#adminSection" class="hidden text-rose-600 font-bold hover:text-rose-700 transition">
-          🛡️ 管理後台
-        </a>
-      </nav>
-      <!-- Google 官方登入按鈕掛載點 -->
-      <div class="flex items-center gap-3">
-        <div id="googleLoginBtn"></div>
-        <div id="userProfileBadge" class="hidden flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-medium text-slate-700">
-          <img id="userAvatar" src="" class="w-5 h-5 rounded-full">
-          <span id="userDisplayName"></span>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Hero 主視覺 (north co 設計) -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-    <div class="grid md:grid-cols-12 gap-10 items-center">
-      <div class="md:col-span-7 space-y-5">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider">
-          🏃 2026/4/1 ～ 4/30 平日限定 (共20天)
-        </div>
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-          一起動起來，<br>
-          <span class="text-orange-500">把健康變成日常。</span>
-        </h1>
-        <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
-          不需要成為最厲害的人，只要成為願意持續邁步的自己。每晉升一段額外領取 7-ELEVEN 禮券，無名額上限，達標即得！
+      <div class="space-y-2">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">MOVE ALL 健走挑戰</h1>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          走出健康，走出獎勵！<br>
+          請先使用 Google 帳號驗證身分，進入專屬活動儀表板。
         </p>
-        <div class="flex flex-wrap gap-4 pt-2">
-          <a href="#checkin" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-xl shadow-sm transition">
-            📸 每日運動打卡 →
-          </a>
-          <a href="#calc" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl transition">
-            試算個人段位獎金
-          </a>
-        </div>
-        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
-          <div>
-            <div class="text-3xl font-black text-slate-900">20</div>
-            <div class="text-xs text-slate-500 font-medium">活動平日天數</div>
-          </div>
-          <div>
-            <div class="text-3xl font-black text-slate-900">6</div>
-            <div class="text-xs text-slate-500 font-medium">段位晉級門檻</div>
-          </div>
-          <div>
-            <div class="text-3xl font-black text-orange-600">NT$1.5K</div>
-            <div class="text-xs text-slate-500 font-medium">最高累積禮券</div>
-          </div>
+      </div>
+
+      <!-- Google 登入按鈕容器 -->
+      <div class="pt-4 flex flex-col items-center justify-center space-y-3">
+        <div id="googleLoginBtnGate"></div>
+        <div id="loginLoadingHint" class="hidden text-xs text-orange-600 font-semibold animate-pulse">
+          驗證身分中，請稍候...
         </div>
       </div>
 
-      <!-- 右側：段位卡片 -->
-      <div class="md:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-        <div class="text-center space-y-1 pb-2 border-b border-slate-100">
-          <span class="text-xs font-bold text-orange-500 tracking-wider uppercase">HOW IT WORKS</span>
-          <h3 class="text-lg font-bold text-slate-900">健走段位門檻標準</h3>
-        </div>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between p-2.5 rounded-xl bg-slate-50">
-            <span class="font-semibold text-slate-700">🥉 銅牌 (40,000 步)</span>
-            <span class="text-xs text-slate-400">感謝參與</span>
-          </div>
-          <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
-            <span class="font-semibold text-slate-800">🥈 銀牌 (100,000 步)</span>
-            <span class="text-orange-600 font-bold">+NT$300 禮券</span>
-          </div>
-          <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
-            <span class="font-semibold text-slate-800">🥇 金牌 (160,000 步)</span>
-            <span class="text-orange-600 font-bold">+NT$200 (累計 $500)</span>
-          </div>
-          <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
-            <span class="font-semibold text-slate-800">💎 鑽石 (210,000 步)</span>
-            <span class="text-orange-600 font-bold">+NT$200 (累計 $700)</span>
-          </div>
-          <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
-            <span class="font-semibold text-slate-800">👑 大師 (260,000 步)</span>
-            <span class="text-orange-600 font-bold">+NT$300 (累計 $1,000)</span>
-          </div>
-          <div class="flex justify-between p-2.5 rounded-xl bg-orange-100 text-slate-900 font-bold">
-            <span>✨ 菁英 (300,000 步)</span>
-            <span class="text-orange-600 font-extrabold">+NT$500 (累計 $1,500)</span>
-          </div>
-        </div>
+      <div class="pt-6 border-t border-slate-100 text-xs text-slate-400 space-y-1">
+        <p>活動期間：2026/4/1 ～ 4/30 (平日20天)</p>
+        <p>系統將自動識別同仁 Email 紀錄個人段位與獎勵</p>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- 段位試算機 -->
-  <section id="calc" class="bg-white border-y border-slate-200 py-14">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6">
-      <div class="text-center max-w-lg mx-auto mb-10">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">互動式段位試算機</h2>
-        <p class="text-slate-500 text-sm mt-2">調整每日目標步數，即時換算 20 天總累積與可解鎖禮券</p>
-      </div>
-      <div class="bg-slate-50 p-6 sm:p-10 rounded-3xl border border-slate-200 grid sm:grid-cols-12 gap-8 items-center">
-        <div class="sm:col-span-7 space-y-6">
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <label class="text-sm font-bold text-slate-700">預估每個平日步數：</label>
-              <span id="stepDisplay" class="font-mono text-2xl font-black text-orange-500">8,000</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <button onclick="changeSteps(-1000)" class="w-10 h-10 rounded-xl bg-white border border-slate-200 font-bold text-lg text-slate-700 hover:bg-slate-100 shadow-sm">-</button>
-              <input id="stepRange" type="range" min="2000" max="20000" step="500" value="8000" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer accent-orange-500" oninput="updateCalculator()">
-              <button onclick="changeSteps(1000)" class="w-10 h-10 rounded-xl bg-white border border-slate-200 font-bold text-lg text-slate-700 hover:bg-slate-100 shadow-sm">+</button>
-            </div>
-          </div>
-          <div class="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-500 flex justify-between">
-            <span>20 個平日全勤累計：</span>
-            <span id="calcTotalSteps" class="font-bold font-mono text-slate-900">160,000 步</span>
-          </div>
-        </div>
-        <div class="sm:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-3">
-          <span class="text-xs font-bold text-slate-400 uppercase">預估達成段位</span>
-          <div id="calcTier" class="text-3xl font-extrabold text-slate-900">🥇 金牌</div>
-          <div class="pt-2 border-t border-slate-100">
-            <span class="text-xs text-slate-500">累計獲得禮券</span>
-            <div id="calcReward" class="text-4xl font-black text-orange-500 mt-1">NT$ 500</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 🏆 即時排行榜 -->
-  <section id="leaderboard" class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-      <div>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase mb-2">
-          🏆 即時更新
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">個人步數排行榜</h2>
-        <p class="text-slate-500 text-sm mt-1">僅統計後台審核通過的有效步數</p>
-      </div>
-      <button onclick="fetchData()" class="text-sm font-semibold text-orange-600 hover:text-orange-700">
-        🔄 重新整理
-      </button>
-    </div>
-
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-            <tr>
-              <th class="p-4 w-16 text-center">名次</th>
-              <th class="p-4">參加同仁</th>
-              <th class="p-4 text-center">達標天數</th>
-              <th class="p-4 text-right">累計有效步數</th>
-              <th class="p-4 text-center">達成段位</th>
-              <th class="p-4 text-right">累計禮券</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody" class="divide-y divide-slate-100 text-slate-700">
-            <tr><td colspan="6" class="p-6 text-center text-slate-400">載入中...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- 打卡與動態牆 -->
-  <section id="checkin" class="bg-slate-100/70 border-t border-slate-200 py-14">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="grid md:grid-cols-12 gap-8">
-        <div class="md:col-span-5">
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-20">
-            <h3 class="text-lg font-bold text-slate-900 mb-4">📸 每日打卡回報</h3>
-            <form onsubmit="handleCheckIn(event)" class="space-y-4 text-sm">
-              <div>
-                <label class="block text-slate-600 font-semibold mb-1">認證帳號 (請先於右上角 Google 登入)</label>
-                <input id="formEmail" type="email" readonly required placeholder="登入後自動填入" class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-slate-500 cursor-not-allowed">
-              </div>
-              <div>
-                <label class="block text-slate-600 font-semibold mb-1">暱稱</label>
-                <input id="formName" type="text" required placeholder="例如：Neroal" class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500">
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-slate-600 font-semibold mb-1">日期</label>
-                  <input id="formDate" type="date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
-                <div>
-                  <label class="block text-slate-600 font-semibold mb-1">當日步數</label>
-                  <input id="formSteps" type="number" required min="1000" placeholder="10500" class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
-              </div>
-              <div>
-                <label class="block text-slate-600 font-semibold mb-1">證明截圖</label>
-                <input id="formFile" type="file" accept="image/*" class="w-full text-xs text-slate-500">
-              </div>
-              <div>
-                <label class="block text-slate-600 font-semibold mb-1">打卡留言</label>
-                <textarea id="formMessage" rows="2" placeholder="今天下班走了三千步！" class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-              </div>
-              <button id="formSubmitBtn" type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl transition shadow-sm">
-                送出打卡
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div class="md:col-span-7 space-y-4">
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-200">
-            💬 同仁打卡留言牆
-          </h3>
-          <div id="feedList" class="space-y-3">
-            <div class="text-center py-10 text-slate-400 text-sm">載入動態牆...</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 🛡️ 管理後台 (含審核面板 + 動態新增 Admin) -->
-  <section id="adminSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-14 my-8 border-2 border-rose-200 bg-rose-50/20 rounded-3xl space-y-10">
+  <!-- ==================== 2. 主應用程式畫面 (登入後才顯示) ==================== -->
+  <div id="mainApp" class="hidden">
     
-    <!-- 模組 1：動態新增管理員 -->
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
-        <div>
-          <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span>👥</span> 管理員名單管理 (Super Admin 授權)
-          </h3>
-          <p class="text-xs text-slate-500 mt-0.5">只有名單內的管理員，可以在這裡新增其他同仁為管理員</p>
+    <!-- 頂部導覽列 -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="bg-orange-500 text-white font-extrabold text-sm px-2.5 py-1 rounded-lg tracking-wider">MOVE ALL</span>
+          <span class="font-bold text-slate-900 text-lg hidden sm:inline">2026 健走挑戰</span>
         </div>
-        <div class="flex gap-2 w-full sm:w-auto">
-          <input id="newAdminEmailInput" type="email" placeholder="輸入新管理員 Email" class="text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-rose-500 w-full sm:w-60">
-          <button onclick="addNewAdmin()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg whitespace-nowrap">
-            新增管理員
+        <nav class="flex items-center gap-6 text-sm font-medium text-slate-600">
+          <a href="#rules" class="hover:text-orange-600 transition">活動設計</a>
+          <a href="#calc" class="hover:text-orange-600 transition">計分試算</a>
+          <a href="#leaderboard" class="hover:text-orange-600 transition font-bold text-slate-900">🏆 排行榜</a>
+          <a href="#checkin" class="hover:text-orange-600 transition">打卡留言</a>
+          <a id="adminNavLink" href="#adminSection" class="hidden text-rose-600 font-bold hover:text-rose-700 transition">
+            🛡️ 管理後台
+          </a>
+        </nav>
+        <!-- 使用者大頭貼與登出 -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-medium text-slate-700">
+            <img id="userAvatar" src="" class="w-5 h-5 rounded-full border border-slate-200">
+            <span id="userDisplayName"></span>
+          </div>
+          <button onclick="logoutUser()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium">
+            登出
           </button>
         </div>
       </div>
-      <div class="text-xs text-slate-600">
-        <span class="font-semibold">目前管理員名單：</span>
-        <span id="currentAdminListDisplay" class="font-mono text-rose-700 font-bold">載入中...</span>
-      </div>
-    </div>
+    </header>
 
-    <!-- 模組 2：審核步數面板 -->
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-      <div class="p-4 border-b border-slate-200 bg-slate-50">
-        <h3 class="text-base font-bold text-slate-900">🛡️ 運動步數審核</h3>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-            <tr>
-              <th class="p-3">日期</th>
-              <th class="p-3">Email</th>
-              <th class="p-3">自報步數</th>
-              <th class="p-3">截圖證明</th>
-              <th class="p-3">當前狀態</th>
-              <th class="p-3">操作</th>
-            </tr>
-          </thead>
-          <tbody id="auditTableBody" class="divide-y divide-slate-100 text-slate-700">
-            <tr><td colspan="6" class="p-4 text-center text-slate-400">載入審核清單...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+    <!-- Hero 主視覺 (north co 設計) -->
+    <section id="rules" class="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
+      <div class="grid md:grid-cols-12 gap-10 items-center">
+        <div class="md:col-span-7 space-y-5">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider">
+            🏃 2026/4/1 ～ 4/30 平日限定 (共20天)
+          </div>
+          <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            一起動起來，<br>
+            <span class="text-orange-500">把健康變成日常。</span>
+          </h1>
+          <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
+            不比極限，只比陪伴與持續。每晉升一段額外領取 7-ELEVEN 禮券，無名額上限，達標即得！
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <a href="#checkin" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-xl shadow-sm transition">
+              📸 每日運動打卡 →
+            </a>
+            <a href="#calc" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl transition">
+              試算個人段位獎金
+            </a>
+          </div>
+          <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+            <div>
+              <div class="text-3xl font-black text-slate-900">20</div>
+              <div class="text-xs text-slate-500 font-medium">活動平日天數</div>
+            </div>
+            <div>
+              <div class="text-3xl font-black text-slate-900">6</div>
+              <div class="text-xs text-slate-500 font-medium">段位晉級門檻</div>
+            </div>
+            <div>
+              <div class="text-3xl font-black text-orange-600">NT$1.5K</div>
+              <div class="text-xs text-slate-500 font-medium">最高累積禮券</div>
+            </div>
+          </div>
+        </div>
 
-  <footer class="bg-white border-t border-slate-200 py-10 text-center text-slate-500 text-xs space-y-2">
-    <div class="font-bold text-slate-900 text-sm">MOVE ALL 2026 健走挑戰</div>
-    <p>健康不是競賽，是我們一起照顧自己的方式。</p>
-  </footer>
+        <!-- 右側：段位卡片 -->
+        <div class="md:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div class="text-center space-y-1 pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-orange-500 tracking-wider uppercase">HOW IT WORKS</span>
+            <h3 class="text-lg font-bold text-slate-900">健走段位門檻標準</h3>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between p-2.5 rounded-xl bg-slate-50">
+              <span class="font-semibold text-slate-700">🥉 銅牌 (40,000 步)</span>
+              <span class="text-xs text-slate-400">感謝參與</span>
+            </div>
+            <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
+              <span class="font-semibold text-slate-800">🥈 銀牌 (100,000 步)</span>
+              <span class="text-orange-600 font-bold">+NT$300 禮券</span>
+            </div>
+            <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
+              <span class="font-semibold text-slate-800">🥇 金牌 (160,000 步)</span>
+              <span class="text-orange-600 font-bold">+NT$200 (累計 $500)</span>
+            </div>
+            <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
+              <span class="font-semibold text-slate-800">💎 鑽石 (210,000 步)</span>
+              <span class="text-orange-600 font-bold">+NT$200 (累計 $700)</span>
+            </div>
+            <div class="flex justify-between p-2.5 rounded-xl bg-orange-50/70">
+              <span class="font-semibold text-slate-800">👑 大師 (260,000 步)</span>
+              <span class="text-orange-600 font-bold">+NT$300 (累計 $1,000)</span>
+            </div>
+            <div class="flex justify-between p-2.5 rounded-xl bg-orange-100 text-slate-900 font-bold">
+              <span>✨ 菁英 (300,000 步)</span>
+              <span class="text-orange-600 font-extrabold">+NT$500 (累計 $1,500)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 段位試算機 -->
+    <section id="calc" class="bg-white border-y border-slate-200 py-14">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-lg mx-auto mb-10">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">互動式段位試算機</h2>
+          <p class="text-slate-500 text-sm mt-2">調整每日目標步數，即時換算 20 天總累積與可解鎖禮券</p>
+        </div>
+        <div class="bg-slate-50 p-6 sm:p-10 rounded-3xl border border-slate-200 grid sm:grid-cols-12 gap-8 items-center">
+          <div class="sm:col-span-7 space-y-6">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-sm font-bold text-slate-700">預估每個平日步數：</label>
+                <span id="stepDisplay" class="font-mono text-2xl font-black text-orange-500">8,000</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button onclick="changeSteps(-1000)" class="w-10 h-10 rounded-xl bg-white border border-slate-200 font-bold text-lg text-slate-700 hover:bg-slate-100 shadow-sm">-</button>
+                <input id="stepRange" type="range" min="2000" max="20000" step="500" value="8000" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer accent-orange-500" oninput="updateCalculator()">
+                <button onclick="changeSteps(1000)" class="w-10 h-10 rounded-xl bg-white border border-slate-200 font-bold text-lg text-slate-700 hover:bg-slate-100 shadow-sm">+</button>
+              </div>
+            </div>
+            <div class="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-500 flex justify-between">
+              <span>20 個平日全勤累計：</span>
+              <span id="calcTotalSteps" class="font-bold font-mono text-slate-900">160,000 步</span>
+            </div>
+          </div>
+          <div class="sm:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-3">
+            <span class="text-xs font-bold text-slate-400 uppercase">預估達成段位</span>
+            <div id="calcTier" class="text-3xl font-extrabold text-slate-900">🥇 金牌</div>
+            <div class="pt-2 border-t border-slate-100">
+              <span class="text-xs text-slate-500">累計獲得禮券</span>
+              <div id="calcReward" class="text-4xl font-black text-orange-500 mt-1">NT$ 500</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🏆 即時排行榜 -->
+    <section id="leaderboard" class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase mb-2">
+            🏆 即時更新
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">個人步數排行榜</h2>
+          <p class="text-slate-500 text-sm mt-1">僅統計後台審核通過的有效步數</p>
+        </div>
+        <button onclick="fetchData()" class="text-sm font-semibold text-orange-600 hover:text-orange-700">
+          🔄 重新整理
+        </button>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
+              <tr>
+                <th class="p-4 w-16 text-center">名次</th>
+                <th class="p-4">參加同仁</th>
+                <th class="p-4 text-center">達標天數</th>
+                <th class="p-4 text-right">累計有效步數</th>
+                <th class="p-4 text-center">達成段位</th>
+                <th class="p-4 text-right">累計禮券</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody" class="divide-y divide-slate-100 text-slate-700">
+              <tr><td colspan="6" class="p-6 text-center text-slate-400">載入中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 打卡與動態牆 -->
+    <section id="checkin" class="bg-slate-100/70 border-t border-slate-200 py-14">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="grid md:grid-cols-12 gap-8">
+          <div class="md:col-span-5">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-20">
+              <h3 class="text-lg font-bold text-slate-900 mb-4">📸 每日打卡回報</h3>
+              <form onsubmit="handleCheckIn(event)" class="space-y-4 text-sm">
+                <div>
+                  <label class="block text-slate-600 font-semibold mb-1">認證帳號 (Google 驗證)</label>
+                  <input id="formEmail" type="email" readonly required class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-slate-600 font-medium cursor-not-allowed">
+                </div>
+                <div>
+                  <label class="block text-slate-600 font-semibold mb-1">暱稱</label>
+                  <input id="formName" type="text" required placeholder="例如：Neroal" class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-slate-600 font-semibold mb-1">日期</label>
+                    <input id="formDate" type="date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500">
+                  </div>
+                  <div>
+                    <label class="block text-slate-600 font-semibold mb-1">當日步數</label>
+                    <input id="formSteps" type="number" required min="1000" placeholder="10500" class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-slate-600 font-semibold mb-1">證明截圖 (Apple Health / Garmin / 運動照)</label>
+                  <input id="formFile" type="file" accept="image/*" class="w-full text-xs text-slate-500">
+                </div>
+                <div>
+                  <label class="block text-slate-600 font-semibold mb-1">打卡留言</label>
+                  <textarea id="formMessage" rows="2" placeholder="今天下班走了三千步！" class="w-full border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+                <button id="formSubmitBtn" type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl transition shadow-sm">
+                  送出打卡
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="md:col-span-7 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-slate-200">
+              💬 同仁打卡留言牆
+            </h3>
+            <div id="feedList" class="space-y-3">
+              <div class="text-center py-10 text-slate-400 text-sm">載入動態牆...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🛡️ 管理後台 (含審核面板 + 動態新增 Admin) -->
+    <section id="adminSection" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-14 my-8 border-2 border-rose-200 bg-rose-50/20 rounded-3xl space-y-10">
+      
+      <!-- 模組 1：動態新增管理員 -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <span>👥</span> 管理員名單管理 (Super Admin 授權)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">只有名單內的管理員，可以在這裡新增其他同仁為管理員</p>
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <input id="newAdminEmailInput" type="email" placeholder="輸入新管理員 Email" class="text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-rose-500 w-full sm:w-60">
+            <button onclick="addNewAdmin()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg whitespace-nowrap">
+              新增管理員
+            </button>
+          </div>
+        </div>
+        <div class="text-xs text-slate-600">
+          <span class="font-semibold">目前管理員名單：</span>
+          <span id="currentAdminListDisplay" class="font-mono text-rose-700 font-bold">載入中...</span>
+        </div>
+      </div>
+
+      <!-- 模組 2：審核步數面板 -->
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-slate-200 bg-slate-50">
+          <h3 class="text-base font-bold text-slate-900">🛡️ 運動步數審核</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
+              <tr>
+                <th class="p-3">日期</th>
+                <th class="p-3">Email</th>
+                <th class="p-3">自報步數</th>
+                <th class="p-3">截圖證明</th>
+                <th class="p-3">當前狀態</th>
+                <th class="p-3">操作</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <tr><td colspan="6" class="p-4 text-center text-slate-400">載入審核清單...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-slate-500 text-xs space-y-2">
+      <div class="font-bold text-slate-900 text-sm">MOVE ALL 2026 健走挑戰</div>
+      <p>健康不是競賽，是我們一起照顧自己的方式。</p>
+    </footer>
+
+  </div>
 
   <script>
-    // ⚠️ 請填入階段一取得的 Google Client ID
+
     const GOOGLE_CLIENT_ID = "922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com";
-    
-    // ⚠️ 請填入階段二取得的 Apps Script Web App /exec 網址
     const API_URL = "https://script.google.com/macros/s/AKfycbyKn80PhMcK2vP5ZwsictSc37S0xPE3gcym6xgNa7DN16IPRVpHkUxAPKIJIwdITLQO/exec";
+
 
     let currentEmail = "";
     let isCurrentAdmin = false;
@@ -308,10 +344,10 @@
     window.onload = function() {
       document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
       updateCalculator();
-      fetchData();
       initGoogleSignIn();
     };
 
+    // 初始化 Google 登入按鈕 (掛載在首頁 Gate)
     function initGoogleSignIn() {
       if (typeof google !== 'undefined' && google.accounts) {
         google.accounts.id.initialize({
@@ -319,25 +355,39 @@
           callback: handleCredentialResponse
         });
         google.accounts.id.renderButton(
-          document.getElementById("googleLoginBtn"),
-          { theme: "outline", size: "medium", shape: "pill" }
+          document.getElementById("googleLoginBtnGate"),
+          { theme: "outline", size: "large", shape: "pill", width: 260 }
         );
       }
     }
 
+    // 登入成功回調
     function handleCredentialResponse(response) {
+      document.getElementById('loginLoadingHint').classList.remove('hidden');
       const payload = parseJwt(response.credential);
       currentEmail = payload.email;
-      
-      document.getElementById('googleLoginBtn').classList.add('hidden');
-      document.getElementById('userProfileBadge').classList.remove('hidden');
+
+      // 切換畫面：隱藏登入門檻，顯示主儀表板
+      document.getElementById('loginGate').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      // 填入同仁資訊
       document.getElementById('userAvatar').src = payload.picture || "";
       document.getElementById('userDisplayName').innerText = payload.name || payload.email;
-
       document.getElementById('formEmail').value = currentEmail;
       document.getElementById('formName').value = payload.name || "";
-      
+
+      // 抓取即時數據
       fetchData();
+    }
+
+    // 登出
+    function logoutUser() {
+      currentEmail = "";
+      isCurrentAdmin = false;
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('loginGate').classList.remove('hidden');
+      document.getElementById('loginLoadingHint').classList.add('hidden');
     }
 
     function parseJwt(token) {
@@ -354,4 +404,188 @@
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          isCurrentAdmin = data.
+          isCurrentAdmin = data.isAdmin;
+          if (data.isAdmin) {
+            document.getElementById('adminNavLink').classList.remove('hidden');
+            document.getElementById('adminSection').classList.remove('hidden');
+            document.getElementById('currentAdminListDisplay').innerText = data.adminList.join(', ');
+            renderAuditTable(data.records);
+          } else {
+            document.getElementById('adminNavLink').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+          }
+          renderLeaderboard(data.leaderboard);
+          renderFeed(data.records);
+        })
+        .catch(err => console.error("API 載入失敗:", err));
+    }
+
+    function renderLeaderboard(list) {
+      const tbody = document.getElementById('leaderboardBody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">目前尚無通過審核的排行榜數據</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map((user, idx) => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4 text-center font-bold">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}</td>
+          <td class="p-4 font-medium text-slate-900">${user.name} <span class="text-xs text-slate-400">(${user.email})</span></td>
+          <td class="p-4 text-center font-mono font-semibold">${user.validDays} 天</td>
+          <td class="p-4 text-right font-mono font-bold text-orange-600">${user.totalSteps.toLocaleString()} 步</td>
+          <td class="p-4 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-800">${user.tier}</span></td>
+          <td class="p-4 text-right font-bold text-slate-800">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderFeed(records) {
+      const container = document.getElementById('feedList');
+      if (!records || records.length === 0) {
+        container.innerHTML = '<div class="text-center py-10 text-slate-400 text-sm">尚無打卡紀錄</div>';
+        return;
+      }
+      container.innerHTML = records.map(item => `
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="font-bold text-slate-900">${item.name}</span>
+              <span class="text-xs text-slate-400 ml-1">(${item.email})</span>
+              <div class="text-xs text-slate-400 mt-0.5">${item.date} 運動打卡</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                item.status === '通過' ? 'bg-emerald-100 text-emerald-700' :
+                item.status === '駁回' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+              }">${item.status}</span>
+              <div class="font-mono font-bold text-orange-600 text-base mt-1">${item.steps.toLocaleString()} 步</div>
+            </div>
+          </div>
+          ${item.message ? `<p class="text-slate-600 text-sm bg-slate-50 p-2.5 rounded-lg">${item.message}</p>` : ''}
+          ${item.imageUrl ? `<a href="${item.imageUrl}" target="_blank" class="inline-block text-xs text-orange-600 hover:underline">📷 查看截圖</a>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderAuditTable(records) {
+      const tbody = document.getElementById('auditTableBody');
+      tbody.innerHTML = records.map(item => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 text-xs">${item.date}</td>
+          <td class="p-3 text-xs font-medium">${item.email}</td>
+          <td class="p-3 font-mono font-bold text-slate-800">${item.steps.toLocaleString()}</td>
+          <td class="p-3 text-xs">
+            ${item.imageUrl ? `<a href="${item.imageUrl}" target="_blank" class="text-orange-600 underline font-semibold">查看截圖</a>` : '無'}
+          </td>
+          <td class="p-3">
+            <span class="px-2 py-0.5 rounded text-xs font-semibold ${
+              item.status === '通過' ? 'bg-emerald-100 text-emerald-700' :
+              item.status === '駁回' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+            }">${item.status}</span>
+          </td>
+          <td class="p-3 space-x-1">
+            <button onclick="auditRecord(${item.rowId}, '通過', ${item.steps})" class="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-xs font-medium">通過</button>
+            <button onclick="auditRecord(${item.rowId}, '駁回', 0)" class="px-2.5 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded text-xs font-medium">駁回</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function auditRecord(rowId, status, steps) {
+      if (!confirm(`確認將此筆標記為「${status}」？`)) return;
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'review',
+          operatorEmail: currentEmail,
+          rowId: rowId,
+          status: status,
+          approvedSteps: steps
+        })
+      }).then(() => fetchData());
+    }
+
+    function addNewAdmin() {
+      const newEmail = document.getElementById('newAdminEmailInput').value.trim();
+      if (!newEmail) return alert("請輸入要新增的管理員 Email");
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'addAdmin',
+          operatorEmail: currentEmail,
+          newAdminEmail: newEmail
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          alert(`成功將 ${newEmail} 新增為管理員！`);
+          document.getElementById('newAdminEmailInput').value = "";
+          fetchData();
+        } else {
+          alert("操作失敗: " + res.message);
+        }
+      });
+    }
+
+    function changeSteps(diff) {
+      const input = document.getElementById('stepRange');
+      input.value = Math.min(20000, Math.max(2000, Number(input.value) + diff));
+      updateCalculator();
+    }
+    function updateCalculator() {
+      const val = Number(document.getElementById('stepRange').value);
+      document.getElementById('stepDisplay').innerText = val.toLocaleString();
+      const total = val * 20;
+      document.getElementById('calcTotalSteps').innerText = total.toLocaleString() + ' 步';
+      let tier = "尚未達標", reward = "NT$ 0";
+      if (total >= 300000) { tier = "✨ 菁英"; reward = "NT$ 1,500"; }
+      else if (total >= 260000) { tier = "👑 大師"; reward = "NT$ 1,000"; }
+      else if (total >= 210000) { tier = "💎 鑽石"; reward = "NT$ 700"; }
+      else if (total >= 160000) { tier = "🥇 金牌"; reward = "NT$ 500"; }
+      else if (total >= 100000) { tier = "🥈 銀牌"; reward = "NT$ 300"; }
+      else if (total >= 40000) { tier = "🥉 銅牌"; reward = "感謝參與"; }
+      document.getElementById('calcTier').innerText = tier;
+      document.getElementById('calcReward').innerText = reward;
+    }
+
+    function handleCheckIn(e) {
+      e.preventDefault();
+      if (!currentEmail) return alert("請先完成 Google 登入！");
+
+      const btn = document.getElementById('formSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = "資料上傳中...";
+
+      const file = document.getElementById('formFile').files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = evt => sendCheckIn(evt.target.result);
+        reader.readAsDataURL(file);
+      } else {
+        sendCheckIn("");
+      }
+    }
+
+    function sendCheckIn(base64Image) {
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'checkIn',
+          email: currentEmail,
+          name: document.getElementById('formName').value,
+          date: document.getElementById('formDate').value,
+          steps: document.getElementById('formSteps').value,
+          message: document.getElementById('formMessage').value,
+          base64Image: base64Image
+        })
+      })
+      .then(() => {
+        alert("🎉 打卡成功！已送出待管理員審核。");
+        document.getElementById('formSubmitBtn').disabled = false;
+        document.getElementById('formSubmitBtn').innerText = "送出打卡";
+        fetchData();
+      });
+    }
+  </script>
+</body>
+</html>
