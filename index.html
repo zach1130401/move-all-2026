@@ -1,5 +1,3 @@
-    <!-- const GOOGLE_CLIENT_ID = "922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com";
-    const API_URL = "https://script.google.com/macros/s/AKfycbywDSzb2oTVhU5CXzd8SbxBkwxG_CWEwcqxr4YhbOTcJQdNQpEYJszwK04YKIEZltCp/exec"; -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -7,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>north co 諾思 2026 員工健康計劃</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google 官方登入 SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            ocean: '#82BDCC',     // 專業 清海藍 (主要主色調)
-            oceanDark: '#64A1B1', // 清海藍加深
-            oceanLight: '#EBF4F7',// 清海藍淺色背景
+            ocean: '#82BDCC',     // 專業 清海藍 (主色調)
+            oceanDark: '#64A1B1',
+            oceanLight: '#EBF4F7',
             stone: '#9F9992',     // 誠信 磐石灰
             cloud: '#F7F7F9',     // 團隊 共融白
             sunrise: '#F2A65A',   // 創新 曙光橘
-            sunriseDark: '#D9893B',
-            appleDark: '#1d1d1f', // 沉穩深黑
-            appleGray: '#86868b', // 質感中性灰
+            appleDark: '#1d1d1f',
+            appleGray: '#86868b',
           }
         }
       }
@@ -32,28 +30,25 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang TC", "Helvetica Neue", sans-serif;
       letter-spacing: -0.015em;
       background-color: #F7F7F9;
-      /* 諾思清海藍漸層氛圍光影底圖 */
       background-image: 
-        radial-gradient(at 0% 0%, rgba(130, 189, 204, 0.28) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(130, 189, 204, 0.22) 0px, transparent 50%),
-        radial-gradient(at 50% 40%, rgba(242, 166, 90, 0.08) 0px, transparent 45%),
-        radial-gradient(at 100% 100%, rgba(130, 189, 204, 0.20) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(130, 189, 204, 0.25) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(130, 189, 204, 0.20) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(242, 166, 90, 0.08) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(130, 189, 204, 0.18) 0px, transparent 50%);
       background-attachment: fixed;
     }
-    /* 自定義細緻捲軸 */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #82BDCC; border-radius: 999px; opacity: 0.5; }
-    ::-webkit-scrollbar-thumb:hover { background: #64A1B1; }
+    ::-webkit-scrollbar-thumb { background: #82BDCC; border-radius: 999px; }
   </style>
 </head>
 <body class="text-appleDark min-h-screen antialiased selection:bg-ocean/30 selection:text-slate-900">
 
-  <!-- ==================== 頂部毛玻璃導覽列 (融入諾思 Logo) ==================== -->
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-stone/20 shadow-xs">
+  <!-- ==================== 頂部導覽列 ==================== -->
+  <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-stone/20 shadow-xs">
     <div class="max-w-6xl mx-auto px-4 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
       
-      <!-- 諾思官方 Logo 呈現 [source: 3] -->
+      <!-- 諾思官方 Logo [source: 3] -->
       <div class="flex items-center gap-3.5">
         <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-ocean flex items-center justify-center shadow-xs overflow-hidden border border-white/20">
           <svg viewBox="0 0 100 100" class="w-6 h-6 sm:w-7 sm:h-7 fill-white">
@@ -78,11 +73,11 @@
         </a>
       </nav>
       
-      <!-- 登入狀態膠囊 -->
+      <!-- 右上角登入狀態膠囊 -->
       <div class="flex items-center gap-3">
         <div id="headerLoggedOutArea">
           <button onclick="scrollToLogin()" class="px-5 py-2.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-xs sm:text-sm font-bold transition shadow-xs">
-            登入帳號
+            Google 登入
           </button>
         </div>
         <div id="headerLoggedInArea" class="hidden flex items-center gap-2.5 bg-white/90 px-4 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
@@ -96,9 +91,9 @@
     </div>
   </header>
 
-  <!-- ==================== 1. 登入門檻畫面 (未登入時展示) ==================== -->
-  <div id="loginGate" class="max-w-4xl mx-auto px-4 sm:px-6 pt-12 pb-6">
-    <div class="bg-white/90 backdrop-blur-md p-8 sm:p-14 rounded-[36px] border border-stone/20 shadow-sm text-center space-y-7">
+  <!-- ==================== 1. 唯一登入門檻畫面 (未登入時只顯示此區塊，主畫面徹底隱藏) ==================== -->
+  <section id="loginGate" class="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+    <div class="bg-white/95 backdrop-blur-md p-8 sm:p-14 rounded-[36px] border border-stone/20 shadow-xl text-center space-y-8">
       
       <!-- 諾思 Logo 大圖標 [source: 3] -->
       <div class="flex justify-center">
@@ -109,103 +104,87 @@
         </div>
       </div>
       
-      <div class="space-y-3 max-w-2xl mx-auto">
+      <div class="space-y-3 max-w-xl mx-auto">
         <div class="inline-block px-4 py-1.5 rounded-full bg-oceanLight text-oceanDark text-xs font-bold uppercase tracking-wider">
           2026 EMPLOYEE WELLNESS PROGRAM
         </div>
         <h1 class="text-3xl sm:text-5xl font-black text-appleDark tracking-tight leading-tight">
-          一起動起來，把健康變成日常。
+          一起動起來，<br class="hidden sm:inline">把健康變成日常。
         </h1>
         <p class="text-appleGray text-base sm:text-lg leading-relaxed pt-1">
           不需要成為最厲害的人，只要成為願意一起完成的團隊。<br>
-          本活動採達標制而非競賽排名制，三人一組共同集點，領取團隊現金獎金與公益伴手禮。
+          為保障同仁帳號安全與防範冒名，本系統<strong>嚴格限定使用 Google 官方驗證登入</strong>。
         </p>
       </div>
 
-      <!-- 雙軌登入卡片 -->
-      <div class="max-w-md mx-auto pt-2 space-y-4">
-        <div class="p-6 rounded-3xl bg-cloud border border-stone/20 space-y-3 text-left">
-          <label class="block text-xs font-bold text-appleDark uppercase tracking-wider">同仁 / 管理員 Email 登入</label>
-          <div class="flex gap-2">
-            <input id="directEmailInput" type="email" placeholder="輸入您的公司或個人 Email" class="w-full bg-white border border-stone/20 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean">
-            <button onclick="handleDirectLogin()" class="px-6 py-2.5 rounded-xl bg-ocean hover:bg-oceanDark text-white text-sm font-bold whitespace-nowrap transition shadow-xs">
-              登入進入
-            </button>
-          </div>
-          <p class="text-[11px] text-stone">輸入 Email 即可直接存取活動儀表板，管理者將自動獲取審核權限。</p>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="h-px bg-stone/20 flex-1"></div>
-          <span class="text-xs text-stone">或使用 Google 帳號驗證</span>
-          <div class="h-px bg-stone/20 flex-1"></div>
-        </div>
-
-        <div class="flex justify-center">
-          <div id="googleLoginBtnGate"></div>
+      <!-- 唯一 Google 登入按鈕容器 -->
+      <div class="pt-2 flex flex-col items-center justify-center space-y-4">
+        <div id="googleLoginBtnGate" class="min-h-[48px] flex justify-center"></div>
+        <div id="loginLoadingHint" class="hidden text-sm text-oceanDark font-semibold animate-pulse">
+          Google 驗證成功，正在載入活動系統...
         </div>
       </div>
 
-      <!-- 四大價值觀卡片 (Apple Bento Grid) [source: 1] -->
-      <div class="pt-10 border-t border-stone/15 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
-        <div class="p-5 rounded-2xl bg-cloud border border-ocean/40 space-y-1.5 shadow-xs">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-ocean inline-block"></span> 專業 Clear Ocean
+      <!-- 四大價值觀卡片 [source: 1] -->
+      <div class="pt-8 border-t border-stone/15 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+        <div class="p-4 rounded-2xl bg-cloud border border-ocean/40 space-y-1 shadow-xs">
+          <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-ocean inline-block"></span> 專業 Clear Ocean
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">清晰判斷與穩定能力，航向更開闊的藍海。</p>
+          <p class="text-[11px] text-appleGray leading-relaxed">清晰判斷與穩定能力，航向更開闊的藍海。</p>
         </div>
-        <div class="p-5 rounded-2xl bg-cloud border border-stone/40 space-y-1.5 shadow-xs">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-stone inline-block"></span> 誠信 Stone
+        <div class="p-4 rounded-2xl bg-cloud border border-stone/40 space-y-1 shadow-xs">
+          <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-stone inline-block"></span> 誠信 Stone
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">言行一致、守住原則，合作關係穩定前行。</p>
+          <p class="text-[11px] text-appleGray leading-relaxed">言行一致、守住原則，合作關係穩定前行。</p>
         </div>
-        <div class="p-5 rounded-2xl bg-cloud border border-slate-300 space-y-1.5 shadow-xs">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span> 團隊 Cloud
+        <div class="p-4 rounded-2xl bg-cloud border border-slate-300 space-y-1 shadow-xs">
+          <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-slate-400 inline-block"></span> 團隊 Cloud
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">彼此支持、共同協作，讓每個人發揮專長價值。</p>
+          <p class="text-[11px] text-appleGray leading-relaxed">彼此支持、共同協作，讓每個人發揮價值。</p>
         </div>
-        <div class="p-5 rounded-2xl bg-cloud border border-sunrise/50 space-y-1.5 shadow-xs">
-          <div class="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-sunrise inline-block"></span> 創新 Sunrise
+        <div class="p-4 rounded-2xl bg-cloud border border-sunrise/50 space-y-1 shadow-xs">
+          <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-sunrise inline-block"></span> 創新 Sunrise
           </div>
-          <p class="text-xs text-appleGray leading-relaxed">在變化中看見可能，讓想法成為前進曙光。</p>
+          <p class="text-[11px] text-appleGray leading-relaxed">在變化中看見可能，讓想法成為前進曙光。</p>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- ==================== 2. 主活動儀表板 (已登入展示) ==================== -->
-  <main id="mainApp" class="space-y-16 sm:space-y-24">
+  <!-- ==================== 2. 主活動儀表板 (已登入展示，未登入時強制 hidden) ==================== -->
+  <main id="mainApp" class="hidden space-y-16 sm:space-y-24">
     
-    <!-- 核心數據 (Apple 巨幅數字風格) -->
+    <!-- 核心數據 (已修復文字折行) -->
     <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-        <div class="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-stone uppercase tracking-wider">團隊機制</div>
-          <div class="text-4xl sm:text-5xl font-black text-appleDark">3 人</div>
+          <div class="text-3xl sm:text-5xl font-black text-appleDark">3 人</div>
           <div class="text-xs text-appleGray mt-1">互助累積集點</div>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-ocean/40 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-ocean/40 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-oceanDark uppercase tracking-wider">個人目標</div>
-          <div class="text-4xl sm:text-5xl font-black text-ocean">8,000</div>
+          <div class="text-3xl sm:text-5xl font-black text-ocean">8,000</div>
           <div class="text-xs text-appleGray mt-1">平日每日目標步數</div>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-sunrise/40 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-sunrise/40 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-sunrise uppercase tracking-wider">最高獎金</div>
-          <div class="text-4xl sm:text-5xl font-black text-sunrise">NT$6,000</div>
+          <div class="text-3xl sm:text-5xl font-black text-sunrise">NT$6,000</div>
           <div class="text-xs text-appleGray mt-1">團隊解鎖現金獎勵</div>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
           <div class="text-xs font-semibold text-stone uppercase tracking-wider">社會回饋</div>
-          <div class="text-4xl sm:text-5xl font-black text-emerald-600">全體參加獎</div>
+          <div class="text-xl sm:text-3xl lg:text-4xl font-black text-emerald-600 whitespace-nowrap">全體參加獎</div>
           <div class="text-xs text-appleGray mt-1">社福烘焙公益禮盒</div>
         </div>
       </div>
     </section>
 
-    <!-- 四大健康任務說明 (Apple 大卡片 Bento Grid) -->
+    <!-- 四大健康任務說明 -->
     <section id="mission" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
       <div class="text-center max-w-2xl mx-auto space-y-2">
         <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">四大團隊健康任務</h2>
@@ -213,28 +192,28 @@
       </div>
 
       <div class="grid sm:grid-cols-2 gap-6 sm:gap-8">
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
           <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">01</div>
           <h3 class="text-xl font-bold text-appleDark">【每日步數】</h3>
           <div class="inline-block px-3 py-1 rounded-full bg-oceanLight text-oceanDark text-xs font-bold">每達標 1 人 +1 點</div>
           <p class="text-appleGray text-sm leading-relaxed">每位團員當週累積 4 天達 8,000 步，每達標 1 人團隊即獲得 1 點（依 Pacer 認列）。</p>
         </div>
 
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
           <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">02</div>
           <h3 class="text-xl font-bold text-appleDark">【規律運動】</h3>
           <div class="inline-block px-3 py-1 rounded-full bg-oceanLight text-oceanDark text-xs font-bold">每位團員達標 +1 點</div>
           <p class="text-appleGray text-sm leading-relaxed">每位團員當週完成 2 次、每次 30 分鐘以上運動，團隊獲得 1 點（內網回報與打卡）。</p>
         </div>
 
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
           <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">03</div>
           <h3 class="text-xl font-bold text-appleDark">【持續達標】</h3>
           <div class="inline-block px-3 py-1 rounded-full bg-oceanLight text-oceanDark text-xs font-bold">全員達標 額外加碼 +1 點</div>
           <p class="text-appleGray text-sm leading-relaxed">團隊當週全員皆完成至少一項健康任務，團隊額外獲得 1 點加碼（福委審核檢核）。</p>
         </div>
 
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-ocean/30 shadow-xs space-y-3 hover:border-ocean transition">
           <div class="w-10 h-10 rounded-xl bg-ocean/20 text-oceanDark flex items-center justify-center font-black text-sm">04</div>
           <h3 class="text-xl font-bold text-appleDark">【一起動起來】</h3>
           <div class="inline-block px-3 py-1 rounded-full bg-oceanLight text-oceanDark text-xs font-bold">共同運動 額外加碼 +1 點</div>
@@ -251,17 +230,17 @@
       </div>
 
       <div class="grid sm:grid-cols-3 gap-6 sm:gap-8">
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs text-center space-y-2">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs text-center space-y-2">
           <div class="text-xs font-semibold text-stone">團隊累積達 10 點</div>
           <div class="text-4xl font-black text-appleDark">NT$ 3,000</div>
           <p class="text-xs text-appleGray">團隊獎金（解鎖門檻一）</p>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-ocean/50 shadow-xs text-center space-y-2">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-ocean/50 shadow-xs text-center space-y-2">
           <div class="text-xs font-semibold text-oceanDark">團隊累積達 15 點</div>
           <div class="text-4xl font-black text-oceanDark">NT$ 4,500</div>
           <p class="text-xs text-appleGray">團隊獎金（解鎖門檻二）</p>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border-2 border-sunrise shadow-md text-center space-y-2">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border-2 border-sunrise shadow-md text-center space-y-2">
           <div class="text-xs font-semibold text-sunrise">團隊累積達 20 點</div>
           <div class="text-4xl font-black text-sunrise">NT$ 6,000</div>
           <p class="text-xs text-appleGray">最高團隊榮譽獎金</p>
@@ -269,7 +248,7 @@
       </div>
 
       <!-- 參加獎禮盒清單 -->
-      <div class="bg-white/90 backdrop-blur-md p-8 sm:p-12 rounded-[32px] border border-stone/20 shadow-xs space-y-6">
+      <div class="bg-white/95 backdrop-blur-md p-8 sm:p-12 rounded-[32px] border border-stone/20 shadow-xs space-y-6">
         <div>
           <h3 class="text-xl font-bold text-appleDark">參加獎：全體有獎・採購友善團體公益產品</h3>
           <p class="text-appleGray text-sm mt-1">支持身障與友善機構，點擊可直接參閱各基金會產品：</p>
@@ -307,17 +286,17 @@
       </div>
 
       <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs space-y-2">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs space-y-2">
           <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟一</div>
           <h4 class="text-lg font-bold text-appleDark">繪製軌跡並上傳</h4>
           <p class="text-appleGray text-sm leading-relaxed">自由參加或尋找夥伴協作，上傳 GPS 路線圖截圖、步數與創作理念。</p>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs space-y-2">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs space-y-2">
           <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟二</div>
           <h4 class="text-lg font-bold text-appleDark">全體同仁點讚票選</h4>
           <p class="text-appleGray text-sm leading-relaxed">活動期間開放所有同仁為最具有創意的路線投票，選出最佳創意大獎。</p>
         </div>
-        <div class="bg-white/90 backdrop-blur-md p-8 rounded-[32px] border border-sunrise/40 shadow-xs space-y-2">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-sunrise/40 shadow-xs space-y-2">
           <div class="text-xs font-bold text-sunrise uppercase tracking-wider">步驟三</div>
           <h4 class="text-lg font-bold text-appleDark">公司提撥相對應捐款</h4>
           <p class="text-appleGray text-sm leading-relaxed">每一步都有價值！公司將依同仁創作成果提撥公益基金回饋社會。</p>
@@ -332,7 +311,7 @@
         <p class="text-appleGray text-sm">即時試算 3 位隊員達標進度與獎勵等級</p>
       </div>
 
-      <div class="bg-white/90 backdrop-blur-md p-8 sm:p-12 rounded-[32px] border border-stone/20 shadow-sm grid md:grid-cols-12 gap-8 items-center">
+      <div class="bg-white/95 backdrop-blur-md p-8 sm:p-12 rounded-[32px] border border-stone/20 shadow-sm grid md:grid-cols-12 gap-8 items-center">
         <div class="md:col-span-7 space-y-4 text-base">
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
@@ -418,7 +397,7 @@
         </button>
       </div>
 
-      <div class="bg-white/90 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
+      <div class="bg-white/95 backdrop-blur-md rounded-[32px] border border-stone/20 overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="bg-cloud text-stone text-xs uppercase border-b border-stone/15">
@@ -456,7 +435,7 @@
 
       <!-- 分頁 1：運動打卡回報區 -->
       <div id="tabContentFeed" class="grid md:grid-cols-12 gap-8 items-start">
-        <div class="md:col-span-5 bg-white/90 backdrop-blur-md p-7 rounded-[28px] border border-stone/20 shadow-xs space-y-4">
+        <div class="md:col-span-5 bg-white/95 backdrop-blur-md p-7 rounded-[28px] border border-stone/20 shadow-xs space-y-4">
           <h3 class="text-lg font-bold text-appleDark">每日運動 / GPS ART 回報</h3>
           <form onsubmit="handleCheckIn(event)" class="space-y-4 text-sm">
             <div>
@@ -491,7 +470,7 @@
           </form>
         </div>
 
-        <div class="md:col-span-7 bg-white/90 backdrop-blur-md p-6 rounded-[28px] border border-stone/20 shadow-xs space-y-4">
+        <div class="md:col-span-7 bg-white/95 backdrop-blur-md p-6 rounded-[28px] border border-stone/20 shadow-xs space-y-4">
           <div class="flex justify-between items-center pb-2 border-b border-stone/10">
             <span class="text-sm font-bold text-appleDark">回報動態牆</span>
             <span class="text-xs text-stone">最新紀錄排在前</span>
@@ -503,7 +482,7 @@
       </div>
 
       <!-- 分頁 2：同仁交流聊天室 -->
-      <div id="tabContentChat" class="hidden bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-[28px] border border-stone/20 shadow-xs space-y-6">
+      <div id="tabContentChat" class="hidden bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[28px] border border-stone/20 shadow-xs space-y-6">
         <div>
           <h3 class="text-lg font-bold text-appleDark">同仁健康交流討論區</h3>
           <p class="text-xs text-stone mt-0.5">可以在此自由留言、相約慢跑健走、揪團運動或討論 GPS ART 創作。</p>
@@ -525,7 +504,7 @@
 
     <!-- 管理後台 -->
     <section id="adminSection" class="hidden max-w-6xl mx-auto px-4 sm:px-8 py-10 border border-rose-200 bg-rose-50/30 rounded-[32px] space-y-6">
-      <div class="bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-stone/20 shadow-xs">
+      <div class="bg-white/95 backdrop-blur-md p-6 rounded-2xl border border-stone/20 shadow-xs">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3 pb-3 border-b border-stone/10">
           <div>
             <h3 class="text-base font-bold text-appleDark">管理員名單維護 (Super Admin 授權)</h3>
@@ -544,7 +523,7 @@
         </div>
       </div>
 
-      <div class="bg-white/90 backdrop-blur-md rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
+      <div class="bg-white/95 backdrop-blur-md rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
         <div class="p-4 border-b border-stone/15 bg-cloud">
           <h3 class="text-sm font-bold text-appleDark">運動步數與 GPS 路線審核</h3>
         </div>
@@ -568,7 +547,7 @@
       </div>
     </section>
 
-    <!-- 頁尾 (四大品牌配色標註) -->
+    <!-- 頁尾 -->
     <footer class="bg-white/80 backdrop-blur-md border-t border-stone/20 py-12 text-center text-stone text-xs space-y-2">
       <div class="font-bold text-appleDark text-sm tracking-wider">north co 諾思</div>
       <p>專業 Clear Ocean ｜ 誠信 Stone ｜ 團隊 Cloud ｜ 創新 Sunrise</p>
@@ -601,11 +580,13 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyKn80PhMcK2vP5ZwsictSc37S0xPE3gcym6xgNa7DN16IPRVpHkUxAPKIJIwdITLQO/exec";
+    // 你的 Google Client ID
     const GOOGLE_CLIENT_ID = "922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com";
 
     let currentEmail = "";
     let currentNickname = "諾思夥伴";
     let isCurrentAdmin = false;
+    let isGsiInitialized = false; // 單次執行鎖，徹底防止回調脫鉤
     let calcState = { stepPoints: 8, sportPoints: 4, teamExtra: 2, coSport: 2 };
 
     window.onload = function() {
@@ -635,30 +616,19 @@
 
     function scrollToLogin() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      const el = document.getElementById('directEmailInput');
-      if (el) el.focus();
     }
 
-    function handleDirectLogin() {
-      const email = document.getElementById('directEmailInput').value.trim();
-      if (!email || !email.includes('@')) return alert("請輸入有效的 Email！");
-
-      currentEmail = email;
-      const defaultName = email.split('@')[0] || "諾思夥伴";
-
-      localStorage.setItem('north_user', JSON.stringify({ email: email, name: defaultName }));
-      showLoggedInUI(defaultName);
-      fetchData();
-    }
-
+    // 關鍵修復：未登入時務必隱藏 mainApp，登入後務必隱藏 loginGate，絕不重疊！
     function showLoggedOutUI() {
       document.getElementById('loginGate').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('hidden'); // 徹底隱藏主活動
       document.getElementById('headerLoggedOutArea').classList.remove('hidden');
       document.getElementById('headerLoggedInArea').classList.add('hidden');
     }
 
     function showLoggedInUI(name) {
-      document.getElementById('loginGate').classList.add('hidden');
+      document.getElementById('loginGate').classList.add('hidden'); // 徹底隱藏登入門檻
+      document.getElementById('mainApp').classList.remove('hidden'); // 展開主活動
       document.getElementById('headerLoggedOutArea').classList.add('hidden');
       document.getElementById('headerLoggedInArea').classList.remove('hidden');
 
@@ -675,33 +645,59 @@
       if (elAvatar) elAvatar.innerText = (name || "諾")[0].toUpperCase();
     }
 
-    let gRetryCount = 0;
+    // Google 登入初始化 (加上 isGsiInitialized 保護鎖，確保只註冊一次)
     function initGoogleSignIn() {
+      if (isGsiInitialized) return;
       if (typeof google !== 'undefined' && google.accounts) {
+        isGsiInitialized = true;
         try {
           google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
-            callback: handleCredentialResponse
+            callback: handleCredentialResponse,
+            auto_select: false
           });
           const gateContainer = document.getElementById("googleLoginBtnGate");
           if (gateContainer) {
-            google.accounts.id.renderButton(gateContainer, { theme: "outline", size: "large", shape: "pill", width: 280 });
+            google.accounts.id.renderButton(gateContainer, {
+              theme: "outline",
+              size: "large",
+              shape: "pill",
+              width: 280,
+              text: "signin_with"
+            });
           }
         } catch (e) {
-          console.warn("GSI 初始化");
+          console.error("GSI 初始化錯誤:", e);
         }
-      } else if (gRetryCount < 6) {
-        gRetryCount++;
-        setTimeout(initGoogleSignIn, 300);
+      } else {
+        setTimeout(initGoogleSignIn, 200);
       }
     }
 
+    // 接收 Google 官方登入成功憑證
     function handleCredentialResponse(response) {
-      const payload = parseJwt(response.credential);
-      currentEmail = payload.email;
-      localStorage.setItem('north_user', JSON.stringify({ email: payload.email, name: payload.name || "諾思夥伴" }));
-      showLoggedInUI(payload.name);
-      fetchData();
+      try {
+        const payload = parseJwt(response.credential);
+        if (!payload || !payload.email) {
+          alert("登入未能取得 Google Email，請重試！");
+          return;
+        }
+        currentEmail = payload.email.toLowerCase().trim();
+        const userName = payload.name || currentEmail.split('@')[0];
+
+        // 寫入持久化記憶
+        localStorage.setItem('north_user', JSON.stringify({
+          email: currentEmail,
+          name: userName,
+          picture: payload.picture || ""
+        }));
+
+        showLoggedInUI(userName);
+        fetchData();
+      } catch (err) {
+        console.error("登入解析失敗:", err);
+        alert("登入處理失敗：" + err.message);
+      }
     }
 
     function logoutUser() {
@@ -989,7 +985,7 @@
 
     function handleCheckIn(e) {
       e.preventDefault();
-      if (!currentEmail) return alert("請先完成登入！");
+      if (!currentEmail) return alert("請先完成 Google 登入！");
 
       const btn = document.getElementById('formSubmitBtn');
       btn.disabled = true;
