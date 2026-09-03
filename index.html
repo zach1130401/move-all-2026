@@ -685,10 +685,10 @@
         return null;
       }
       const parts = token.split('.');
-      if (parts.length < 2 || !parts) return null;
+      if (parts.length < 2 || !parts[1]) return null;
       
       try {
-        let base64 = parts.replace(/-/g, '+').replace(/_/g, '/');
+        let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
         while (base64.length % 4 !== 0) {
           base64 += '=';
         }
