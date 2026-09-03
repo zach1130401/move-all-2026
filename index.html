@@ -902,19 +902,81 @@
       document.getElementById('calcTierBadge').innerText = badge;
     }
 
+    function cleanUserInfo(user) {
+      if (!user) return { email: "", name: "諾思夥伴" };
+      let email = user.email;
+      let name = user.name;
+
+      if (Array.isArray(email)) {
+        const foundEmail = email.find(item => typeof item === "string" && item.includes("@"));
+        if (foundEmail) {
+          const idx = email.indexOf(foundEmail);
+          const emailStr = foundEmail.trim();
+          const nameStr = (email[idx + 1] && typeof email[idx + 1] === "string") ? email[idx + 1].trim() : "";
+          email = emailStr;
+          if (nameStr && (!name || typeof name !== "string" || name.includes(","))) {
+            name = nameStr;
+          }
+        }
+      }
+
+      if (typeof name === "string" && name.includes(",")) {
+        const parts = name.split(",");
+        const foundEmail = parts.find(p => p.trim().includes("@"));
+        if (foundEmail) {
+          const idx = parts.indexOf(foundEmail);
+          if (!email || typeof email !== "string" || email.includes(",")) {
+            email = foundEmail.trim();
+          }
+          name = (parts[idx + 1] && parts[idx + 1].trim()) || (typeof email === "string" ? email.split("@")[0] : "");
+        }
+      }
+
+      if (typeof email === "string" && email.includes(",")) {
+        const parts = email.split(",");
+        const foundEmail = parts.find(p => p.trim().includes("@"));
+        if (foundEmail) {
+          const idx = parts.indexOf(foundEmail);
+          email = foundEmail.trim();
+          if (!name || typeof name !== "string" || name.includes(",")) {
+            name = (parts[idx + 1] && parts[idx + 1].trim()) || email.split("@")[0];
+          }
+        }
+      }
+
+      email = typeof email === "string" ? email.trim() : "";
+      name = typeof name === "string" ? name.trim() : "";
+
+      if (name.includes(",")) name = name.split(",")[0].trim();
+      if (!name && email) name = email.split("@")[0];
+      if (!name) name = "諾思夥伴";
+
+      return { email, name };
+    }
+
     function renderLeaderboard(list) {
       const tbody = document.getElementById('leaderboardBody');
       if (!list || list.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無通過審核的排行榜數據</td></tr>';
         return;
       }
-      tbody.innerHTML = list.map((user, idx) => `
+      const validList = list.map(item => {
+        const info = cleanUserInfo(item);
+        return { ...item, cleanName: info.name, cleanEmail: info.email };
+      }).filter(item => item.cleanEmail || (item.totalSteps && item.totalSteps > 0));
+
+      if (validList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無有效的排行榜數據</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = validList.map((user, idx) => `
         <tr class="hover:bg-oceanLight/30 transition">
           <td class="p-4 text-center font-bold">${idx + 1}</td>
-          <td class="p-4 font-bold text-appleDark">${user.name} <span class="text-xs text-stone font-normal">(${user.email})</span></td>
-          <td class="p-4 text-center font-mono font-semibold">${user.validDays} 天</td>
-          <td class="p-4 text-right font-mono font-black text-oceanDark text-base">${user.totalSteps.toLocaleString()} 步</td>
-          <td class="p-4 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier}</span></td>
+          <td class="p-4 font-bold text-appleDark">${user.cleanName} <span class="text-xs text-stone font-normal">(${user.cleanEmail})</span></td>
+          <td class="p-4 text-center font-mono font-semibold">${user.validDays || 0} 天</td>
+          <td class="p-4 text-right font-mono font-black text-oceanDark text-base">${(user.totalSteps || 0).toLocaleString()} 步</td>
+          <td class="p-4 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || '未達標'}</span></td>
           <td class="p-4 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : '—'}</td>
         </tr>
       `).join('');
@@ -926,20 +988,30 @@
         container.innerHTML = '<div class="text-center py-10 text-stone text-sm">尚無回報紀錄</div>';
         return;
       }
-      container.innerHTML = records.map(item => `
+      const validRecords = records.map(item => {
+        const info = cleanUserInfo(item);
+        return { ...item, cleanName: info.name, cleanEmail: info.email };
+      }).filter(item => item.date && (item.cleanEmail || item.steps > 0));
+
+      if (validRecords.length === 0) {
+        container.innerHTML = '<div class="text-center py-10 text-stone text-sm">尚無有效的回報紀錄</div>';
+        return;
+      }
+
+      container.innerHTML = validRecords.map(item => `
         <div class="bg-cloud p-4 rounded-2xl border border-stone/15 space-y-2">
           <div class="flex justify-between items-start">
             <div>
-              <span class="font-bold text-appleDark text-sm">${item.name}</span>
-              <span class="text-xs text-stone ml-1">(${item.email})</span>
+              <span class="font-bold text-appleDark text-sm">${item.cleanName}</span>
+              <span class="text-xs text-stone ml-1">(${item.cleanEmail})</span>
               <div class="text-xs text-stone mt-0.5">${item.date} 運動打卡</div>
             </div>
             <div class="text-right">
               <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                 item.status === '通過' ? 'bg-emerald-100 text-emerald-800' :
                 item.status === '駁回' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-              }">${item.status}</span>
-              <div class="font-mono font-black text-oceanDark text-sm mt-1">${item.steps.toLocaleString()} 步</div>
+              }">${item.status || '待審核'}</span>
+              <div class="font-mono font-black text-oceanDark text-sm mt-1">${(item.steps || 0).toLocaleString()} 步</div>
             </div>
           </div>
           ${item.message ? `<p class="text-appleDark text-xs bg-white p-2.5 rounded-xl border border-stone/10 leading-relaxed">${item.message}</p>` : ''}
@@ -954,11 +1026,21 @@
 
     function renderAuditTable(records) {
       const tbody = document.getElementById('auditTableBody');
-      tbody.innerHTML = records.map(item => `
+      const validRecords = records.map(item => {
+        const info = cleanUserInfo(item);
+        return { ...item, cleanName: info.name, cleanEmail: info.email };
+      }).filter(item => item.date && (item.cleanEmail || item.steps > 0));
+
+      if (validRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前無需要審核的資料</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = validRecords.map(item => `
         <tr class="hover:bg-oceanLight/20 transition">
           <td class="p-3 text-xs">${item.date}</td>
-          <td class="p-3 text-xs font-semibold">${item.email} (${item.name})</td>
-          <td class="p-3 font-mono font-bold text-appleDark">${item.steps.toLocaleString()}</td>
+          <td class="p-3 text-xs font-semibold">${item.cleanName} <span class="text-stone font-normal">(${item.cleanEmail})</span></td>
+          <td class="p-3 font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()}</td>
           <td class="p-3">
             ${item.imageUrl ? `
               <img src="${item.imageUrl}" onclick="openLightbox('${item.imageUrl}')" class="w-10 h-10 rounded-lg border border-stone/20 object-cover cursor-zoom-in hover:ring-2 hover:ring-ocean transition" title="點擊放大預覽">
@@ -968,7 +1050,7 @@
             <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${
               item.status === '通過' ? 'bg-emerald-100 text-emerald-800' :
               item.status === '駁回' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-            }">${item.status}</span>
+            }">${item.status || '待審核'}</span>
           </td>
           <td class="p-3 space-x-1">
             <button onclick="auditRecord(${item.rowId}, '通過', ${item.steps})" class="px-2.5 py-1 bg-ocean hover:bg-oceanDark text-white rounded-md text-xs font-semibold transition">通過</button>
