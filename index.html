@@ -664,6 +664,32 @@
             </div>
           </div>
 
+          <!-- Pacer 點數修改稽核紀錄區 -->
+          <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-2xs">
+            <div class="p-3 bg-stone/5 border-b border-stone/15 flex justify-between items-center cursor-pointer select-none" onclick="togglePacerLogsBox()">
+              <h5 class="text-xs font-bold text-appleDark flex items-center gap-2">
+                <span>📋 Pacer 點數修改稽核歷史紀錄</span>
+                <span id="pacerLogCountBadge" class="px-2 py-0.5 rounded-full text-[10px] bg-oceanLight text-oceanDark font-bold">0 筆異動</span>
+              </h5>
+              <span id="pacerLogToggleIcon" class="text-xs text-stone hover:text-appleDark font-bold">▼ 展開歷史紀錄</span>
+            </div>
+            <div id="pacerLogsBox" class="hidden p-2 max-h-52 overflow-y-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-cloud text-stone border-b border-stone/15 sticky top-0">
+                  <tr>
+                    <th class="p-2">修改時間</th>
+                    <th class="p-2">受更同仁 (Email)</th>
+                    <th class="p-2 text-center">最新 Pacer 點數</th>
+                    <th class="p-2">操作管理員</th>
+                  </tr>
+                </thead>
+                <tbody id="pacerLogsTableBody" class="divide-y divide-stone/10">
+                  <tr><td colspan="4" class="p-4 text-center text-stone">目前無點數修改紀錄</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
             <div class="overflow-x-auto max-h-[480px]">
               <table class="w-full text-left text-xs">
@@ -1122,6 +1148,7 @@
             document.getElementById('currentAdminListDisplay').innerText = data.adminList.join(', ');
             renderAuditTable(data.records);
             renderAdminTeamTable(data.teams, data.leaderboard);
+            renderPacerLogs(data.pacerLogs);
           } else {
             document.getElementById('adminNavLink').classList.add('hidden');
           }
@@ -1413,6 +1440,36 @@
       document.getElementById('pacerUserEmailInput').value = "";
       document.getElementById('pacerUserPointsInput').value = "";
       fetchData();
+    }
+
+    function renderPacerLogs(logs) {
+      const tbody = document.getElementById('pacerLogsTableBody');
+      const countBadge = document.getElementById('pacerLogCountBadge');
+      if (!tbody) return;
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-stone">目前無點數修改紀錄</td></tr>';
+        if (countBadge) countBadge.innerText = "0 筆異動";
+        return;
+      }
+      if (countBadge) countBadge.innerText = `${logs.length} 筆異動`;
+
+      tbody.innerHTML = logs.map(item => `
+        <tr class="hover:bg-cloud/50 transition">
+          <td class="p-2 text-stone text-[11px]">${item.timestamp}</td>
+          <td class="p-2 font-bold text-appleDark">${item.targetName} <span class="text-stone font-normal text-[11px]">(${item.targetEmail})</span></td>
+          <td class="p-2 text-center font-mono font-bold text-oceanDark">${item.points} 點</td>
+          <td class="p-2 text-stone text-[11px]">${item.operatorName || item.operatorEmail}</td>
+        </tr>
+      `).join('');
+    }
+
+    function togglePacerLogsBox() {
+      const box = document.getElementById('pacerLogsBox');
+      const icon = document.getElementById('pacerLogToggleIcon');
+      if (box) {
+        box.classList.toggle('hidden');
+        if (icon) icon.innerText = box.classList.contains('hidden') ? '▼ 展開歷史紀錄' : '▲ 收合歷史紀錄';
+      }
     }
 
     function renderLeaderboard(list) {
