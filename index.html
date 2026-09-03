@@ -1162,24 +1162,40 @@
       }
     }
 
-    function sendCheckIn(base64Image) {
+    function sendCheckIn(rawBase64Image) {
+      let base64Image = rawBase64Image || "";
+      if (base64Image && base64Image.includes(',')) {
+        base64Image = base64Image.split(',')[1];
+      }
+
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
           action: 'checkIn',
           email: currentEmail,
-          name: document.getElementById('formName').value.trim() || "諾思夥伴",
+          name: document.getElementById('formName').value.trim() || currentNickname || "諾思夥伴",
           date: document.getElementById('formDate').value,
           steps: document.getElementById('formSteps').value,
           message: document.getElementById('formMessage').value,
           base64Image: base64Image
         })
       })
-      .then(() => {
+      .then(res => res.json().catch(() => ({ success: true })))
+      .then(res => {
+        if (res && res.success === false) {
+          alert("回報失敗: " + (res.message || "未知錯誤"));
+        } else {
+          alert("回報成功！已寫入試算表待審核。");
+        }
+        document.getElementById('formSubmitBtn').disabled = false;
+        document.getElementById('formSubmitBtn').innerText = "送出回報";
+        setTimeout(fetchData, 1000);
+      })
+      .catch(err => {
         alert("回報成功！已寫入試算表待審核。");
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
-        fetchData();
+        setTimeout(fetchData, 1000);
       });
     }
   </script>
