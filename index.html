@@ -542,16 +542,30 @@
               </div>
             </div>
             <div>
-              <label class="block text-stone text-xs font-semibold uppercase mb-1">證明截圖 / GPS 路線圖 <span class="text-rose-500 font-bold">* (必填圖片)</span></label>
-              <input id="formFile" type="file" accept="image/*" required class="w-full text-xs text-stone file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-oceanLight file:text-oceanDark hover:file:bg-ocean/20 cursor-pointer">
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-stone text-xs font-semibold uppercase">證明截圖 / GPS 路線圖 <span class="text-rose-500 font-bold">* (必填圖片)</span></label>
+                <button type="button" id="clearImgBtn" onclick="clearFormImage()" class="text-xs text-rose-600 hover:text-rose-700 font-bold hidden flex items-center gap-1">✕ 清除圖片</button>
+              </div>
+              <input id="formFile" type="file" accept="image/*" required onchange="previewFormImage(event)" class="w-full text-xs text-stone file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-oceanLight file:text-oceanDark hover:file:bg-ocean/20 cursor-pointer">
+              
+              <!-- 圖片即時預覽與一鍵清除區 -->
+              <div id="formImagePreviewBox" class="hidden mt-2 relative.inline-block group w-fit">
+                <img id="formImagePreview" src="" class="max-h-36 rounded-xl border border-stone/20 object-cover shadow-2xs">
+                <button type="button" onclick="clearFormImage()" class="absolute -top-2 -right-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md transition" title="清除已選圖片">✕</button>
+              </div>
             </div>
             <div>
               <label class="block text-stone text-xs font-semibold uppercase mb-1">運動項目 / 心得 / GPS 路線理念</label>
               <textarea id="formMessage" rows="2" placeholder="例如：慢跑 35 分鐘、健身房核心訓練、或繪製 GPS 企鵝圖案..." class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm"></textarea>
             </div>
-            <button id="formSubmitBtn" type="submit" class="w-full bg-ocean hover:bg-oceanDark text-white font-bold py-3 rounded-full transition shadow-xs text-sm">
-              送出回報
-            </button>
+            <div class="flex gap-2">
+              <button id="formSubmitBtn" type="submit" class="flex-1 bg-ocean hover:bg-oceanDark text-white font-bold py-3 rounded-full transition shadow-xs text-sm">
+                送出回報
+              </button>
+              <button type="button" onclick="resetCheckInForm()" class="px-4 py-3 bg-stone/10 hover:bg-stone/20 text-stone font-bold rounded-full transition text-xs whitespace-nowrap">
+                重設內容
+              </button>
+            </div>
           </form>
         </div>
 
@@ -2008,6 +2022,7 @@
           alert("回報失敗: " + (res.message || "未知錯誤"));
         } else {
           alert("回報成功！已寫入試算表待審核。");
+          resetCheckInForm();
         }
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
@@ -2015,10 +2030,44 @@
       })
       .catch(err => {
         alert("回報成功！已寫入試算表待審核。");
+        resetCheckInForm();
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
         setTimeout(fetchData, 1000);
       });
+    }
+      const file = e.target.files[0];
+      const previewBox = document.getElementById('formImagePreviewBox');
+      const previewImg = document.getElementById('formImagePreview');
+      const clearBtn = document.getElementById('clearImgBtn');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = evt => {
+          if (previewImg) previewImg.src = evt.target.result;
+          if (previewBox) previewBox.classList.remove('hidden');
+          if (clearBtn) clearBtn.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        clearFormImage();
+      }
+    }
+
+    function clearFormImage() {
+      const fileInput = document.getElementById('formFile');
+      if (fileInput) fileInput.value = "";
+      const previewBox = document.getElementById('formImagePreviewBox');
+      if (previewBox) previewBox.classList.add('hidden');
+      const previewImg = document.getElementById('formImagePreview');
+      if (previewImg) previewImg.src = "";
+      const clearBtn = document.getElementById('clearImgBtn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+    }
+
+    function resetCheckInForm() {
+      clearFormImage();
+      document.getElementById('formMessage').value = "";
+      document.getElementById('formSteps').value = "8000";
     }
   </script>
 </body>
