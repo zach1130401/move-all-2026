@@ -64,20 +64,22 @@
         <a href="#gpsart" class="hover:text-oceanDark transition">GPS ART</a>
         <a href="#leaderboard" class="hover:text-oceanDark transition font-semibold text-appleDark">即時排行</a>
         <a href="#interactionSection" class="hover:text-oceanDark transition">交流與回報</a>
-        <a id="adminNavLink" href="#adminSection" class="hidden text-rose-600 font-bold hover:text-rose-700 transition">
-          管理後台
-        </a>
+        <button id="adminNavLink" onclick="openAdminModal()" class="hidden text-rose-600 font-bold hover:text-rose-700 transition">
+          管理員控制台
+        </button>
       </nav>
       
       <!-- 右上角登入狀態膠囊 -->
       <div class="flex items-center gap-2.5 shrink-0">
         <div id="headerLoggedOutArea" class="hidden"></div>
-        <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
+        <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3.5 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
           <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0" id="userAvatarText">N</div>
-          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[90px] sm:max-w-[110px] truncate inline-block align-bottom">諾思夥伴</span>
-          <span id="userTeamBadgeDisplay" onclick="openTeamModal()" title="點擊檢視/設定團隊" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0 cursor-pointer hover:bg-amber-200 transition">🏆 未組隊</span>
+          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[80px] sm:max-w-[110px] truncate inline-block align-bottom">諾思夥伴</span>
+          <span id="userTeamBadgeDisplay" onclick="openTeamModal()" title="點擊檢視/設定團隊" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0 cursor-pointer hover:bg-amber-200 transition">未組隊</span>
           <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-0.5 shrink-0">改暱稱</button>
           <span class="text-slate-300">|</span>
+          <button id="adminCapsuleBtn" onclick="openAdminModal()" class="hidden text-rose-600 hover:underline font-bold shrink-0">管理後台</button>
+          <span id="adminCapsuleDivider" class="hidden text-slate-300">|</span>
           <button onclick="logoutUser()" class="text-appleGray hover:text-appleDark font-medium shrink-0">登出</button>
         </div>
       </div>
@@ -1016,6 +1018,34 @@
       });
     }
 
+    function toggleReaction(msgId, type, btn) {
+      const reactionKey = 'north_reactions_' + msgId;
+      let counts = { like: 0, cheer: 0, agree: 0 };
+      try {
+        const saved = localStorage.getItem(reactionKey);
+        if (saved) counts = JSON.parse(saved);
+      } catch(e){}
+
+      const userKey = 'north_user_reacted_' + msgId + '_' + type;
+      const hasReacted = localStorage.getItem(userKey) === 'true';
+
+      if (hasReacted) {
+        counts[type] = Math.max(0, (counts[type] || 1) - 1);
+        localStorage.removeItem(userKey);
+        btn.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200', 'bg-amber-50', 'text-amber-700', 'border-amber-200', 'bg-oceanLight', 'text-oceanDark', 'border-ocean/30');
+      } else {
+        counts[type] = (counts[type] || 0) + 1;
+        localStorage.setItem(userKey, 'true');
+        if (type === 'like') btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
+        if (type === 'cheer') btn.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
+        if (type === 'agree') btn.classList.add('bg-oceanLight', 'text-oceanDark', 'border-ocean/30');
+      }
+      localStorage.setItem(reactionKey, JSON.stringify(counts));
+
+      const countEl = btn.querySelector('.reaction-count');
+      if (countEl) countEl.innerText = counts[type];
+    }
+
     function renderChatMessages(list) {
       const container = document.getElementById('chatMessageList');
       if (!container) return;
@@ -1030,6 +1060,18 @@
       container.innerHTML = sortedList.map((item, idx) => {
         const info = cleanUserInfo(item);
         const initial = (info.name || "諾")[0].toUpperCase();
+        const msgId = item.id || item.timestamp || (info.email + '_' + idx);
+        const reactionKey = 'north_reactions_' + msgId;
+        let counts = { like: 0, cheer: 0, agree: 0 };
+        try {
+          const saved = localStorage.getItem(reactionKey);
+          if (saved) counts = JSON.parse(saved);
+        } catch(e){}
+
+        const hasLike = localStorage.getItem('north_user_reacted_' + msgId + '_like') === 'true';
+        const hasCheer = localStorage.getItem('north_user_reacted_' + msgId + '_cheer') === 'true';
+        const hasAgree = localStorage.getItem('north_user_reacted_' + msgId + '_agree') === 'true';
+
         return `
           <div class="p-4 rounded-2xl bg-white/95 border border-stone/15 shadow-2xs space-y-2 hover:border-ocean/40 transition">
             <div class="flex items-center justify-between gap-2">
@@ -1050,14 +1092,14 @@
             </div>
 
             <div class="pl-10 pt-1 flex items-center gap-2 text-[11px] text-stone border-t border-stone/10">
-              <button onclick="this.classList.toggle('bg-rose-50'); this.classList.toggle('text-rose-600'); this.classList.toggle('border-rose-200');" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold hover:border-rose-300 hover:text-rose-600 transition">
-                讚
+              <button onclick="toggleReaction('${msgId}', 'like', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasLike ? 'bg-rose-50 text-rose-600 border-rose-200' : 'hover:border-rose-300 hover:text-rose-600'}">
+                讚 <span class="reaction-count font-mono font-bold">${counts.like || 0}</span>
               </button>
-              <button onclick="this.classList.toggle('bg-amber-50'); this.classList.toggle('text-amber-700'); this.classList.toggle('border-amber-200');" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold hover:border-amber-300 hover:text-amber-700 transition">
-                加油
+              <button onclick="toggleReaction('${msgId}', 'cheer', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasCheer ? 'bg-amber-50 text-amber-700 border-amber-200' : 'hover:border-amber-300 hover:text-amber-700'}">
+                加油 <span class="reaction-count font-mono font-bold">${counts.cheer || 0}</span>
               </button>
-              <button onclick="this.classList.toggle('bg-oceanLight'); this.classList.toggle('text-oceanDark'); this.classList.toggle('border-ocean/30');" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold hover:border-ocean/40 hover:text-oceanDark transition">
-                認同
+              <button onclick="toggleReaction('${msgId}', 'agree', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasAgree ? 'bg-oceanLight text-oceanDark border-ocean/30' : 'hover:border-ocean/40 hover:text-oceanDark'}">
+                認同 <span class="reaction-count font-mono font-bold">${counts.agree || 0}</span>
               </button>
             </div>
           </div>
