@@ -539,50 +539,119 @@
 
     </section>
 
-    <!-- 管理後台 -->
-    <section id="adminSection" class="hidden max-w-6xl mx-auto px-4 sm:px-8 py-10 border border-rose-200 bg-rose-50/30 rounded-[32px] space-y-6">
-      <div class="bg-white/95 backdrop-blur-md p-6 rounded-2xl border border-stone/20 shadow-xs">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3 pb-3 border-b border-stone/10">
+    <!-- (管理員後台控制台改為獨立彈窗控制台，一般用戶完全看不到) -->
+  </main>
+
+  <!-- ==================== 獨立專屬管理員控制台 (Admin Dashboard Modal) ==================== -->
+  <div id="adminDashboardModal" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="bg-white rounded-[32px] max-w-5xl w-full p-6 sm:p-10 space-y-6 shadow-2xl border border-rose-200 max-h-[92vh] flex flex-col">
+      
+      <!-- 標題列 -->
+      <div class="flex justify-between items-center border-b border-stone/15 pb-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 font-bold flex items-center justify-center text-lg">⚙️</div>
           <div>
-            <h3 class="text-base font-bold text-appleDark">管理員名單維護 (Super Admin 授權)</h3>
-            <p class="text-xs text-stone">名單內管理員皆具備審核權限</p>
-          </div>
-          <div class="flex gap-2 w-full sm:w-auto">
-            <input id="newAdminEmailInput" type="email" placeholder="輸入新管理員 Email" class="text-xs border border-stone/20 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-rose-500 w-full sm:w-60">
-            <button onclick="addNewAdmin()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg whitespace-nowrap">
-              新增
-            </button>
+            <h3 class="text-xl font-bold text-appleDark">north co 諾思 專屬管理員控制台</h3>
+            <p class="text-xs text-stone">資料維護、步數審核與團隊隊名調整專區</p>
           </div>
         </div>
-        <div class="text-xs text-slate-600">
-          <span class="font-semibold">目前管理員名單：</span>
-          <span id="currentAdminListDisplay" class="font-mono text-rose-700 font-bold">載入中...</span>
-        </div>
+        <button onclick="closeAdminModal()" class="text-stone hover:text-appleDark font-bold text-xl px-2 py-1">✕ 關閉控制台</button>
       </div>
 
-      <div class="bg-white/95 backdrop-blur-md rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
-        <div class="p-4 border-b border-stone/15 bg-cloud">
-          <h3 class="text-sm font-bold text-appleDark">運動步數與 GPS 路線審核</h3>
-        </div>
-        <div class="overflow-x-auto max-h-[480px] overflow-y-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-cloud text-stone border-b border-stone/15 sticky top-0">
-              <tr>
-                <th class="p-3">日期</th>
-                <th class="p-3">同仁 Email</th>
-                <th class="p-3">自報步數</th>
-                <th class="p-3">截圖證明 (點擊放大)</th>
-                <th class="p-3">狀態</th>
-                <th class="p-3">操作</th>
-              </tr>
-            </thead>
-            <tbody id="auditTableBody" class="divide-y divide-stone/10 text-appleDark">
-              <tr><td colspan="6" class="p-6 text-center text-stone">載入審核清單...</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- 管理分頁按鈕 -->
+      <div class="flex gap-3 border-b border-stone/15 pb-2 shrink-0">
+        <button id="adminTabBtnAudit" onclick="switchAdminTab('audit')" class="pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition">
+          📋 運動步數與截圖審核
+        </button>
+        <button id="adminTabBtnTeams" onclick="switchAdminTab('teams')" class="pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
+          🏆 所有團隊與隊名管理
+        </button>
+        <button id="adminTabBtnUsers" onclick="switchAdminTab('users')" class="pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
+          🛡️ 管理員權限維護
+        </button>
       </div>
-    </section>
+
+      <!-- 控制台內容區塊 (可滾動) -->
+      <div class="overflow-y-auto space-y-6 pr-1 flex-1">
+        
+        <!-- 分頁 1: 運動步數與截圖審核 -->
+        <div id="adminTabContentAudit" class="space-y-4">
+          <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
+            <div class="overflow-x-auto max-h-[480px]">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-cloud text-stone border-b border-stone/15 sticky top-0 z-10">
+                  <tr>
+                    <th class="p-3">日期</th>
+                    <th class="p-3">同仁 Email</th>
+                    <th class="p-3">自報步數</th>
+                    <th class="p-3">截圖證明 (點擊放大)</th>
+                    <th class="p-3">狀態</th>
+                    <th class="p-3">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody" class="divide-y divide-stone/10 text-appleDark">
+                  <tr><td colspan="6" class="p-6 text-center text-stone">載入審核清單...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分頁 2: 團隊與隊名總管理 (Admin 調整) -->
+        <div id="adminTabContentTeams" class="hidden space-y-4">
+          <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex justify-between items-center">
+            <span>💡 管理員具備所有團隊隊名修正、成員重新圈選與額外點數調整權限。</span>
+            <button onclick="adminPromptNewTeam()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs">
+              + 手動新增/調整隊伍
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
+            <div class="overflow-x-auto max-h-[450px]">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-cloud text-stone border-b border-stone/15 sticky top-0 z-10">
+                  <tr>
+                    <th class="p-3 w-10 text-center">No.</th>
+                    <th class="p-3">團隊名稱 (隊名)</th>
+                    <th class="p-3">隊長 (主要聯絡人)</th>
+                    <th class="p-3">3 人組員名單</th>
+                    <th class="p-3 text-center">累計總點數</th>
+                    <th class="p-3 text-right">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTeamTableBody" class="divide-y divide-stone/10 text-appleDark">
+                  <tr><td colspan="6" class="p-6 text-center text-stone">載入團隊清單...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分頁 3: 管理員權限維護 -->
+        <div id="adminTabContentUsers" class="hidden space-y-4">
+          <div class="bg-white p-6 rounded-2xl border border-stone/20 shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-stone/10">
+              <div>
+                <h4 class="text-sm font-bold text-appleDark">新增/移除管理員 (Super Admin)</h4>
+                <p class="text-xs text-stone mt-0.5">名單內管理員皆具備獨立後台審核與團隊維護權限</p>
+              </div>
+              <div class="flex gap-2 w-full sm:w-auto">
+                <input id="newAdminEmailInput" type="email" placeholder="輸入新管理員 Email" class="text-xs border border-stone/20 rounded-lg px-3.5 py-2 outline-none focus:ring-2 focus:ring-rose-500 w-full sm:w-60">
+                <button onclick="addNewAdmin()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg whitespace-nowrap shadow-xs">
+                  新增管理員
+                </button>
+              </div>
+            </div>
+            <div class="text-xs text-slate-600">
+              <span class="font-semibold">目前管理員授權名單：</span>
+              <span id="currentAdminListDisplay" class="font-mono text-rose-700 font-bold ml-1">載入中...</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
     <!-- 頁尾 -->
     <footer class="bg-white/80 backdrop-blur-md border-t border-stone/20 py-12 text-center text-stone text-xs space-y-2">
@@ -624,14 +693,16 @@
       </div>
       <p class="text-xs text-stone leading-relaxed">請輸入您的 3 人小組隊名與成員，系統將自動累計團隊總步數與點數，並解鎖 NT$ 4,800 / NT$ 6,000 現金獎勵！</p>
       
+      <div id="teamPermissionNotice" class="hidden text-xs text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200 leading-relaxed font-semibold"></div>
+
       <div class="space-y-3 text-sm">
         <div>
           <label class="block text-xs font-bold text-appleDark mb-1">團隊隊名 <span class="text-rose-500">*</span></label>
           <input id="teamNameInput" type="text" placeholder="例如：諾思勁跑隊" class="w-full border border-stone/20 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ocean">
         </div>
         <div>
-          <label class="block text-xs font-bold text-appleDark mb-1">隊員 1 (主要聯絡人 / 您的 Email)</label>
-          <input id="teamMember1Input" type="text" readonly class="w-full border border-stone/20 bg-stone/5 rounded-xl px-4 py-2 text-xs text-stone">
+          <label class="block text-xs font-bold text-appleDark mb-1">隊員 1 (隊長 / 主要創立人)</label>
+          <input id="teamMember1Input" type="text" readonly class="w-full border border-stone/20 bg-stone/5 rounded-xl px-4 py-2 text-xs text-stone font-semibold">
         </div>
         <div>
           <label class="block text-xs font-bold text-appleDark mb-1">隊員 2 (Email 或暱稱) <span class="text-rose-500">*</span></label>
@@ -644,8 +715,8 @@
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeTeamModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-stone hover:bg-slate-100">取消</button>
-        <button onclick="saveTeamInfo()" class="px-5 py-2 rounded-full text-xs font-semibold bg-ocean hover:bg-oceanDark text-white shadow-xs">儲存團隊設定</button>
+        <button onclick="closeTeamModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-stone hover:bg-slate-100">關閉</button>
+        <button id="teamSaveBtn" onclick="saveTeamInfo()" class="px-5 py-2 rounded-full text-xs font-semibold bg-ocean hover:bg-oceanDark text-white shadow-xs">儲存團隊設定</button>
       </div>
     </div>
   </div>
@@ -849,12 +920,11 @@
 
           if (data.isAdmin) {
             document.getElementById('adminNavLink').classList.remove('hidden');
-            document.getElementById('adminSection').classList.remove('hidden');
             document.getElementById('currentAdminListDisplay').innerText = data.adminList.join(', ');
             renderAuditTable(data.records);
+            renderAdminTeamTable(data.teams, data.leaderboard);
           } else {
             document.getElementById('adminNavLink').classList.add('hidden');
-            document.getElementById('adminSection').classList.add('hidden');
           }
           renderLeaderboard(data.leaderboard);
           renderTeamLeaderboard(data.leaderboard, data.teams);
@@ -1137,14 +1207,45 @@
       document.getElementById('teamMember1Input').value = currentEmail;
       
       const saved = localStorage.getItem('north_team_' + currentEmail);
+      let isCaptain = true;
+      let captainEmail = currentEmail;
+
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
           document.getElementById('teamNameInput').value = parsed.teamName || "";
           document.getElementById('teamMember2Input').value = parsed.members[1] || "";
           document.getElementById('teamMember3Input').value = parsed.members[2] || "";
+          captainEmail = parsed.captainEmail || parsed.members[0] || currentEmail;
+          if (captainEmail.toLowerCase() !== currentEmail.toLowerCase()) {
+            isCaptain = false;
+          }
         } catch(e){}
       }
+
+      const noticeEl = document.getElementById('teamPermissionNotice');
+      const saveBtn = document.getElementById('teamSaveBtn');
+      const nameInput = document.getElementById('teamNameInput');
+      const m2Input = document.getElementById('teamMember2Input');
+      const m3Input = document.getElementById('teamMember3Input');
+
+      if (!isCaptain) {
+        if (noticeEl) {
+          noticeEl.innerText = `🔒 您正在檢視團隊資訊。隊名與成員設定僅限隊長 (${captainEmail}) 具備修改權限。`;
+          noticeEl.classList.remove('hidden');
+        }
+        if (saveBtn) saveBtn.classList.add('hidden');
+        nameInput.readOnly = true;
+        m2Input.readOnly = true;
+        m3Input.readOnly = true;
+      } else {
+        if (noticeEl) noticeEl.classList.add('hidden');
+        if (saveBtn) saveBtn.classList.remove('hidden');
+        nameInput.readOnly = false;
+        m2Input.readOnly = false;
+        m3Input.readOnly = false;
+      }
+
       document.getElementById('teamModal').classList.remove('hidden');
     }
 
@@ -1162,6 +1263,7 @@
 
       const teamData = {
         teamName: teamName,
+        captainEmail: currentEmail,
         members: [currentEmail, m2, m3]
       };
 
@@ -1172,6 +1274,7 @@
         body: JSON.stringify({
           action: 'setTeam',
           operatorEmail: currentEmail,
+          captainEmail: currentEmail,
           teamName: teamName,
           members: [currentEmail, m2, m3]
         })
@@ -1180,6 +1283,102 @@
       alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
       closeTeamModal();
       fetchData();
+    }
+
+    function openAdminModal() {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+      document.getElementById('adminDashboardModal').classList.remove('hidden');
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminDashboardModal').classList.add('hidden');
+    }
+
+    function switchAdminTab(tab) {
+      document.getElementById('adminTabContentAudit').classList.add('hidden');
+      document.getElementById('adminTabContentTeams').classList.add('hidden');
+      document.getElementById('adminTabContentUsers').classList.add('hidden');
+
+      document.getElementById('adminTabBtnAudit').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
+      document.getElementById('adminTabBtnTeams').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
+      document.getElementById('adminTabBtnUsers').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
+
+      if (tab === 'audit') {
+        document.getElementById('adminTabContentAudit').classList.remove('hidden');
+        document.getElementById('adminTabBtnAudit').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition";
+      } else if (tab === 'teams') {
+        document.getElementById('adminTabContentTeams').classList.remove('hidden');
+        document.getElementById('adminTabBtnTeams').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition";
+      } else {
+        document.getElementById('adminTabContentUsers').classList.remove('hidden');
+        document.getElementById('adminTabBtnUsers').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition";
+      }
+    }
+
+    function renderAdminTeamTable(teams, individualList) {
+      const tbody = document.getElementById('adminTeamTableBody');
+      if (!tbody) return;
+
+      if (!teams || teams.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，可點擊上方按鈕建立新隊伍</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = teams.map((team, idx) => `
+        <tr class="hover:bg-rose-50/30 transition text-xs">
+          <td class="p-3 text-center font-bold">${idx + 1}</td>
+          <td class="p-3 font-bold text-appleDark">${team.teamName}</td>
+          <td class="p-3 font-semibold text-rose-700 font-mono">${team.captainEmail || (team.members ? team.members[0] : '未設定')}</td>
+          <td class="p-3 text-stone">${team.members ? team.members.join(', ') : '無'}</td>
+          <td class="p-3 text-center font-bold text-sunrise">${team.teamPoints || 0} 點</td>
+          <td class="p-3 text-right">
+            <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改隊名/成員</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function adminEditTeam(targetTeamName) {
+      const newName = prompt(`管理員修改團隊「${targetTeamName}」的隊名：`, targetTeamName);
+      if (!newName) return;
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'adminEditTeam',
+          operatorEmail: currentEmail,
+          oldTeamName: targetTeamName,
+          newTeamName: newName
+        })
+      })
+      .then(() => {
+        alert(`團隊隊名已成功修改為「${newName}」！`);
+        fetchData();
+      });
+    }
+
+    function adminPromptNewTeam() {
+      const teamName = prompt("管理員建立新團隊 - 請輸入團隊隊名：");
+      if (!teamName) return;
+      const m1 = prompt("請輸入隊長 Email (主要發起人)：");
+      if (!m1) return;
+      const m2 = prompt("請輸入隊員 2 Email 或暱稱：");
+      const m3 = prompt("請輸入隊員 3 Email 或暱稱：");
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'setTeam',
+          operatorEmail: currentEmail,
+          captainEmail: m1,
+          teamName: teamName,
+          members: [m1, m2 || "", m3 || ""]
+        })
+      })
+      .then(() => {
+        alert(`管理員成功建立/更新團隊「${teamName}」！`);
+        fetchData();
+      });
     }
 
     function renderTeamLeaderboard(individualList, serverTeams) {
