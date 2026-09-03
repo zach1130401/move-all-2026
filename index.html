@@ -45,23 +45,19 @@
 <body class="text-appleDark min-h-screen antialiased selection:bg-ocean/30 selection:text-slate-900">
 
   <!-- ==================== 頂部導覽列 (含諾思官方 Logo) ==================== -->
-  <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-stone/20 shadow-xs">
-    <div class="max-w-6xl mx-auto px-4 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-stone/20 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between gap-4">
       
-      <!-- 諾思官方 Logo [source: 3] -->
-      <div class="flex items-center gap-3.5">
-        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-ocean flex items-center justify-center shadow-xs overflow-hidden border border-white/20">
-          <svg viewBox="0 0 100 100" class="w-6 h-6 sm:w-7 sm:h-7 fill-white">
-            <path d="M 23 64 C 17 58 17 48 23 42 L 44 21 C 48 17 54 21 52 26 L 46 44 C 45 46 47 48 49 47 L 77 21 C 83 15 93 15 99 21 C 105 27 105 37 99 43 L 78 64 C 74 68 68 64 70 59 L 76 41 C 77 39 75 37 73 38 L 45 64 C 39 70 29 70 23 64 Z"/>
-          </svg>
-        </div>
+      <!-- 諾思官方 Logo -->
+      <a href="#" class="flex items-center gap-3 shrink-0">
+        <img src="https://web.northapp.online/img/company-logo.png" alt="north co Logo" class="h-9 sm:h-10 w-auto object-contain">
         <div>
-          <span class="font-black text-appleDark text-lg sm:text-xl tracking-tight">north co</span>
-          <span class="text-xs text-stone block font-semibold">諾思 2026 員工健康計劃</span>
+          <span class="font-black text-appleDark text-base sm:text-lg tracking-tight block leading-tight">north co</span>
+          <span class="text-[11px] text-stone font-semibold block leading-tight">諾思 2026 員工健康計劃</span>
         </div>
-      </div>
+      </a>
 
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-appleGray">
+      <nav class="hidden lg:flex items-center gap-5 xl:gap-7 text-xs lg:text-sm font-medium text-appleGray shrink-0">
         <a href="#mission" class="hover:text-oceanDark transition">任務機制</a>
         <a href="#rewards" class="hover:text-oceanDark transition">獎金與公益</a>
         <a href="#calc" class="hover:text-oceanDark transition">點數試算</a>
@@ -74,14 +70,14 @@
       </nav>
       
       <!-- 右上角登入狀態膠囊 -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5 shrink-0">
         <div id="headerLoggedOutArea" class="hidden"></div>
-        <div id="headerLoggedInArea" class="hidden flex items-center gap-2.5 bg-white/90 px-4 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
-          <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs" id="userAvatarText">N</div>
-          <span id="userNicknameDisplay" class="font-bold text-appleDark">諾思夥伴</span>
-          <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-1">改暱稱</button>
+        <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
+          <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0" id="userAvatarText">N</div>
+          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[100px] sm:max-w-[140px] truncate inline-block align-bottom">諾思夥伴</span>
+          <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-0.5 shrink-0">改暱稱</button>
           <span class="text-slate-300">|</span>
-          <button onclick="logoutUser()" class="text-appleGray hover:text-appleDark font-medium">登出</button>
+          <button onclick="logoutUser()" class="text-appleGray hover:text-appleDark font-medium shrink-0">登出</button>
         </div>
       </div>
     </div>
@@ -91,13 +87,9 @@
   <section id="loginGate" class="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
     <div class="bg-white/95 backdrop-blur-md p-8 sm:p-14 rounded-[36px] border border-stone/20 shadow-xl text-center space-y-8">
       
-      <!-- 諾思 Logo 大圖標 [source: 3] -->
+      <!-- 諾思 Logo 大圖標 -->
       <div class="flex justify-center">
-        <div class="w-20 h-20 rounded-3xl bg-ocean flex items-center justify-center shadow-md border-2 border-white/40">
-          <svg viewBox="0 0 100 100" class="w-12 h-12 fill-white">
-            <path d="M 23 64 C 17 58 17 48 23 42 L 44 21 C 48 17 54 21 52 26 L 46 44 C 45 46 47 48 49 47 L 77 21 C 83 15 93 15 99 21 C 105 27 105 37 99 43 L 78 64 C 74 68 68 64 70 59 L 76 41 C 77 39 75 37 73 38 L 45 64 C 39 70 29 70 23 64 Z"/>
-          </svg>
-        </div>
+        <img src="https://web.northapp.online/img/company-logo.png" alt="north co Logo" class="h-16 sm:h-20 w-auto object-contain">
       </div>
       
       <div class="space-y-3 max-w-xl mx-auto">
@@ -755,10 +747,12 @@
         .then(res => res.json())
         .then(data => {
           isCurrentAdmin = data.isAdmin;
-          currentNickname = data.userNickname || "諾思夥伴";
+          const rawNick = data.userNickname || currentNickname || "諾思夥伴";
+          const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
+          currentNickname = nickInfo.name || currentEmail.split('@')[0] || "諾思夥伴";
           document.getElementById('userNicknameDisplay').innerText = currentNickname;
           document.getElementById('formName').value = currentNickname;
-          document.getElementById('userAvatarText').innerText = (currentNickname || "諾")[0];
+          document.getElementById('userAvatarText').innerText = (currentNickname || "諾")[0].toUpperCase();
 
           if (data.isAdmin) {
             document.getElementById('adminNavLink').classList.remove('hidden');
