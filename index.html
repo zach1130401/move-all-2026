@@ -44,7 +44,7 @@
 </head>
 <body class="text-appleDark min-h-screen antialiased selection:bg-ocean/30 selection:text-slate-900">
 
-  <!-- ==================== 頂部導覽列 ==================== -->
+  <!-- ==================== 頂部導覽列 (含諾思官方 Logo) ==================== -->
   <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-stone/20 shadow-xs">
     <div class="max-w-6xl mx-auto px-4 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
       
@@ -91,7 +91,7 @@
     </div>
   </header>
 
-  <!-- ==================== 1. 唯一登入門檻畫面 (未登入時只顯示此區塊，主畫面徹底隱藏) ==================== -->
+  <!-- ==================== 1. 唯一登入門檻 (嚴格限定 Google 驗證，絕無任何冒名輸入) ==================== -->
   <section id="loginGate" class="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
     <div class="bg-white/95 backdrop-blur-md p-8 sm:p-14 rounded-[36px] border border-stone/20 shadow-xl text-center space-y-8">
       
@@ -113,15 +113,15 @@
         </h1>
         <p class="text-appleGray text-base sm:text-lg leading-relaxed pt-1">
           不需要成為最厲害的人，只要成為願意一起完成的團隊。<br>
-          為保障同仁帳號安全與防範冒名，本系統<strong>嚴格限定使用 Google 官方驗證登入</strong>。
+          為保障同仁帳號安全與防範冒名，本系統<strong>唯一限定使用 Google 官方身分登入</strong>。
         </p>
       </div>
 
-      <!-- 唯一 Google 登入按鈕容器 -->
-      <div class="pt-2 flex flex-col items-center justify-center space-y-4">
+      <!-- 唯一 Google 登入按鈕掛載點 -->
+      <div class="pt-4 flex flex-col items-center justify-center space-y-4">
         <div id="googleLoginBtnGate" class="min-h-[48px] flex justify-center"></div>
         <div id="loginLoadingHint" class="hidden text-sm text-oceanDark font-semibold animate-pulse">
-          Google 驗證成功，正在載入活動系統...
+          Google 帳號驗證成功，正在載入活動系統...
         </div>
       </div>
 
@@ -155,10 +155,10 @@
     </div>
   </section>
 
-  <!-- ==================== 2. 主活動儀表板 (已登入展示，未登入時強制 hidden) ==================== -->
+  <!-- ==================== 2. 主活動儀表板 (未登入時 100% 強制 hidden，絕不重疊) ==================== -->
   <main id="mainApp" class="hidden space-y-16 sm:space-y-24">
     
-    <!-- 核心數據 (已修復文字折行) -->
+    <!-- 核心數據 (修復折行) -->
     <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[30px] border border-stone/20 shadow-xs text-center space-y-1">
@@ -580,13 +580,13 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyKn80PhMcK2vP5ZwsictSc37S0xPE3gcym6xgNa7DN16IPRVpHkUxAPKIJIwdITLQO/exec";
-    // 你的 Google Client ID
+    // 你的真實 Google Client ID
     const GOOGLE_CLIENT_ID = "922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com";
 
     let currentEmail = "";
     let currentNickname = "諾思夥伴";
     let isCurrentAdmin = false;
-    let isGsiInitialized = false; // 單次執行鎖，徹底防止回調脫鉤
+    let isGsiInitialized = false; // 單次執行保護鎖
     let calcState = { stepPoints: 8, sportPoints: 4, teamExtra: 2, coSport: 2 };
 
     window.onload = function() {
@@ -618,17 +618,17 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 關鍵修復：未登入時務必隱藏 mainApp，登入後務必隱藏 loginGate，絕不重疊！
+    // 關鍵：未登入強制隱藏 mainApp，登入後強制隱藏 loginGate，絕不重疊跑版！
     function showLoggedOutUI() {
       document.getElementById('loginGate').classList.remove('hidden');
-      document.getElementById('mainApp').classList.add('hidden'); // 徹底隱藏主活動
+      document.getElementById('mainApp').classList.add('hidden');
       document.getElementById('headerLoggedOutArea').classList.remove('hidden');
       document.getElementById('headerLoggedInArea').classList.add('hidden');
     }
 
     function showLoggedInUI(name) {
-      document.getElementById('loginGate').classList.add('hidden'); // 徹底隱藏登入門檻
-      document.getElementById('mainApp').classList.remove('hidden'); // 展開主活動
+      document.getElementById('loginGate').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
       document.getElementById('headerLoggedOutArea').classList.add('hidden');
       document.getElementById('headerLoggedInArea').classList.remove('hidden');
 
@@ -645,7 +645,7 @@
       if (elAvatar) elAvatar.innerText = (name || "諾")[0].toUpperCase();
     }
 
-    // Google 登入初始化 (加上 isGsiInitialized 保護鎖，確保只註冊一次)
+    // Google 登入初始化 (附帶單次保護鎖)
     function initGoogleSignIn() {
       if (isGsiInitialized) return;
       if (typeof google !== 'undefined' && google.accounts) {
@@ -674,18 +674,50 @@
       }
     }
 
+    // 重構 JWT 解密核心：支援物件與字串、位元填充，徹底解決 replace is not a function
+    function decodeJwt(input) {
+      if (!input) return null;
+      let token = input;
+      if (typeof input === 'object' && input !== null) {
+        token = input.credential || input.id_token || input.token || '';
+      }
+      if (typeof token !== 'string' || !token.includes('.')) {
+        return null;
+      }
+      const parts = token.split('.');
+      if (parts.length < 2 || !parts) return null;
+      
+      try {
+        let base64 = parts.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4 !== 0) {
+          base64 += '=';
+        }
+        const decoded = atob(base64);
+        const jsonPayload = decodeURIComponent(
+          decoded.split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join('')
+        );
+        return JSON.parse(jsonPayload);
+      } catch (err) {
+        console.error("JWT 解析失敗:", err);
+        return null;
+      }
+    }
+
     // 接收 Google 官方登入成功憑證
     function handleCredentialResponse(response) {
       try {
-        const payload = parseJwt(response.credential);
+        const payload = decodeJwt(response);
         if (!payload || !payload.email) {
-          alert("登入未能取得 Google Email，請重試！");
+          alert("登入處理失敗：未能解析出有效 Google Email，請重試！");
           return;
         }
-        currentEmail = payload.email.toLowerCase().trim();
+
+        currentEmail = String(payload.email).toLowerCase().trim();
         const userName = payload.name || currentEmail.split('@')[0];
 
-        // 寫入持久化記憶
+        // 寫入本機持久化記憶
         localStorage.setItem('north_user', JSON.stringify({
           email: currentEmail,
           name: userName,
@@ -695,7 +727,7 @@
         showLoggedInUI(userName);
         fetchData();
       } catch (err) {
-        console.error("登入解析失敗:", err);
+        console.error("登入解析攔截錯誤:", err);
         alert("登入處理失敗：" + err.message);
       }
     }
@@ -706,15 +738,6 @@
       isCurrentAdmin = false;
       showLoggedOutUI();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function parseJwt(token) {
-      const base64Url = token.split('.');
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
     }
 
     function fetchData() {
