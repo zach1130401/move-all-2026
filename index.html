@@ -1338,7 +1338,26 @@
         }
 
         currentEmail = String(payload.email).toLowerCase().trim();
-        const userName = (payload.name && payload.name.trim() && payload.name !== "諾思夥伴") ? payload.name.trim() : getRandomFunNickname(currentEmail);
+
+        // 既存同仁優先保持既有暱稱；僅初次登入新同仁演算預設趣味稱號
+        let userName = "";
+        if (window.latestNicknameMap && window.latestNicknameMap[currentEmail] && window.latestNicknameMap[currentEmail] !== "諾思夥伴") {
+          userName = window.latestNicknameMap[currentEmail];
+        }
+        if (!userName) {
+          const savedUser = localStorage.getItem('north_user');
+          if (savedUser) {
+            try {
+              const parsed = JSON.parse(savedUser);
+              if (parsed && parsed.email === currentEmail && parsed.name && parsed.name !== "諾思夥伴") {
+                userName = parsed.name;
+              }
+            } catch(e){}
+          }
+        }
+        if (!userName) {
+          userName = getRandomFunNickname(currentEmail);
+        }
 
         // 0ms 零感知延遲：立即註冊至本機記憶體暱稱對照表並即時渲染參賽名單
         window.latestNicknameMap = window.latestNicknameMap || {};

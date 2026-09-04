@@ -192,30 +192,45 @@ function getRandomFunNickname(email) {
 
 function updateUserNickname(email, nickname, ss) {
   const cleanEmail = String(email || "").trim().toLowerCase();
-  let cleanName = String(nickname || "").trim();
-  if (!cleanName || cleanName === "諾思夥伴") {
-    cleanName = getRandomFunNickname(cleanEmail);
-  }
-  if (!cleanEmail) return cleanName;
+  if (!cleanEmail) return "諾思夥伴";
 
   const sheet = getUserProfilesSheet(ss);
   const data = sheet.getDataRange().getValues();
   
   let foundRow = -1;
+  let existingNick = "";
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).trim().toLowerCase() === cleanEmail) {
       foundRow = i + 1;
+      existingNick = String(data[i][1] || "").trim();
       break;
     }
   }
 
+  let cleanName = String(nickname || "").trim();
+
   if (foundRow > 0) {
+    // 既存同仁：若先前已有暱稱，除非傳入明確自訂的新暱稱 (非空且非預設)，否則一律保留既有暱稱！
+    if (existingNick && existingNick !== "諾思夥伴") {
+      if (!cleanName || cleanName === "諾思夥伴" || cleanName === cleanEmail || cleanName === existingNick) {
+        return existingNick;
+      }
+    }
+    // 既存同仁手動變更暱稱
+    if (!cleanName || cleanName === "諾思夥伴") {
+      cleanName = existingNick || getRandomFunNickname(cleanEmail);
+    }
     sheet.getRange(foundRow, 2).setValue(cleanName);
     sheet.getRange(foundRow, 3).setValue(new Date());
+    return cleanName;
   } else {
+    // 首次登入新同仁：僅於第一次登入且無紀錄時演算產生專屬趣味暱稱
+    if (!cleanName || cleanName === "諾思夥伴") {
+      cleanName = getRandomFunNickname(cleanEmail);
+    }
     sheet.appendRow([cleanEmail, cleanName, new Date()]);
+    return cleanName;
   }
-  return cleanName;
 }
 
 function getAdminList(ss) {
