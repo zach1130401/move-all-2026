@@ -12,21 +12,23 @@
   <!-- Google 官方登入 SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            ocean: '#82BDCC',     // 專業 清海藍 (主色調)
-            oceanDark: '#64A1B1',
-            oceanLight: '#EBF4F7',
-            stone: '#9F9992',     // 誠信 磐石灰
-            cloud: '#F7F7F9',     // 團隊 共融白
-            sunrise: '#F2A65A',   // 創新 曙光橘
-            appleDark: '#1d1d1f',
-            appleGray: '#86868b',
+    if (typeof tailwind !== 'undefined') {
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ocean: '#82BDCC',     // 專業 清海藍 (主色調)
+              oceanDark: '#64A1B1',
+              oceanLight: '#EBF4F7',
+              stone: '#9F9992',     // 誠信 磐石灰
+              cloud: '#F7F7F9',     // 團隊 共融白
+              sunrise: '#F2A65A',   // 創新 曙光橘
+              appleDark: '#1d1d1f',
+              appleGray: '#86868b',
+            }
           }
         }
-      }
+      };
     }
   </script>
   <style>
@@ -76,11 +78,7 @@
       
       <!-- 右上角登入狀態膠囊 -->
       <div class="flex items-center gap-2.5 shrink-0">
-        <div id="headerLoggedOutArea" class="hidden">
-          <button onclick="promptFallbackEmailLogin()" class="px-4 py-1.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-xs font-bold transition shadow-xs">
-            Google / Email 登入
-          </button>
-        </div>
+        <div id="headerLoggedOutArea" class="hidden"></div>
         <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3.5 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
           <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0 cursor-pointer" id="userAvatarText" onclick="toggleHeaderEmail()" title="點擊顯示/隱藏個人 Email">N</div>
           <span id="userNicknameDisplay" onclick="toggleHeaderEmail()" class="font-bold text-appleDark max-w-[120px] sm:max-w-[200px] truncate inline-block align-bottom cursor-pointer hover:text-ocean transition" title="點擊顯示/隱藏個人 Email">諾思夥伴</span>
@@ -136,12 +134,6 @@
                data-width="280"
                data-logo_alignment="left">
           </div>
-        </div>
-
-        <div>
-          <button type="button" onclick="promptFallbackEmailLogin()" class="text-xs text-stone hover:text-oceanDark font-medium transition underline py-1">
-            無法顯示 Google 登入按鈕？點此輸入 Email 快速登入
-          </button>
         </div>
 
         <div id="loginLoadingHint" class="hidden text-xs text-oceanDark font-semibold animate-pulse">
@@ -1091,11 +1083,11 @@
     // 你的真實 Google Client ID
     const GOOGLE_CLIENT_ID = "922771895128-kp7vsps48bled1jltgmj7fpuevs2qlav.apps.googleusercontent.com";
 
-    let currentEmail = "";
-    let currentNickname = "諾思夥伴";
-    let isCurrentAdmin = false;
-    let isGsiInitialized = false; // 單次執行保護鎖
-    let calcState = { stepPoints: 10, teamExtra: 4, sportPoints: 4, coSport: 2 };
+    var currentEmail = "";
+    var currentNickname = "諾思夥伴";
+    var isCurrentAdmin = false;
+    var isGsiInitialized = false; // 單次執行保護鎖
+    var calcState = { stepPoints: 10, teamExtra: 4, sportPoints: 4, coSport: 2 };
 
     window.onload = function() {
       document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
@@ -2799,8 +2791,6 @@
         let teams = (serverTeams && serverTeams.length > 0) ? [...serverTeams] : [];
 
         if (teams.length === 0) {
-
-        if (teams.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，請於上方點擊按鈕新增或匯入團隊</td></tr>';
           return;
         }
@@ -3482,6 +3472,26 @@
       if (catEl) catEl.value = "【每日步數】8,000 步達標";
       toggleStepsInputVisibility();
     }
+
+    // 顯式將所有核心全域 UI/Login 函式掛載至 window 物件
+    Object.assign(window, {
+      showLoggedOutUI,
+      showLoggedInUI,
+      initGoogleSignIn,
+      handleCredentialResponse,
+      promptFallbackEmailLogin,
+      logoutUser,
+      fetchData,
+      applyRenderData,
+      renderLeaderboard,
+      renderTeamLeaderboard,
+      renderFeed,
+      renderChatMessages,
+      previewChatImage,
+      clearChatImage,
+      handleSendChat,
+      cleanUserInfo
+    });
   </script>
 </body>
 </html>

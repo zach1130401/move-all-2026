@@ -1,0 +1,25 @@
+{
+  "name": "move-all",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zach1130401/move-all-2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zach1130401/move-all-2026/issues"
+  },
+  "homepage": "https://github.com/zach1130401/move-all-2026#readme",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^5.0.0"
+  }
+}

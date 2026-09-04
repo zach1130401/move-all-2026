@@ -1,3 +1,4 @@
 # Ignore Google Apps Script folder
 gas/
 *.gs
+node_modules/
