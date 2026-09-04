@@ -1506,8 +1506,6 @@
         });
         if (foundTeam && foundTeam.teamName) {
           userTeamName = foundTeam.teamName;
-        } else {
-          localStorage.removeItem('north_team_' + currentEmail);
         }
       }
 
@@ -1537,21 +1535,11 @@
     }
 
     function fetchData() {
-      // 1. 秒載本機快取 (0ms 零感知渲染)
-      const cached = localStorage.getItem('north_cache_data_' + currentEmail);
-      if (cached) {
-        try {
-          applyRenderData(JSON.parse(cached));
-        } catch(e){}
-      }
-
-      // 2. 背景請求最新資料 (由 Apps Script 5分鐘記憶體快取加速)
       const url = `${API_URL}?action=getData&email=${encodeURIComponent(currentEmail)}&_t=${Date.now()}`;
       fetch(url)
         .then(res => res.json())
         .then(data => {
           if (data && !data.error) {
-            localStorage.setItem('north_cache_data_' + currentEmail, JSON.stringify(data));
             applyRenderData(data);
           }
         })
@@ -2420,7 +2408,6 @@
       .then(res => {
         if (res && res.success) {
           showToast(res.message || "🗑️ 團隊已成功解散！", "success");
-          localStorage.removeItem('north_team_' + currentEmail);
           closeTeamModal();
           fetchData();
         } else {
@@ -2443,14 +2430,6 @@
       if (m2.toLowerCase() === m3.toLowerCase() || m2.toLowerCase() === currentEmail.toLowerCase() || m3.toLowerCase() === currentEmail.toLowerCase()) {
         return alert("團隊 3 人不能選擇重複的同仁！請選擇 3 位不同的成員。");
       }
-
-      const teamData = {
-        teamName: teamName,
-        captainEmail: currentEmail,
-        members: [currentEmail, m2, m3]
-      };
-
-      localStorage.setItem('north_team_' + currentEmail, JSON.stringify(teamData));
 
       fetch(API_URL, {
         method: 'POST',
@@ -2746,11 +2725,6 @@
       if (lines.length === 0) return alert("未檢測到有效的團隊資料行");
 
       let count = 0;
-      let localTeams = [];
-      const savedLocal = localStorage.getItem('north_all_teams');
-      if (savedLocal) {
-        try { localTeams = JSON.parse(savedLocal); } catch(e){}
-      }
 
       lines.forEach(line => {
         const parts = line.split(/[,;\t]+/).map(p => p.trim());
@@ -2761,23 +2735,6 @@
           const m3 = parts[3] || "";
 
           if (teamName) {
-            const teamObj = {
-              teamName: teamName,
-              captainEmail: captainEmail,
-              members: [captainEmail, m2, m3]
-            };
-
-            const existingIdx = localTeams.findIndex(t => t.teamName === teamName);
-            if (existingIdx >= 0) {
-              localTeams[existingIdx] = teamObj;
-            } else {
-              localTeams.push(teamObj);
-            }
-
-            if (captainEmail) {
-              localStorage.setItem('north_team_' + captainEmail.toLowerCase(), JSON.stringify(teamObj));
-            }
-
             fetch(API_URL, {
               method: 'POST',
               body: JSON.stringify({
@@ -2794,7 +2751,6 @@
         }
       });
 
-      localStorage.setItem('north_all_teams', JSON.stringify(localTeams));
       alert(`成功匯入 ${count} 支團隊！已同步更新至系統榜單。`);
       closeImportTeamsModal();
       document.getElementById('importTeamsTextarea').value = "";
@@ -2840,14 +2796,6 @@
         let teams = (serverTeams && serverTeams.length > 0) ? [...serverTeams] : [];
 
         if (teams.length === 0) {
-          const savedAll = localStorage.getItem('north_all_teams');
-          if (savedAll) {
-            try {
-              const parsed = JSON.parse(savedAll);
-              if (Array.isArray(parsed)) teams = parsed;
-            } catch(e){}
-          }
-        }
 
         if (teams.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，請於上方點擊按鈕新增或匯入團隊</td></tr>';
@@ -2914,13 +2862,6 @@
       .then(res => {
         if (res && res.success) {
           showToast(res.message || "🗑️ 團隊已成功刪除！", "success");
-          const savedAll = localStorage.getItem('north_all_teams');
-          if (savedAll) {
-            try {
-              const parsed = JSON.parse(savedAll).filter(t => t && t.teamName !== teamName);
-              localStorage.setItem('north_all_teams', JSON.stringify(parsed));
-            } catch(e){}
-          }
           fetchData();
         } else {
           showToast("刪除失敗: " + (res.message || "未知錯誤"), "error");
@@ -3130,17 +3071,7 @@
       if (!tbody) return;
 
       try {
-        const localTeam = localStorage.getItem('north_team_' + currentEmail);
         let teams = (serverTeams && serverTeams.length > 0) ? [...serverTeams] : [];
-
-        if (teams.length === 0 && localTeam) {
-          try {
-            const parsed = JSON.parse(localTeam);
-            if (parsed && parsed.teamName) {
-              teams.push(parsed);
-            }
-          } catch(e){}
-        }
 
         if (!teams || teams.length === 0) {
           tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">目前尚無團隊資料，請由隊長點擊右上角「組隊」完成 3 人團隊建立</td></tr>';
