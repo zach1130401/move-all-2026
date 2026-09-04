@@ -594,6 +594,7 @@
               <select id="formCategory" onchange="toggleStepsInputVisibility()" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm font-semibold text-appleDark bg-cloud/50">
                 <option value="【每日步數】8,000 步達標">🏃【每日步數】Pacer / 手環 8,000 步達標</option>
                 <option value="【規律運動】30 分鐘以上自主運動">🚴【規律運動】30分鐘以上運動 (慢跑/健走/瑜伽等)</option>
+                <option value="【一起動起來】團隊成員共同運動">👥【一起動起來】團隊成員共同運動合照 (+1 點)</option>
               </select>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -3254,10 +3255,14 @@
       }
 
       tbody.innerHTML = validRecords.map(item => {
+        const isCoSport = item.message && item.message.includes("一起動起來");
         const isSport = (item.message && item.message.includes("規律運動")) || item.steps === 0;
-        const stepsDisplay = isSport
-          ? '<span class="px-2.5 py-1 rounded-lg bg-oceanLight text-oceanDark font-bold text-xs inline-block">🚴 規律運動 (免填步數)</span>'
-          : `<span class="font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()} 步</span>`;
+        let stepsDisplay = `<span class="font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()} 步</span>`;
+        if (isCoSport) {
+          stepsDisplay = '<span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs inline-block">👥 一起動起來 (團隊合照)</span>';
+        } else if (isSport) {
+          stepsDisplay = '<span class="px-2.5 py-1 rounded-lg bg-oceanLight text-oceanDark font-bold text-xs inline-block">🚴 規律運動 (免填步數)</span>';
+        }
         const auditPtsBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">+1 點</span>`;
 
         return `
@@ -3502,7 +3507,7 @@
       const cat = document.getElementById('formCategory')?.value || "";
       const stepsBox = document.getElementById('stepsInputBox');
       const stepsInput = document.getElementById('formSteps');
-      if (cat.includes("規律運動")) {
+      if (cat.includes("規律運動") || cat.includes("一起動起來")) {
         if (stepsBox) stepsBox.classList.add('hidden');
         if (stepsInput) stepsInput.value = "0";
       } else {

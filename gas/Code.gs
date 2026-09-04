@@ -819,7 +819,7 @@ function getEventData(ss, nicknameMap) {
     }
     if (status === "通過") {
       const msg = String(row[6] || "").trim();
-      if (msg.includes("規律運動") || reportedSteps === 0) {
+      if (msg.includes("規律運動") || msg.includes("一起動起來") || reportedSteps === 0) {
         userStatsMap[cleanEmail].sportCount += 1;
       } else {
         userStatsMap[cleanEmail].validDays += 1;
