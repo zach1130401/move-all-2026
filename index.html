@@ -2269,24 +2269,23 @@
 
       const m2Select = document.getElementById('teamMember2Input');
       const m3Select = document.getElementById('teamMember3Input');
-      if (m2Select) m2Select.innerHTML = buildOptions(m2Selected, m3Selected);
-      if (m3Select) m3Select.innerHTML = buildOptions(m3Selected, m2Selected);
 
-      // 動態即時過濾：當切換隊員 2 時，動態從隊員 3 排除已選同仁；反之亦然
-      if (m2Select) {
-        m2Select.onchange = function() {
-          const currentM2 = m2Select.value;
-          const currentM3 = m3Select ? m3Select.value : "";
-          if (m3Select) m3Select.innerHTML = buildOptions(currentM3, currentM2);
-        };
-      }
-      if (m3Select) {
-        m3Select.onchange = function() {
-          const currentM3 = m3Select.value;
-          const currentM2 = m2Select ? m2Select.value : "";
-          if (m2Select) m2Select.innerHTML = buildOptions(currentM2, currentM3);
-        };
-      }
+      let userTeamInit = true;
+      const refreshUserTeamSelects = () => {
+        const currentM2 = m2Select ? m2Select.value : "";
+        const currentM3 = m3Select ? m3Select.value : "";
+        const activeM2 = userTeamInit ? m2Selected : currentM2;
+        const activeM3 = userTeamInit ? m3Selected : currentM3;
+
+        if (m2Select) m2Select.innerHTML = buildOptions(activeM2, activeM3);
+        if (m3Select) m3Select.innerHTML = buildOptions(activeM3, activeM2);
+        userTeamInit = false;
+      };
+
+      refreshUserTeamSelects();
+
+      if (m2Select) m2Select.onchange = refreshUserTeamSelects;
+      if (m3Select) m3Select.onchange = refreshUserTeamSelects;
 
       const noticeEl = document.getElementById('teamPermissionNotice');
       const saveBtn = document.getElementById('teamSaveBtn');
