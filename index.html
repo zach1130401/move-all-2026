@@ -1429,13 +1429,15 @@
       if (hasReacted) {
         counts[type] = Math.max(0, (counts[type] || 1) - 1);
         localStorage.removeItem(userKey);
-        btn.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200', 'bg-amber-50', 'text-amber-700', 'border-amber-200', 'bg-oceanLight', 'text-oceanDark', 'border-ocean/30');
+        if (type === 'like') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-rose-300 hover:text-rose-600";
+        if (type === 'cheer') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-amber-300 hover:text-amber-700";
+        if (type === 'agree') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-ocean/40 hover:text-oceanDark";
       } else {
         counts[type] = (counts[type] || 0) + 1;
         localStorage.setItem(userKey, 'true');
-        if (type === 'like') btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
-        if (type === 'cheer') btn.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
-        if (type === 'agree') btn.classList.add('bg-oceanLight', 'text-oceanDark', 'border-ocean/30');
+        if (type === 'like') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-rose-50 text-rose-600 border-rose-200";
+        if (type === 'cheer') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-amber-50 text-amber-700 border-amber-200";
+        if (type === 'agree') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-oceanLight text-oceanDark border-ocean/30";
       }
       localStorage.setItem(reactionKey, JSON.stringify(counts));
 
@@ -1457,7 +1459,8 @@
       container.innerHTML = sortedList.map((item, idx) => {
         const info = cleanUserInfo(item);
         const initial = (info.name || "諾")[0].toUpperCase();
-        const msgId = item.id || item.timestamp || (info.email + '_' + idx);
+        const rawId = item.id || item.timestamp || (info.email + '_' + idx);
+        const msgId = 'chat_' + String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
         const reactionKey = 'north_reactions_' + msgId;
         let counts = { like: 0, cheer: 0, agree: 0 };
         try {
@@ -1490,13 +1493,13 @@
 
             <div class="pl-10 pt-1 flex items-center gap-2 text-[11px] text-stone border-t border-stone/10">
               <button onclick="toggleReaction('${msgId}', 'like', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasLike ? 'bg-rose-50 text-rose-600 border-rose-200' : 'hover:border-rose-300 hover:text-rose-600'}">
-                讚 <span class="reaction-count font-mono font-bold">${counts.like || 0}</span>
+                👍 讚 <span class="reaction-count font-mono font-bold">${counts.like || 0}</span>
               </button>
               <button onclick="toggleReaction('${msgId}', 'cheer', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasCheer ? 'bg-amber-50 text-amber-700 border-amber-200' : 'hover:border-amber-300 hover:text-amber-700'}">
-                加油 <span class="reaction-count font-mono font-bold">${counts.cheer || 0}</span>
+                🔥 加油 <span class="reaction-count font-mono font-bold">${counts.cheer || 0}</span>
               </button>
               <button onclick="toggleReaction('${msgId}', 'agree', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasAgree ? 'bg-oceanLight text-oceanDark border-ocean/30' : 'hover:border-ocean/40 hover:text-oceanDark'}">
-                認同 <span class="reaction-count font-mono font-bold">${counts.agree || 0}</span>
+                👏 認同 <span class="reaction-count font-mono font-bold">${counts.agree || 0}</span>
               </button>
             </div>
           </div>
@@ -2093,7 +2096,7 @@
       if (!confirm("確定要強制清空全系統記憶體快取與本機暫存嗎？\n清空後下一次連線將直接讀取 Google Sheets 最新原始資料。")) return;
 
       Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('north_')) localStorage.removeItem(k);
+        if (k.startsWith('north_cache_data_')) localStorage.removeItem(k);
       });
       fetch(API_URL, {
         method: 'POST',
@@ -2701,33 +2704,60 @@
         return;
       }
 
-      container.innerHTML = validRecords.map(item => `
-        <div class="bg-cloud p-4 rounded-2xl border border-stone/15 space-y-2">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="font-bold text-appleDark text-sm">${item.cleanName}</span>
-              <span class="text-xs text-stone ml-1">(${item.cleanEmail})</span>
-              <div class="text-xs text-stone mt-0.5">${item.date} 運動打卡</div>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                item.status === '通過' ? 'bg-emerald-100 text-emerald-800' :
-                item.status === '駁回' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-              }">${item.status || '待審核'}</span>
-              <div class="font-mono font-black text-oceanDark text-sm mt-1">${(item.steps || 0).toLocaleString()} 步</div>
-            </div>
-          </div>
-          ${item.message ? `<p class="text-appleDark text-xs bg-white p-2.5 rounded-xl border border-stone/10 leading-relaxed">${item.message}</p>` : ''}
-          ${item.imageUrl ? `
-            <div class="pt-1 space-y-1">
-              <img src="${formatImageUrl(item.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="max-h-48 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="截圖證明" title="點擊放大預覽">
-              <div class="hidden text-xs text-stone bg-white/90 p-2 rounded-xl border border-stone/10">
-                ⚠️ 截圖受 Google 雲端權限限制，<a href="${item.imageUrl}" target="_blank" class="text-oceanDark font-bold underline">點此在新分頁查看原圖 ↗</a>
+      container.innerHTML = validRecords.map((item, idx) => {
+        const rawId = item.rowId || item.timestamp || (item.cleanEmail + '_' + item.date + '_' + idx);
+        const msgId = 'feed_' + String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const reactionKey = 'north_reactions_' + msgId;
+        let counts = { like: 0, cheer: 0, agree: 0 };
+        try {
+          const saved = localStorage.getItem(reactionKey);
+          if (saved) counts = JSON.parse(saved);
+        } catch(e){}
+
+        const hasLike = localStorage.getItem('north_user_reacted_' + msgId + '_like') === 'true';
+        const hasCheer = localStorage.getItem('north_user_reacted_' + msgId + '_cheer') === 'true';
+        const hasAgree = localStorage.getItem('north_user_reacted_' + msgId + '_agree') === 'true';
+
+        return `
+          <div class="bg-cloud p-4 rounded-2xl border border-stone/15 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="font-bold text-appleDark text-sm">${item.cleanName}</span>
+                <span class="text-xs text-stone ml-1">(${item.cleanEmail})</span>
+                <div class="text-xs text-stone mt-0.5">${item.date} 運動打卡</div>
+              </div>
+              <div class="text-right">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                  item.status === '通過' ? 'bg-emerald-100 text-emerald-800' :
+                  item.status === '駁回' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                }">${item.status || '待審核'}</span>
+                <div class="font-mono font-black text-oceanDark text-sm mt-1">${(item.steps || 0).toLocaleString()} 步</div>
               </div>
             </div>
-          ` : ''}
-        </div>
-      `).join('');
+            ${item.message ? `<p class="text-appleDark text-xs bg-white p-2.5 rounded-xl border border-stone/10 leading-relaxed">${item.message}</p>` : ''}
+            ${item.imageUrl ? `
+              <div class="pt-1 space-y-1">
+                <img src="${formatImageUrl(item.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="max-h-48 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="截圖證明" title="點擊放大預覽">
+                <div class="hidden text-xs text-stone bg-white/90 p-2 rounded-xl border border-stone/10">
+                  ⚠️ 截圖受 Google 雲端權限限制，<a href="${item.imageUrl}" target="_blank" class="text-oceanDark font-bold underline">點此在新分頁查看原圖 ↗</a>
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="pt-2 flex items-center gap-2 text-[11px] text-stone border-t border-stone/10">
+              <button onclick="toggleReaction('${msgId}', 'like', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasLike ? 'bg-rose-50 text-rose-600 border-rose-200' : 'hover:border-rose-300 hover:text-rose-600'}">
+                👍 讚 <span class="reaction-count font-mono font-bold">${counts.like || 0}</span>
+              </button>
+              <button onclick="toggleReaction('${msgId}', 'cheer', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasCheer ? 'bg-amber-50 text-amber-700 border-amber-200' : 'hover:border-amber-300 hover:text-amber-700'}">
+                🔥 加油 <span class="reaction-count font-mono font-bold">${counts.cheer || 0}</span>
+              </button>
+              <button onclick="toggleReaction('${msgId}', 'agree', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasAgree ? 'bg-oceanLight text-oceanDark border-ocean/30' : 'hover:border-ocean/40 hover:text-oceanDark'}">
+                👏 認同 <span class="reaction-count font-mono font-bold">${counts.agree || 0}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderAuditTable(records) {
