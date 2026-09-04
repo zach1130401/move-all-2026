@@ -2035,8 +2035,8 @@
           <td class="p-3.5 text-center font-mono font-semibold text-oceanDark">${user.sportCount} 次</td>
           <td class="p-3.5 text-right font-mono font-black text-oceanDark text-sm sm:text-base">${(user.totalSteps || 0).toLocaleString()} 步</td>
           <td class="p-3.5 text-center font-mono font-black text-sunrise text-sm sm:text-base">${user.points} 點</td>
-          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || (user.points >= 20 ? 'Gold' : user.points >= 15 ? 'Silver' : user.points >= 10 ? 'Bronze' : '尚未達標')}</span></td>
-          <td class="p-3.5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : (user.points >= 20 ? 'NT$ 6,000' : user.points >= 15 ? 'NT$ 4,500' : user.points >= 10 ? 'NT$ 3,000' : '參加獎')}</td>
+          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || '尚未達標'}</span></td>
+          <td class="p-3.5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : '參加獎'}</td>
         </tr>
       `).join('');
     }
@@ -3152,8 +3152,8 @@
           const membersStr = membersList.map(m => getFormattedUserLabel(m)).join(', ');
           const teamSteps = Number(team.teamSteps) || 0;
           const teamPoints = Number(team.teamPoints) || 0;
-          const statusBadge = team.statusBadge || (teamPoints >= 15 ? "🏆 解鎖最高門檻 (≥15點)" : teamPoints >= 10 ? "🎯 解鎖第一門檻 (≥10點)" : "尚未達標");
-          const rewardText = team.rewardText || (teamPoints >= 15 ? "NT$ 6,000" : teamPoints >= 10 ? "NT$ 4,800" : "參加獎 (公益禮盒)");
+          const statusBadge = team.statusBadge || "尚未達標";
+          const rewardText = team.rewardText || "參加獎 (公益禮盒)";
 
           return `
           <tr class="hover:bg-oceanLight/30 transition text-xs sm:text-sm">
