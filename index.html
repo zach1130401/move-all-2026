@@ -35,15 +35,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* ── Apple-style typography foundation ── */
+    /* ── Font & smoothing ── */
     :root {
       --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "PingFang TC", "Helvetica Neue", Arial, sans-serif;
     }
     body {
       font-family: var(--font-sans);
-      font-size: 17px;
-      line-height: 1.6;
-      letter-spacing: -0.01em;
       background-color: #F7F7F9;
       background-image:
         radial-gradient(at 0% 0%, rgba(130, 189, 204, 0.25) 0px, transparent 50%),
@@ -55,42 +52,16 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ── Display / Hero headings — tight tracking, heavy weight ── */
-    h1, .display {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 900;
+    /* ── Apple-feel: only page-level display headings (scoped to .apple-heading) ── */
+    .apple-heading {
       letter-spacing: -0.04em;
       line-height: 1.08;
+      font-weight: 900;
     }
-    h2, .headline {
-      font-size: clamp(1.75rem, 4vw, 2.75rem);
-      font-weight: 800;
+    .apple-section-heading {
       letter-spacing: -0.035em;
       line-height: 1.1;
-    }
-    h3, .title {
-      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
-    }
-    h4 {
-      font-size: clamp(1.1rem, 2vw, 1.4rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    /* ── Body / callout ── */
-    p, .body-text {
-      font-size: 1rem;
-      font-weight: 400;
-      line-height: 1.7;
-      letter-spacing: -0.005em;
-    }
-    .caption {
-      font-size: 0.8125rem;
-      letter-spacing: 0em;
-      color: #86868b;
+      font-weight: 800;
     }
 
     /* ── Scrollbar ── */
@@ -158,10 +129,10 @@
         <div class="inline-block px-3.5 py-1 rounded-full bg-oceanLight text-oceanDark text-[11px] font-black uppercase tracking-wider">
           2026 EMPLOYEE WELLNESS PROGRAM
         </div>
-        <h1 class="text-appleDark">
+        <h1 class="text-2xl sm:text-4xl font-black text-appleDark tracking-tight leading-snug apple-heading">
           一起動起來，<br class="hidden sm:inline">把健康變成日常。
         </h1>
-        <p class="text-appleGray pt-1">
+        <p class="text-appleGray text-sm sm:text-base leading-relaxed pt-0.5">
           不需要成為最厲害的人，只要成為願意一起完成的團隊。
         </p>
       </div>
@@ -201,7 +172,7 @@
     <div class="space-y-10 text-left max-w-5xl mx-auto pt-6">
       <div class="text-center space-y-2">
         <span class="text-xs font-black uppercase tracking-widest text-oceanDark bg-oceanLight px-4 py-1.5 rounded-full">North Co. Values</span>
-        <h3 class="text-appleDark">我們的四大價值觀</h3>
+        <h3 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight apple-section-heading">我們的四大價值觀</h3>
       </div>
 
       <div class="grid md:grid-cols-2 gap-8">
@@ -284,7 +255,7 @@
     <!-- 四大健康任務說明 -->
     <section id="mission" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
       <div class="text-center max-w-2xl mx-auto space-y-2">
-        <h2 class="text-appleDark">健康生活挑戰任務機制</h2>
+        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight apple-section-heading">健康生活挑戰任務機制</h2>
         <p class="text-appleGray text-base">採達標與團隊集點制而非競賽排名制，照顧健康並為社會盡一份心力。</p>
       </div>
 
@@ -322,7 +293,7 @@
     <!-- 獎金門檻與公益專區 -->
     <section id="rewards" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-10">
       <div class="text-center max-w-2xl mx-auto space-y-2">
-        <h2 class="text-appleDark">團隊獎金門檻與公益夥伴</h2>
+        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight apple-section-heading">團隊獎金門檻與公益夥伴</h2>
         <p class="text-appleGray text-base">採 3 人團隊集點制，團隊點數累積越高，團隊現金獎金越高！</p>
       </div>
 
@@ -383,7 +354,7 @@
     <!-- 推薦運動 30 分鐘與紀錄指南專區 -->
     <section id="sportsGuide" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-8">
       <div class="text-center max-w-2xl mx-auto space-y-2">
-        <h2 class="text-appleDark">🚴 推薦 30 分鐘運動與證明方式</h2>
+        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight apple-section-heading">🚴 推薦 30 分鐘運動與證明方式</h2>
         <p class="text-appleGray text-base">選擇您喜歡的運動方式，持續 30 分鐘以上並截圖紀錄即可輕鬆回報取得點數！</p>
       </div>
 
@@ -425,7 +396,7 @@
     <!-- 互動式團隊點數計算機 -->
     <section id="calc" class="max-w-5xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="text-center max-w-lg mx-auto space-y-2">
-        <h2 class="text-appleDark">團隊點數試算</h2>
+        <h2 class="text-3xl font-black text-appleDark tracking-tight apple-section-heading">團隊點數試算</h2>
         <p class="text-appleGray text-sm">即時試算 3 位隊員在活動期間 (30 天) 之達標進度與獎勵等級</p>
       </div>
 
