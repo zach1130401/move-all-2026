@@ -2014,18 +2014,37 @@
         return;
       }
 
-      tbody.innerHTML = validList.map((user, idx) => `
-        <tr class="hover:bg-oceanLight/30 transition text-xs sm:text-sm">
-          <td class="p-3.5 text-center font-bold">${idx + 1}</td>
-          <td class="p-3.5 font-bold text-appleDark">${user.cleanName} <span class="text-xs text-stone font-normal block sm:inline">(${user.cleanEmail})</span></td>
+      const rankMedal  = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+      const rankRowBg  = [
+        'bg-gradient-to-r from-amber-50  via-yellow-50  to-amber-50/30  border-l-4 border-amber-400',
+        'bg-gradient-to-r from-slate-100 via-gray-50   to-slate-50/30  border-l-4 border-slate-400',
+        'bg-gradient-to-r from-orange-50 via-amber-50  to-orange-50/30 border-l-4 border-orange-400',
+        'bg-gradient-to-r from-teal-50   via-cyan-50   to-teal-50/30   border-l-4 border-teal-400',
+        'bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50/30 border-l-4 border-violet-400',
+      ];
+      const rankNumColor = ['text-amber-500','text-slate-500','text-orange-500','text-teal-600','text-violet-600'];
+
+      tbody.innerHTML = validList.map((user, idx) => {
+        const isTop5   = idx < 5;
+        const rowBg    = isTop5 ? rankRowBg[idx]   : 'hover:bg-oceanLight/20';
+        const numCls   = isTop5 ? `text-2xl ${rankNumColor[idx]}` : 'text-stone';
+        const rankCell = isTop5 ? rankMedal[idx] : (idx + 1);
+        const nameCls  = isTop5 ? 'font-extrabold text-appleDark' : 'font-bold text-appleDark';
+        const ptsCls   = isTop5 ? 'font-black text-lg' : 'font-black';
+        const ptsColor = idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-slate-500' : idx === 2 ? 'text-orange-500' : idx < 5 ? 'text-teal-600' : 'text-sunrise';
+
+        return `
+        <tr class="${rowBg} transition text-xs sm:text-sm">
+          <td class="p-3.5 text-center font-bold ${numCls}">${rankCell}</td>
+          <td class="p-3.5 ${nameCls}">${user.cleanName} <span class="text-xs text-stone font-normal block sm:inline">(${user.cleanEmail})</span></td>
           <td class="p-3.5 text-center font-mono font-semibold">${user.validDays} 天</td>
           <td class="p-3.5 text-center font-mono font-semibold text-oceanDark">${user.sportCount} 次</td>
           <td class="p-3.5 text-right font-mono font-black text-oceanDark text-sm sm:text-base">${(user.totalSteps || 0).toLocaleString()} 步</td>
-          <td class="p-3.5 text-center font-mono font-black text-sunrise text-sm sm:text-base">${user.points} 點</td>
+          <td class="p-3.5 text-center font-mono ${ptsCls} ${ptsColor} text-sm sm:text-base">${user.points} 點</td>
           <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || '尚未達標'}</span></td>
           <td class="p-3.5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : '參加獎'}</td>
-        </tr>
-      `).join('');
+        </tr>`;
+      }).join('');
     }
 
     function switchBoardTab(tab) {
