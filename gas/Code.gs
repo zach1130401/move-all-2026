@@ -352,7 +352,7 @@ function calculateTeamPointsBackend(teams, records, leaderboard) {
       const stats = userStats[mEmail];
       if (stats) {
         teamSteps += (stats.totalSteps || 0);
-        teamPoints += ((stats.validDays || 0) + (stats.sportCount || 0));
+        teamPoints += (stats.points !== undefined ? Number(stats.points) : ((stats.validDays || 0) + (stats.sportCount || 0)));
       }
     });
 

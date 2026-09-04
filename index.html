@@ -2041,8 +2041,8 @@
           <td class="p-3.5 text-center font-mono font-semibold text-oceanDark">${user.sportCount} 次</td>
           <td class="p-3.5 text-right font-mono font-black text-oceanDark text-sm sm:text-base">${(user.totalSteps || 0).toLocaleString()} 步</td>
           <td class="p-3.5 text-center font-mono font-black text-sunrise text-sm sm:text-base">${user.points} 點</td>
-          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || (user.points >= 20 ? 'Gold' : user.points >= 10 ? 'Silver' : 'Bronze')}</span></td>
-          <td class="p-3.5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : (user.points >= 15 ? 'NT$ 2,000' : user.points >= 10 ? 'NT$ 1,600' : '參加獎')}</td>
+          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-oceanLight text-oceanDark border border-ocean/30">${user.tier || (user.points >= 20 ? 'Gold' : user.points >= 15 ? 'Silver' : user.points >= 10 ? 'Bronze' : '尚未達標')}</span></td>
+          <td class="p-3.5 text-right font-bold text-appleDark">${user.reward > 0 ? 'NT$ ' + user.reward.toLocaleString() : (user.points >= 20 ? 'NT$ 6,000' : user.points >= 15 ? 'NT$ 4,500' : user.points >= 10 ? 'NT$ 3,000' : '參加獎')}</td>
         </tr>
       `).join('');
     }
