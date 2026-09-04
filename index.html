@@ -808,10 +808,11 @@
                     <th class="p-3">當前歸屬團隊</th>
                     <th class="p-3 text-center">歷史打卡次數</th>
                     <th class="p-3 text-center">當前累計點數</th>
+                    <th class="p-3 text-right">操作</th>
                   </tr>
                 </thead>
                 <tbody id="adminRosterTableBody" class="divide-y divide-stone/10 text-appleDark">
-                  <tr><td colspan="6" class="p-6 text-center text-stone">載入參賽同仁名單...</td></tr>
+                  <tr><td colspan="7" class="p-6 text-center text-stone">載入參賽同仁名單...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -2315,7 +2316,7 @@
       if (badge) badge.innerText = `${emailsList.length} 人`;
 
       if (emailsList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無已註冊同仁資料</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">目前尚無已註冊同仁資料</td></tr>';
         return;
       }
 
@@ -2350,7 +2351,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">查無符合搜尋條件的同仁</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">查無符合搜尋條件的同仁</td></tr>';
         return;
       }
 
@@ -2362,8 +2363,44 @@
           <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${u.teamName === '未組隊' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">${u.teamName}</span></td>
           <td class="p-3 text-center font-mono">${u.recordCount} 次</td>
           <td class="p-3 text-center font-mono font-bold text-sunrise">${u.pts} 點</td>
+          <td class="p-3 text-right">
+            <button onclick="adminDeleteUser('${u.email}')" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold rounded-lg text-xs transition shadow-2xs">
+              🗑️ 刪除同仁
+            </button>
+          </td>
         </tr>
       `).join('');
+    }
+
+    function adminDeleteUser(email) {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+      if (!email) return;
+
+      if (!confirm(`⚠️ 確定要從系統與參賽名單中刪除同仁「${email}」嗎？\n\n注意：刪除後該同仁將自動從所在團隊移除，且其試算表註冊紀錄將被清除。`)) return;
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'deleteUser',
+          operatorEmail: currentEmail,
+          targetEmail: email
+        })
+      })
+      .then(res => res.json().catch(() => ({ success: true })))
+      .then(res => {
+        if (res && res.success === false) {
+          showToast("刪除失敗: " + (res.message || "未知錯誤"), "error");
+        } else {
+          showToast(`已成功刪除同仁 (${email})`, "success");
+          if (window.latestNicknameMap) delete window.latestNicknameMap[email.toLowerCase().trim()];
+          fetchData();
+        }
+      })
+      .catch(() => {
+        showToast(`已成功刪除同仁 (${email})`, "success");
+        if (window.latestNicknameMap) delete window.latestNicknameMap[email.toLowerCase().trim()];
+        fetchData();
+      });
     }
 
     function openImportTeamsModal() {

@@ -377,6 +377,24 @@ function doPost(e) {
       return createJsonResponse({ success: true, teams: getTeams(ss) });
     }
 
+    // 10. 管理員刪除團隊 (deleteTeam)
+    if (action === "deleteTeam") {
+      if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
+      deleteTeam(payload.teamName, ss);
+      clearCache();
+      return createJsonResponse({ success: true, teams: getTeams(ss) });
+    }
+
+    // 11. 管理員刪除同仁 (deleteUser)
+    if (action === "deleteUser") {
+      if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
+      const targetEmail = (payload.targetEmail || "").trim().toLowerCase();
+      const err = deleteUser(targetEmail, ss);
+      if (err) return createJsonResponse({ success: false, message: err });
+      clearCache();
+      return createJsonResponse({ success: true, message: `已成功刪除同仁 (${targetEmail})` });
+    }
+
     // 8. 管理員更新 Pacer 點數 (updatePacerPoints)
     if (action === "updatePacerPoints") {
       if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
@@ -713,4 +731,62 @@ function reviewRecord(rowId, status, approvedSteps, ss) {
   const sheet = ss.getSheets()[0];
   sheet.getRange(rowId, 8).setValue(status);
   sheet.getRange(rowId, 9).setValue(status === "通過" ? approvedSteps : 0);
+}
+
+function deleteUser(targetEmail, ss) {
+  const cleanEmail = String(targetEmail || "").trim().toLowerCase();
+  if (!cleanEmail) return "無效的 Email 帳號";
+
+  ss = ss || getSpreadsheet();
+
+  // 1. 從 User_Profiles 試算表中刪除該同仁資料列
+  const profileSheet = getUserProfilesSheet(ss);
+  const profileData = profileSheet.getDataRange().getValues();
+  for (let i = profileData.length - 1; i >= 1; i--) {
+    if (String(profileData[i][0]).trim().toLowerCase() === cleanEmail) {
+      profileSheet.deleteRow(i + 1);
+    }
+  }
+
+  // 2. 從 Pacer_Points 試算表中刪除
+  const pacerSheet = getPacerPointsSheet(ss);
+  const pacerData = pacerSheet.getDataRange().getValues();
+  for (let i = pacerData.length - 1; i >= 1; i--) {
+    if (String(pacerData[i][0]).trim().toLowerCase() === cleanEmail) {
+      pacerSheet.deleteRow(i + 1);
+    }
+  }
+
+  // 3. 從所有團隊中移除該成員或重置隊伍
+  const teamsSheet = getTeamsSheet(ss);
+  const teamsData = teamsSheet.getDataRange().getValues();
+  for (let i = teamsData.length - 1; i >= 1; i--) {
+    const row = teamsData[i];
+    const teamName = String(row[0] || "").trim();
+    if (!teamName) continue;
+
+    const capt = String(row[1] || "").trim();
+    const m1 = String(row[2] || "").trim();
+    const m2 = String(row[3] || "").trim();
+    const m3 = String(row[4] || "").trim();
+
+    const members = [m1, m2, m3].filter(m => m && String(m).trim().toLowerCase() !== cleanEmail);
+    const isCaptMatched = capt.toLowerCase().trim() === cleanEmail;
+    const isMemberMatched = [m1, m2, m3].some(m => String(m).trim().toLowerCase() === cleanEmail);
+
+    if (isCaptMatched || isMemberMatched) {
+      if (members.length === 0) {
+        teamsSheet.deleteRow(i + 1);
+      } else {
+        const newCapt = isCaptMatched ? (members[0] || "") : capt;
+        teamsSheet.getRange(i + 1, 2).setValue(newCapt);
+        teamsSheet.getRange(i + 1, 3).setValue(members[0] || "");
+        teamsSheet.getRange(i + 1, 4).setValue(members[1] || "");
+        teamsSheet.getRange(i + 1, 5).setValue(members[2] || "");
+        teamsSheet.getRange(i + 1, 7).setValue(new Date());
+      }
+    }
+  }
+
+  return null;
 }
