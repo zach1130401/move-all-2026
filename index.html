@@ -637,6 +637,9 @@
     <!-- (管理員後台控制台改為獨立彈窗控制台，一般用戶完全看不到) -->
   </main>
 
+  <!-- 精美系統通知 Toast 彈窗容器 -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4"></div>
+
   <!-- ==================== 獨立專屬管理員控制台 (Admin Dashboard Modal) ==================== -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <div class="bg-white rounded-[32px] max-w-5xl w-full p-6 sm:p-10 space-y-6 shadow-2xl border border-rose-200 max-h-[92vh] flex flex-col">
@@ -1890,15 +1893,15 @@
       .then(res => res.json().catch(() => ({ success: true })))
       .then(res => {
         if (res && res.success === false) {
-          alert("儲存失敗: " + (res.message || "同仁可能已歸屬其他團隊"));
+          showToast("儲存失敗: " + (res.message || "同仁可能已歸屬其他團隊"), "error");
         } else {
-          alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
+          showToast(`🎉 成功設定團隊「${teamName}」！已開始累計團隊點數`, "success");
           closeTeamModal();
           fetchData();
         }
       })
       .catch(() => {
-        alert(`成功設定團隊「${teamName}」！已開始累計 3 人小組點數。`);
+        showToast(`🎉 成功設定團隊「${teamName}」！已開始累計團隊點數`, "success");
         closeTeamModal();
         fetchData();
       });
@@ -1927,11 +1930,11 @@
       })
       .then(res => res.json())
       .then(res => {
-        alert(res.message || "全系統快取已成功強制清空！");
+        showToast(res.message || "⚡ 全系統記憶體與本機快取已成功強制清空！", "success");
         fetchData();
       })
       .catch(() => {
-        alert("快取清空完成！");
+        showToast("⚡ 全系統快取清空完成！", "success");
         fetchData();
       });
     }
@@ -2141,7 +2144,7 @@
       .then(res => res.json())
       .then(res => {
         if (res && res.success) {
-          alert(res.message || "團隊已成功刪除！");
+          showToast(res.message || "🗑️ 團隊已成功刪除！", "success");
           const savedAll = localStorage.getItem('north_all_teams');
           if (savedAll) {
             try {
@@ -2151,11 +2154,11 @@
           }
           fetchData();
         } else {
-          alert("刪除失敗: " + (res.message || "未知錯誤"));
+          showToast("刪除失敗: " + (res.message || "未知錯誤"), "error");
         }
       })
       .catch(err => {
-        alert("網路異常，刪除失敗");
+        showToast("網路異常，刪除失敗", "error");
       });
     }
 
@@ -2291,15 +2294,15 @@
       .then(res => res.json().catch(() => ({ success: true })))
       .then(res => {
         if (res && res.success === false) {
-          alert("儲存失敗: " + (res.message || "同仁可能已歸屬其他團隊"));
+          showToast("儲存失敗: " + (res.message || "同仁可能已歸屬其他團隊"), "error");
         } else {
-          alert(`管理員已成功儲存團隊「${teamName}」！`);
+          showToast(`🎉 管理員已成功儲存團隊「${teamName}」！`, "success");
           closeAdminTeamEditModal();
           fetchData();
         }
       })
       .catch(err => {
-        alert("團隊設定已送出！");
+        showToast(`🎉 管理員已成功儲存團隊「${teamName}」！`, "success");
         closeAdminTeamEditModal();
         fetchData();
       });
@@ -2629,9 +2632,9 @@
       .then(res => res.json().catch(() => ({ success: true })))
       .then(res => {
         if (res && res.success === false) {
-          alert("回報失敗: " + (res.message || "未知錯誤"));
+          showToast("回報失敗: " + (res.message || "未知錯誤"), "error");
         } else {
-          alert("回報成功！已寫入試算表待審核。");
+          showToast("🎉 運動與步數回報成功！已寫入試算表並即時更新榜單", "success");
           resetCheckInForm();
         }
         document.getElementById('formSubmitBtn').disabled = false;
@@ -2639,12 +2642,52 @@
         fetchData();
       })
       .catch(err => {
-        alert("回報成功！已寫入試算表待審核。");
+        showToast("🎉 運動與步數回報成功！已寫入試算表並即時更新榜單", "success");
         resetCheckInForm();
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
         fetchData();
       });
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) {
+        alert(message);
+        return;
+      }
+
+      const toast = document.createElement('div');
+      toast.className = "pointer-events-auto flex items-center gap-3 p-4 rounded-2xl border shadow-xl backdrop-blur-md transition-all duration-300 transform translate-y-[-10px] opacity-0 text-xs sm:text-sm font-semibold";
+      
+      let icon = "ℹ️";
+      if (type === 'success') {
+        toast.className += " bg-white/95 text-appleDark border-emerald-300/80 shadow-emerald-900/10";
+        icon = '<div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 font-bold flex items-center justify-center text-sm shrink-0">✓</div>';
+      } else if (type === 'error') {
+        toast.className += " bg-white/95 text-appleDark border-rose-300/80 shadow-rose-900/10";
+        icon = '<div class="w-7 h-7 rounded-full bg-rose-100 text-rose-600 font-bold flex items-center justify-center text-xs shrink-0">✕</div>';
+      } else {
+        toast.className += " bg-white/95 text-appleDark border-ocean/30 shadow-ocean/10";
+        icon = '<div class="w-7 h-7 rounded-full bg-oceanLight text-oceanDark font-bold flex items-center justify-center text-xs shrink-0">ℹ</div>';
+      }
+
+      toast.innerHTML = `
+        ${icon}
+        <div class="flex-1 text-appleDark font-medium leading-snug">${message}</div>
+        <button onclick="this.parentElement.remove()" class="text-stone hover:text-appleDark font-bold text-xs p-1">✕</button>
+      `;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        setTimeout(() => toast.remove(), 350);
+      }, 3800);
     }
 
     function previewFormImage(e) {
