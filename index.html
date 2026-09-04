@@ -2093,9 +2093,15 @@
       `).join('');
     }
 
+    function extractEmail(str) {
+      if (!str || typeof str !== 'string') return '';
+      const match = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+      return match ? match[1].toLowerCase().trim() : str.toLowerCase().trim();
+    }
+
     function getFormattedUserLabel(email) {
       if (!email || typeof email !== 'string') return '';
-      const cleanE = email.trim().toLowerCase();
+      const cleanE = extractEmail(email);
       if (!cleanE) return '';
 
       let nick = "";
@@ -2105,14 +2111,14 @@
       if (!nick && window.latestLeaderboardData && Array.isArray(window.latestLeaderboardData)) {
         const found = window.latestLeaderboardData.find(u => {
           const info = cleanUserInfo(u);
-          return info.email && info.email.toLowerCase().trim() === cleanE;
+          return info.email && extractEmail(info.email) === cleanE;
         });
         if (found) nick = (found.name || found.nick);
       }
       if (!nick && window.latestRecordsData && Array.isArray(window.latestRecordsData)) {
         const found = window.latestRecordsData.find(r => {
           const info = cleanUserInfo(r);
-          return info.email && info.email.toLowerCase().trim() === cleanE;
+          return info.email && extractEmail(info.email) === cleanE;
         });
         if (found) nick = (found.name || found.nick);
       }
@@ -2213,12 +2219,9 @@
       }
 
       // 精確過濾出隊長以外的隊員 2 與隊員 3 名單 (確保 3 位成員皆完整呈現)
-      const cleanCapt = String(captainEmail || "").toLowerCase().trim();
+      const cleanCapt = extractEmail(captainEmail);
       const nonCaptMembers = (existingTeam && existingTeam.members && Array.isArray(existingTeam.members)) 
-        ? existingTeam.members.filter(m => {
-            const cleanM = String(m || "").toLowerCase().trim();
-            return cleanM && cleanM !== cleanCapt && !cleanM.includes(cleanCapt) && !cleanCapt.includes(cleanM);
-          })
+        ? existingTeam.members.map(m => extractEmail(m)).filter(cleanM => cleanM && cleanM !== cleanCapt)
         : [];
 
       const m2Selected = nonCaptMembers[0] || '';
@@ -2226,44 +2229,36 @@
 
       const buildOptions = (selectedVal, excludeVal) => {
         let opts = '<option value="">-- 請選擇同仁 --</option>';
-        const cleanSelected = String(selectedVal || "").toLowerCase().trim();
-        const cleanExclude = String(excludeVal || "").toLowerCase().trim();
-        const cleanCapt = String(captainEmail || "").toLowerCase().trim();
+        const cleanSelected = extractEmail(selectedVal);
+        const cleanExclude = extractEmail(excludeVal);
 
         userMap.forEach((label, valEmail) => {
-          const cleanEmail = valEmail.toLowerCase().trim();
+          const cleanEmail = extractEmail(valEmail);
 
           // 排除隊長 (隊長已固定為隊員 1)
-          if (cleanCapt && (cleanEmail === cleanCapt || cleanEmail.includes(cleanCapt) || cleanCapt.includes(cleanEmail))) {
+          if (cleanCapt && cleanEmail === cleanCapt) {
             return;
           }
+
+          const isSelected = cleanSelected && cleanSelected === cleanEmail;
 
           // 排除另一個下拉選單已選擇的同仁 (防止一人同時被選為隊員 2 與隊員 3)
-          const isSelected = cleanSelected && (cleanSelected === cleanEmail || cleanSelected.includes(cleanEmail) || cleanEmail.includes(cleanSelected));
-          if (cleanExclude && !isSelected && (cleanExclude === cleanEmail || cleanExclude.includes(cleanEmail) || cleanEmail.includes(cleanExclude))) {
+          if (cleanExclude && !isSelected && cleanExclude === cleanEmail) {
             return;
           }
 
-          const selectedAttr = isSelected ? 'selected' : '';
-          
           // 檢查該同仁是否已歸屬其他團隊 (若已加入其他團隊且非當前選中，直接排除不顯示)
-          let alreadyInTeam = "";
-          assignedTeamsMap.forEach((tName, keyEmail) => {
-            if (keyEmail && keyEmail.length > 2) {
-              if (cleanEmail === keyEmail || cleanEmail.includes(keyEmail) || keyEmail.includes(cleanEmail)) {
-                alreadyInTeam = tName;
-              }
-            }
-          });
-
+          const alreadyInTeam = assignedTeamsMap.get(cleanEmail);
           if (alreadyInTeam && !isSelected) {
             return; // 直接排除已有團隊的同仁
           }
 
-          opts += `<option value="${valEmail}" ${selectedAttr}>${label}</option>`;
+          const selectedAttr = isSelected ? 'selected' : '';
+          opts += `<option value="${cleanEmail}" ${selectedAttr}>${label}</option>`;
         });
-        if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
-          opts += `<option value="${selectedVal}" selected>${getFormattedUserLabel(selectedVal)}</option>`;
+
+        if (cleanSelected && !Array.from(userMap.keys()).some(k => extractEmail(k) === cleanSelected)) {
+          opts += `<option value="${cleanSelected}" selected>${getFormattedUserLabel(cleanSelected)}</option>`;
         }
         return opts;
       };
@@ -2903,12 +2898,8 @@
 
       // 取出既存團隊成員並精確過濾隊長
       const existingMembers = existingTeam ? (existingTeam.members || []) : [];
-      const captVal = existingTeam ? (existingTeam.captainEmail || existingMembers[0] || "") : "";
-      const cleanCaptAdmin = String(captVal || "").toLowerCase().trim();
-      const nonCaptAdminMembers = existingMembers.filter(m => {
-        const cleanM = String(m || "").toLowerCase().trim();
-        return cleanM && cleanM !== cleanCaptAdmin && !cleanM.includes(cleanCaptAdmin) && !cleanCaptAdmin.includes(cleanM);
-      });
+      const captVal = extractEmail(existingTeam ? (existingTeam.captainEmail || existingMembers[0] || "") : "");
+      const nonCaptAdminMembers = existingMembers.map(m => extractEmail(m)).filter(cleanM => cleanM && cleanM !== captVal);
       const m2Val = nonCaptAdminMembers[0] || "";
       const m3Val = nonCaptAdminMembers[1] || "";
 
@@ -2920,7 +2911,7 @@
             const isCurrentTeam = existingTeam && (existingTeam.teamName === t.teamName);
             if (!isCurrentTeam) {
               t.members.forEach(m => {
-                const cleanM = String(m || "").toLowerCase().trim();
+                const cleanM = extractEmail(m);
                 if (cleanM && cleanM.length > 2) {
                   assignedTeamsMap.set(cleanM, t.teamName);
                 }
@@ -2932,37 +2923,30 @@
 
       const buildSelectOptions = (selectedVal, placeholder, excludeVals = []) => {
         let opts = `<option value="">${placeholder}</option>`;
-        const cleanSelected = String(selectedVal || "").toLowerCase().trim();
-        const cleanExcludes = (excludeVals || []).map(x => String(x || "").toLowerCase().trim()).filter(Boolean);
+        const cleanSelected = extractEmail(selectedVal);
+        const cleanExcludes = (excludeVals || []).map(x => extractEmail(x)).filter(Boolean);
 
         userMap.forEach((label, valEmail) => {
-          const cleanEmail = valEmail.toLowerCase().trim();
-          const isSelected = (cleanSelected && (cleanSelected === cleanEmail || cleanSelected.includes(cleanEmail) || cleanEmail.includes(cleanSelected)));
+          const cleanEmail = extractEmail(valEmail);
+          const isSelected = cleanSelected && cleanSelected === cleanEmail;
 
           // 排除其他選單中已被選中的成員 (防止同一人在隊長/隊員2/隊員3重複被選)
-          if (!isSelected && cleanExcludes.some(ex => ex && (ex === cleanEmail || ex.includes(cleanEmail) || cleanEmail.includes(ex)))) {
+          if (!isSelected && cleanExcludes.includes(cleanEmail)) {
             return;
           }
 
           // 檢查該同仁是否已歸屬其他團隊 (若已在其他團隊且非當前選中，直接排除不顯示)
-          let alreadyInTeam = "";
-          assignedTeamsMap.forEach((tName, keyEmail) => {
-            if (keyEmail && keyEmail.length > 2) {
-              if (cleanEmail === keyEmail || cleanEmail.includes(keyEmail) || keyEmail.includes(cleanEmail)) {
-                alreadyInTeam = tName;
-              }
-            }
-          });
-
+          const alreadyInTeam = assignedTeamsMap.get(cleanEmail);
           if (alreadyInTeam && !isSelected) {
             return; // 直接排除已有團隊的同仁
           }
 
           const selectedAttr = isSelected ? 'selected' : '';
-          opts += `<option value="${valEmail}" ${selectedAttr}>${label}</option>`;
+          opts += `<option value="${cleanEmail}" ${selectedAttr}>${label}</option>`;
         });
-        if (selectedVal && !userMap.has(selectedVal.toLowerCase().trim())) {
-          opts += `<option value="${selectedVal}" selected>${getFormattedUserLabel(selectedVal)}</option>`;
+
+        if (cleanSelected && !Array.from(userMap.keys()).some(k => extractEmail(k) === cleanSelected)) {
+          opts += `<option value="${cleanSelected}" selected>${getFormattedUserLabel(cleanSelected)}</option>`;
         }
         return opts;
       };
@@ -3096,7 +3080,7 @@
 
           return {
             teamName: t.teamName,
-            membersStr: membersList.join(', '),
+            membersStr: membersList.map(m => getFormattedUserLabel(m)).join(', '),
             teamSteps: teamSteps,
             teamPoints: teamPoints,
             statusBadge: statusBadge,
