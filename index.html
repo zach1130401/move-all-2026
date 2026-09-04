@@ -2053,6 +2053,35 @@
       `).join('');
     }
 
+    function getFormattedUserLabel(email) {
+      if (!email || typeof email !== 'string') return '';
+      const cleanE = email.trim().toLowerCase();
+      if (!cleanE) return '';
+
+      let nick = "";
+      if (window.latestNicknameMap && window.latestNicknameMap[cleanE]) {
+        nick = window.latestNicknameMap[cleanE];
+      }
+      if (!nick && window.latestLeaderboardData && Array.isArray(window.latestLeaderboardData)) {
+        const found = window.latestLeaderboardData.find(u => {
+          const info = cleanUserInfo(u);
+          return info.email && info.email.toLowerCase().trim() === cleanE;
+        });
+        if (found) nick = (found.name || found.nick);
+      }
+      if (!nick && window.latestRecordsData && Array.isArray(window.latestRecordsData)) {
+        const found = window.latestRecordsData.find(r => {
+          const info = cleanUserInfo(r);
+          return info.email && info.email.toLowerCase().trim() === cleanE;
+        });
+        if (found) nick = (found.name || found.nick);
+      }
+      if (!nick) {
+        nick = getRandomFunNickname(cleanE);
+      }
+      return `${nick} (${cleanE})`;
+    }
+
     function openTeamModal() {
       if (!currentEmail) return alert("請先完成 Google 登入！");
       
@@ -2104,8 +2133,7 @@
         Object.keys(window.latestNicknameMap).forEach(email => {
           const cleanE = (email || '').toLowerCase().trim();
           if (cleanE && cleanE !== currentEmail.toLowerCase().trim()) {
-            const nick = window.latestNicknameMap[email];
-            userMap.set(cleanE, `${nick} (${email})`);
+            userMap.set(cleanE, getFormattedUserLabel(cleanE));
           }
         });
       }
@@ -2114,7 +2142,7 @@
           const info = cleanUserInfo(u);
           if (info.email && info.email.toLowerCase() !== currentEmail.toLowerCase()) {
             if (!userMap.has(info.email.toLowerCase())) {
-              userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+              userMap.set(info.email.toLowerCase(), getFormattedUserLabel(info.email));
             }
           }
         });
@@ -2124,7 +2152,7 @@
           const info = cleanUserInfo(r);
           if (info.email && info.email.toLowerCase() !== currentEmail.toLowerCase()) {
             if (!userMap.has(info.email.toLowerCase())) {
-              userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+              userMap.set(info.email.toLowerCase(), getFormattedUserLabel(info.email));
             }
           }
         });
@@ -2138,9 +2166,9 @@
         if (captainEmail.toLowerCase() !== currentEmail.toLowerCase()) {
           isCaptain = false;
         }
-        document.getElementById('teamMember1Input').value = captainEmail;
+        document.getElementById('teamMember1Input').value = getFormattedUserLabel(captainEmail);
       } else {
-        document.getElementById('teamMember1Input').value = currentEmail;
+        document.getElementById('teamMember1Input').value = getFormattedUserLabel(currentEmail);
         document.getElementById('teamNameInput').value = "";
       }
 
@@ -2184,7 +2212,7 @@
           }
         });
         if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
-          opts += `<option value="${selectedVal}" selected>${selectedVal}</option>`;
+          opts += `<option value="${selectedVal}" selected>${getFormattedUserLabel(selectedVal)}</option>`;
         }
         return opts;
       };
@@ -2655,7 +2683,7 @@
 
           return {
             ...t,
-            membersStr: membersList.join(', '),
+            membersStr: membersList.map(m => getFormattedUserLabel(m)).join(', '),
             teamSteps: teamSteps,
             teamPoints: teamPoints
           };
@@ -2665,7 +2693,7 @@
           <tr class="hover:bg-rose-50/30 transition text-xs">
             <td class="p-3 text-center font-bold">${idx + 1}</td>
             <td class="p-3 font-bold text-appleDark">${team.teamName}</td>
-            <td class="p-3 font-semibold text-rose-700 font-mono">${team.captainEmail || (team.members ? team.members[0] : '未設定')}</td>
+            <td class="p-3 font-semibold text-rose-700 font-mono">${getFormattedUserLabel(team.captainEmail || (team.members ? team.members[0] : '')) || '未設定'}</td>
             <td class="p-3 text-stone font-medium">${team.membersStr || '無'}</td>
             <td class="p-3 text-center font-bold text-sunrise text-sm">${team.teamPoints || 0} 點</td>
             <td class="p-3 text-right flex justify-end gap-1.5">
@@ -2742,7 +2770,7 @@
           window.latestTeamsData.forEach(t => {
             if (t && t.teamName) {
               const isSel = (targetTeamName && t.teamName === targetTeamName) ? 'selected' : '';
-              opts += `<option value="${t.teamName}" ${isSel}>${t.teamName} (隊長: ${t.captainEmail || '未設'})</option>`;
+              opts += `<option value="${t.teamName}" ${isSel}>${t.teamName} (隊長: ${getFormattedUserLabel(t.captainEmail) || '未設'})</option>`;
             }
           });
         }
@@ -2769,8 +2797,7 @@
         Object.keys(window.latestNicknameMap).forEach(email => {
           const cleanE = (email || '').toLowerCase().trim();
           if (cleanE) {
-            const nick = window.latestNicknameMap[email];
-            userMap.set(cleanE, `${nick} (${email})`);
+            userMap.set(cleanE, getFormattedUserLabel(cleanE));
           }
         });
       }
@@ -2778,7 +2805,7 @@
         window.latestLeaderboardData.forEach(u => {
           const info = cleanUserInfo(u);
           if (info.email && !userMap.has(info.email.toLowerCase())) {
-            userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+            userMap.set(info.email.toLowerCase(), getFormattedUserLabel(info.email));
           }
         });
       }
@@ -2786,7 +2813,7 @@
         window.latestRecordsData.forEach(r => {
           const info = cleanUserInfo(r);
           if (info.email && !userMap.has(info.email.toLowerCase())) {
-            userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+            userMap.set(info.email.toLowerCase(), getFormattedUserLabel(info.email));
           }
         });
       }
@@ -2811,7 +2838,7 @@
           opts += `<option value="${valEmail}" ${isSelected}>${label}</option>`;
         });
         if (selectedVal && !userMap.has(selectedVal.toLowerCase().trim())) {
-          opts += `<option value="${selectedVal}" selected>${selectedVal}</option>`;
+          opts += `<option value="${selectedVal}" selected>${getFormattedUserLabel(selectedVal)}</option>`;
         }
         return opts;
       };
