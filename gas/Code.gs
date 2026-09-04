@@ -327,6 +327,100 @@ function getPacerPointsMap(ss) {
   return map;
 }
 
+function calculateTeamPointsBackend(teams, records, leaderboard) {
+  const userStats = {};
+  (leaderboard || []).forEach(user => {
+    if (user && user.email) {
+      userStats[String(user.email).trim().toLowerCase()] = user;
+    }
+  });
+
+  const validCoSportRecords = (records || []).filter(r => r && r.status === '通過' && String(r.message || '').includes('一起動起來'));
+  const validApprovedRecords = (records || []).filter(r => r && r.status === '通過');
+
+  const processed = (teams || []).map(t => {
+    const membersList = (t.members || []).filter(Boolean).map(m => String(m).trim());
+    if (t.captainEmail && !membersList.map(m => m.toLowerCase()).includes(String(t.captainEmail).trim().toLowerCase())) {
+      membersList.unshift(String(t.captainEmail).trim());
+    }
+
+    const cleanMembers = membersList.map(m => m.toLowerCase());
+    let teamSteps = 0;
+    let teamPoints = 0;
+
+    cleanMembers.forEach(mEmail => {
+      const stats = userStats[mEmail];
+      if (stats) {
+        teamSteps += (stats.totalSteps || 0);
+        teamPoints += ((stats.validDays || 0) + (stats.sportCount || 0));
+      }
+    });
+
+    const uniqueCoSportDates = new Set();
+    validCoSportRecords.forEach(r => {
+      const rEmail = String(r.email || '').trim().toLowerCase();
+      if (rEmail && cleanMembers.includes(rEmail) && r.date) {
+        uniqueCoSportDates.add(String(r.date).trim());
+      }
+    });
+
+    const coSportPoints = uniqueCoSportDates.size;
+    teamPoints += coSportPoints;
+
+    const extra = Number(t.extraPoints) || 0;
+    teamPoints += extra;
+
+    const weeklyCompliance = [1, 2, 3, 4].map(wNum => {
+      const memberCompleted = cleanMembers.map(mEmail => {
+        return validApprovedRecords.some(r => {
+          const rEmail = String(r.email || '').trim().toLowerCase();
+          if (rEmail !== mEmail || !r.date) return false;
+          const dt = new Date(String(r.date).replace(/-/g, '/'));
+          const day = dt.getDate();
+          if (wNum === 1 && day >= 1 && day <= 7) return true;
+          if (wNum === 2 && day >= 8 && day <= 14) return true;
+          if (wNum === 3 && day >= 15 && day <= 21) return true;
+          if (wNum === 4 && day >= 22 && day <= 31) return true;
+          return false;
+        });
+      });
+      const completedCount = memberCompleted.filter(Boolean).length;
+      return {
+        week: wNum,
+        completedCount: completedCount,
+        totalMembers: cleanMembers.length,
+        isAllCompleted: cleanMembers.length > 0 && completedCount === cleanMembers.length
+      };
+    });
+
+    let statusBadge = "尚未達標";
+    let rewardText = "參加獎 (公益禮盒)";
+    if (teamPoints >= 15) {
+      statusBadge = "🏆 解鎖最高門檻 (≥15點)";
+      rewardText = "NT$ 6,000";
+    } else if (teamPoints >= 10) {
+      statusBadge = "🎯 解鎖第一門檻 (≥10點)";
+      rewardText = "NT$ 4,800";
+    }
+
+    return {
+      teamName: t.teamName,
+      captainEmail: t.captainEmail,
+      members: membersList,
+      extraPoints: extra,
+      coSportPoints: coSportPoints,
+      teamSteps: teamSteps,
+      teamPoints: teamPoints,
+      weeklyCompliance: weeklyCompliance,
+      statusBadge: statusBadge,
+      rewardText: rewardText
+    };
+  });
+
+  processed.sort((a, b) => b.teamPoints - a.teamPoints);
+  return processed;
+}
+
 // 高效能快取讀取
 function getCachedMainData(ss) {
   const cache = CacheService.getScriptCache();
@@ -339,13 +433,14 @@ function getCachedMainData(ss) {
 
   const nicknameMap = getUserNicknameMap(ss);
   const eventData = getEventData(ss, nicknameMap);
-  const teams = getTeams(ss);
+  const rawTeams = getTeams(ss);
+  const processedTeams = calculateTeamPointsBackend(rawTeams, eventData.records, eventData.leaderboard);
   const admins = getAdminList(ss);
 
   const mainData = {
     leaderboard: eventData.leaderboard,
     records: eventData.records,
-    teams: teams,
+    teams: processedTeams,
     adminList: admins,
     nicknameMap: nicknameMap
   };
