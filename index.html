@@ -2079,8 +2079,29 @@
 
       // 選單名單完全由 User_Profiles (latestNicknameMap) 及動態數據自動產生
 
-      const m2Selected = existingTeam && existingTeam.members ? existingTeam.members[1] || '' : '';
-      const m3Selected = existingTeam && existingTeam.members ? existingTeam.members[2] || '' : '';
+      if (existingTeam) {
+        document.getElementById('teamNameInput').value = existingTeam.teamName || "";
+        captainEmail = existingTeam.captainEmail || (existingTeam.members ? existingTeam.members[0] : currentEmail);
+        if (captainEmail.toLowerCase() !== currentEmail.toLowerCase()) {
+          isCaptain = false;
+        }
+        document.getElementById('teamMember1Input').value = captainEmail;
+      } else {
+        document.getElementById('teamMember1Input').value = currentEmail;
+        document.getElementById('teamNameInput').value = "";
+      }
+
+      // 精確過濾出隊長以外的隊員 2 與隊員 3 名單 (確保 3 位成員皆完整呈現)
+      const cleanCapt = String(captainEmail || "").toLowerCase().trim();
+      const nonCaptMembers = (existingTeam && existingTeam.members && Array.isArray(existingTeam.members)) 
+        ? existingTeam.members.filter(m => {
+            const cleanM = String(m || "").toLowerCase().trim();
+            return cleanM && cleanM !== cleanCapt && !cleanM.includes(cleanCapt) && !cleanCapt.includes(cleanM);
+          })
+        : [];
+
+      const m2Selected = nonCaptMembers[0] || '';
+      const m3Selected = nonCaptMembers[1] || '';
 
       const buildOptions = (selectedVal) => {
         let opts = '<option value="">-- 請選擇同仁 --</option>';
@@ -2118,18 +2139,6 @@
       const m3Select = document.getElementById('teamMember3Input');
       if (m2Select) m2Select.innerHTML = buildOptions(m2Selected);
       if (m3Select) m3Select.innerHTML = buildOptions(m3Selected);
-
-      if (existingTeam) {
-        document.getElementById('teamNameInput').value = existingTeam.teamName || "";
-        captainEmail = existingTeam.captainEmail || (existingTeam.members ? existingTeam.members[0] : currentEmail);
-        if (captainEmail.toLowerCase() !== currentEmail.toLowerCase()) {
-          isCaptain = false;
-        }
-        document.getElementById('teamMember1Input').value = captainEmail;
-      } else {
-        document.getElementById('teamMember1Input').value = currentEmail;
-        document.getElementById('teamNameInput').value = "";
-      }
 
       const noticeEl = document.getElementById('teamPermissionNotice');
       const saveBtn = document.getElementById('teamSaveBtn');
@@ -2682,11 +2691,16 @@
 
       // 選單名單完全由 User_Profiles (latestNicknameMap) 及動態數據自動產生
 
-      // 取出既存團隊成員
+      // 取出既存團隊成員並精確過濾隊長
       const existingMembers = existingTeam ? (existingTeam.members || []) : [];
       const captVal = existingTeam ? (existingTeam.captainEmail || existingMembers[0] || "") : "";
-      const m2Val = existingMembers[1] || "";
-      const m3Val = existingMembers[2] || "";
+      const cleanCaptAdmin = String(captVal || "").toLowerCase().trim();
+      const nonCaptAdminMembers = existingMembers.filter(m => {
+        const cleanM = String(m || "").toLowerCase().trim();
+        return cleanM && cleanM !== cleanCaptAdmin && !cleanM.includes(cleanCaptAdmin) && !cleanCaptAdmin.includes(cleanM);
+      });
+      const m2Val = nonCaptAdminMembers[0] || "";
+      const m3Val = nonCaptAdminMembers[1] || "";
 
       const buildSelectOptions = (selectedVal, placeholder) => {
         let opts = `<option value="">${placeholder}</option>`;
