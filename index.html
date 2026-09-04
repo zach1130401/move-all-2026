@@ -2215,13 +2215,26 @@
       const m2Selected = nonCaptMembers[0] || '';
       const m3Selected = nonCaptMembers[1] || '';
 
-      const buildOptions = (selectedVal) => {
+      const buildOptions = (selectedVal, excludeVal) => {
         let opts = '<option value="">-- 請選擇同仁 --</option>';
         const cleanSelected = String(selectedVal || "").toLowerCase().trim();
+        const cleanExclude = String(excludeVal || "").toLowerCase().trim();
+        const cleanCapt = String(captainEmail || "").toLowerCase().trim();
 
         userMap.forEach((label, valEmail) => {
           const cleanEmail = valEmail.toLowerCase().trim();
+
+          // 排除隊長 (隊長已固定為隊員 1)
+          if (cleanCapt && (cleanEmail === cleanCapt || cleanEmail.includes(cleanCapt) || cleanCapt.includes(cleanEmail))) {
+            return;
+          }
+
+          // 排除另一個下拉選單已選擇的同仁 (防止一人同時被選為隊員 2 與隊員 3)
           const isSelected = cleanSelected && (cleanSelected === cleanEmail || cleanSelected.includes(cleanEmail) || cleanEmail.includes(cleanSelected));
+          if (cleanExclude && !isSelected && (cleanExclude === cleanEmail || cleanExclude.includes(cleanEmail) || cleanEmail.includes(cleanExclude))) {
+            return;
+          }
+
           const selectedAttr = isSelected ? 'selected' : '';
           
           // 檢查該同仁是否已歸屬其他團隊
@@ -2250,8 +2263,24 @@
 
       const m2Select = document.getElementById('teamMember2Input');
       const m3Select = document.getElementById('teamMember3Input');
-      if (m2Select) m2Select.innerHTML = buildOptions(m2Selected);
-      if (m3Select) m3Select.innerHTML = buildOptions(m3Selected);
+      if (m2Select) m2Select.innerHTML = buildOptions(m2Selected, m3Selected);
+      if (m3Select) m3Select.innerHTML = buildOptions(m3Selected, m2Selected);
+
+      // 動態即時過濾：當切換隊員 2 時，動態從隊員 3 排除已選同仁；反之亦然
+      if (m2Select) {
+        m2Select.onchange = function() {
+          const currentM2 = m2Select.value;
+          const currentM3 = m3Select ? m3Select.value : "";
+          if (m3Select) m3Select.innerHTML = buildOptions(currentM3, currentM2);
+        };
+      }
+      if (m3Select) {
+        m3Select.onchange = function() {
+          const currentM3 = m3Select.value;
+          const currentM2 = m2Select ? m2Select.value : "";
+          if (m2Select) m2Select.innerHTML = buildOptions(currentM2, currentM3);
+        };
+      }
 
       const noticeEl = document.getElementById('teamPermissionNotice');
       const saveBtn = document.getElementById('teamSaveBtn');
@@ -2868,11 +2897,22 @@
       const m2Val = nonCaptAdminMembers[0] || "";
       const m3Val = nonCaptAdminMembers[1] || "";
 
-      const buildSelectOptions = (selectedVal, placeholder) => {
+      const buildSelectOptions = (selectedVal, placeholder, excludeVals = []) => {
         let opts = `<option value="">${placeholder}</option>`;
+        const cleanSelected = String(selectedVal || "").toLowerCase().trim();
+        const cleanExcludes = (excludeVals || []).map(x => String(x || "").toLowerCase().trim()).filter(Boolean);
+
         userMap.forEach((label, valEmail) => {
-          const isSelected = (selectedVal && selectedVal.toLowerCase().trim() === valEmail) ? 'selected' : '';
-          opts += `<option value="${valEmail}" ${isSelected}>${label}</option>`;
+          const cleanEmail = valEmail.toLowerCase().trim();
+          const isSelected = (cleanSelected && (cleanSelected === cleanEmail || cleanSelected.includes(cleanEmail) || cleanEmail.includes(cleanSelected)));
+
+          // 排除其他選單中已被選中的成員 (防止同一人在隊長/隊員2/隊員3重複被選)
+          if (!isSelected && cleanExcludes.some(ex => ex && (ex === cleanEmail || ex.includes(cleanEmail) || cleanEmail.includes(ex)))) {
+            return;
+          }
+
+          const selectedAttr = isSelected ? 'selected' : '';
+          opts += `<option value="${valEmail}" ${selectedAttr}>${label}</option>`;
         });
         if (selectedVal && !userMap.has(selectedVal.toLowerCase().trim())) {
           opts += `<option value="${selectedVal}" selected>${getFormattedUserLabel(selectedVal)}</option>`;
@@ -2880,9 +2920,21 @@
         return opts;
       };
 
-      captSelect.innerHTML = buildSelectOptions(captVal, "-- 請選擇隊長 Email (必填) --");
-      m2Select.innerHTML = buildSelectOptions(m2Val, "-- 無 / 請選擇隊員 2 (選填) --");
-      m3Select.innerHTML = buildSelectOptions(m3Val, "-- 無 / 請選擇隊員 3 (選填) --");
+      const refreshAdminTeamSelects = () => {
+        const currentCapt = captSelect.value || captVal;
+        const currentM2 = m2Select.value || m2Val;
+        const currentM3 = m3Select.value || m3Val;
+
+        captSelect.innerHTML = buildSelectOptions(currentCapt, "-- 請選擇隊長 Email (必填) --", [currentM2, currentM3]);
+        m2Select.innerHTML = buildSelectOptions(currentM2, "-- 無 / 請選擇隊員 2 (選填) --", [currentCapt, currentM3]);
+        m3Select.innerHTML = buildSelectOptions(currentM3, "-- 無 / 請選擇隊員 3 (選填) --", [currentCapt, currentM2]);
+      };
+
+      refreshAdminTeamSelects();
+
+      captSelect.onchange = refreshAdminTeamSelects;
+      m2Select.onchange = refreshAdminTeamSelects;
+      m3Select.onchange = refreshAdminTeamSelects;
 
       modal.classList.remove('hidden');
     }
