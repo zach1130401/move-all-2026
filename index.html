@@ -1062,6 +1062,8 @@
           const cleaned = cleanUserInfo({ email: user.email, name: user.name });
           currentEmail = cleaned.email || user.email || "";
           if (currentEmail) {
+            window.latestNicknameMap = window.latestNicknameMap || {};
+            window.latestNicknameMap[currentEmail] = cleaned.name;
             localStorage.setItem('north_user', JSON.stringify({
               email: currentEmail,
               name: cleaned.name,
@@ -1259,6 +1261,10 @@
         currentEmail = String(payload.email).toLowerCase().trim();
         const userName = (payload.name && payload.name.trim() && payload.name !== "諾思夥伴") ? payload.name.trim() : getRandomFunNickname(currentEmail);
 
+        // 0ms 零感知延遲：立即註冊至本機記憶體暱稱對照表並即時渲染參賽名單
+        window.latestNicknameMap = window.latestNicknameMap || {};
+        window.latestNicknameMap[currentEmail] = userName;
+
         localStorage.setItem('north_user', JSON.stringify({
           email: currentEmail,
           name: userName,
@@ -1266,8 +1272,10 @@
         }));
 
         showLoggedInUI(userName);
+        renderPublicRosterTable();
+        renderAdminRosterTable();
 
-        // 自動向 GAS 後端註冊/同步同仁 Email 與 Google 暱稱至 User_Profiles 試算表
+        // 背景同步至 GAS 後端 User_Profiles 試算表
         fetch(API_URL, {
           method: 'POST',
           body: JSON.stringify({
@@ -1303,7 +1311,10 @@
       window.latestTeamsData = data.teams || [];
       window.latestLeaderboardData = data.leaderboard || [];
       window.latestRecordsData = data.records || [];
-      window.latestNicknameMap = data.nicknameMap || {};
+      window.latestNicknameMap = Object.assign({}, data.nicknameMap || {}, window.latestNicknameMap || {});
+      if (currentEmail && currentNickname) {
+        window.latestNicknameMap[currentEmail] = currentNickname;
+      }
       
       const elNameDisp = document.getElementById('userNicknameDisplay');
       if (elNameDisp) elNameDisp.innerText = currentNickname;
