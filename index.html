@@ -1401,6 +1401,9 @@
 
     function logoutUser() {
       localStorage.removeItem('north_user');
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('north_cache_data_')) localStorage.removeItem(k);
+      });
       currentEmail = "";
       isCurrentAdmin = false;
       showLoggedOutUI();
@@ -1411,7 +1414,7 @@
       if (!data) return;
 
       // 檢查當前登入者帳號是否已被管理員刪除/註銷 (若是則執行強制登出)
-      if (currentEmail && data.deletedUsers && Array.isArray(data.deletedUsers)) {
+      if (currentEmail && data.deletedUsers && Array.isArray(data.deletedUsers) && data.deletedUsers.length > 0) {
         const userCleanE = currentEmail.toLowerCase().trim();
         if (data.deletedUsers.includes(userCleanE)) {
           console.warn("帳號已被管理員刪除，執行強制登出");
