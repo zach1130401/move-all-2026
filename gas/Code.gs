@@ -78,6 +78,28 @@ function getPacerPointsSheet(ss) {
   return sheet;
 }
 
+function getDeletedUsersSheet(ss) {
+  ss = ss || getSpreadsheet();
+  let sheet = ss.getSheetByName("Deleted_Users");
+  if (!sheet) {
+    sheet = ss.insertSheet("Deleted_Users");
+    sheet.appendRow(["Email", "刪除時間"]);
+  }
+  return sheet;
+}
+
+function getDeletedUsers(ss) {
+  ss = ss || getSpreadsheet();
+  const sheet = getDeletedUsersSheet(ss);
+  const data = sheet.getDataRange().getValues();
+  const list = [];
+  for (let i = 1; i < data.length; i++) {
+    const e = extractEmailFromStr(data[i][0]);
+    if (e) list.push(e);
+  }
+  return list;
+}
+
 function getReactionsSheet(ss) {
   ss = ss || getSpreadsheet();
   let sheet = ss.getSheetByName("Reactions");
@@ -213,24 +235,32 @@ function updateUserNickname(email, nickname, ss) {
     // 既存同仁：若先前已有暱稱，除非傳入明確自訂的新暱稱 (非空且非預設)，否則一律保留既有暱稱！
     if (existingNick && existingNick !== "諾思夥伴") {
       if (!cleanName || cleanName === "諾思夥伴" || cleanName === cleanEmail || cleanName === existingNick) {
-        return existingNick;
+        cleanName = existingNick;
       }
     }
-    // 既存同仁手動變更暱稱
     if (!cleanName || cleanName === "諾思夥伴") {
       cleanName = existingNick || getRandomFunNickname(cleanEmail);
     }
     sheet.getRange(foundRow, 2).setValue(cleanName);
     sheet.getRange(foundRow, 3).setValue(new Date());
-    return cleanName;
   } else {
     // 首次登入新同仁：僅於第一次登入且無紀錄時演算產生專屬趣味暱稱
     if (!cleanName || cleanName === "諾思夥伴") {
       cleanName = getRandomFunNickname(cleanEmail);
     }
     sheet.appendRow([cleanEmail, cleanName, new Date()]);
-    return cleanName;
   }
+
+  // 若該同仁先前曾被標記刪除，於重新登入/註冊時自動從 Deleted_Users 名單中除名
+  const delSheet = getDeletedUsersSheet(ss);
+  const delData = delSheet.getDataRange().getValues();
+  for (let i = delData.length - 1; i >= 1; i--) {
+    if (extractEmailFromStr(delData[i][0]) === cleanEmail) {
+      delSheet.deleteRow(i + 1);
+    }
+  }
+
+  return cleanName;
 }
 
 function getAdminList(ss) {
@@ -380,6 +410,7 @@ function doGet(e) {
       chatMessages: chatMessages,
       nicknameMap: nicknameMap,
       reactions: reactions,
+      deletedUsers: getDeletedUsers(ss),
       pacerLogs: isAdmin ? getPacerLogs(ss, nicknameMap) : [],
       adminList: isAdmin ? admins : []
     });
@@ -926,6 +957,10 @@ function deleteUser(targetEmail, ss) {
       }
     }
   }
+
+  // 4. 寫入 Deleted_Users 試算表中，供前端動態偵測並執行強制登出
+  const delSheet = getDeletedUsersSheet(ss);
+  delSheet.appendRow([cleanEmail, new Date()]);
 
   return null;
 }

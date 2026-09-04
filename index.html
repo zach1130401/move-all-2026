@@ -1411,9 +1411,9 @@
       if (!data) return;
 
       // 檢查當前登入者帳號是否已被管理員刪除/註銷 (若是則執行強制登出)
-      if (currentEmail && data.nicknameMap && typeof data.nicknameMap === 'object' && Object.keys(data.nicknameMap).length > 0) {
+      if (currentEmail && data.deletedUsers && Array.isArray(data.deletedUsers)) {
         const userCleanE = currentEmail.toLowerCase().trim();
-        if (!data.nicknameMap[userCleanE]) {
+        if (data.deletedUsers.includes(userCleanE)) {
           console.warn("帳號已被管理員刪除，執行強制登出");
           alert("⚠️ 您的帳號已被管理員從系統中刪除/註銷！即刻為您執行強制登出。");
           logoutUser();
