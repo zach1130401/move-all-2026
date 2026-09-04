@@ -1714,8 +1714,12 @@
         return;
       }
 
-      // 依最新時間倒序排列
-      const sortedList = [...list].reverse();
+      // 依 timestamp 或 id 明確由新到舊排序
+      const sortedList = [...list].sort((a, b) => {
+        const tA = a.timestamp ? new Date(a.timestamp).getTime() : (a.id ? parseInt(String(a.id).replace(/\D/g,'')) || 0 : 0);
+        const tB = b.timestamp ? new Date(b.timestamp).getTime() : (b.id ? parseInt(String(b.id).replace(/\D/g,'')) || 0 : 0);
+        return tB - tA;
+      });
 
       container.innerHTML = sortedList.map((item, idx) => {
         const info = cleanUserInfo(item);
