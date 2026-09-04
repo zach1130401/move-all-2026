@@ -2106,8 +2106,9 @@
             <td class="p-3 font-semibold text-rose-700 font-mono">${team.captainEmail || (team.members ? team.members[0] : '未設定')}</td>
             <td class="p-3 text-stone font-medium">${team.membersStr || '無'}</td>
             <td class="p-3 text-center font-bold text-sunrise text-sm">${team.teamPoints || 0} 點</td>
-            <td class="p-3 text-right">
-              <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改隊名/成員</button>
+            <td class="p-3 text-right flex justify-end gap-1.5">
+              <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改成員</button>
+              <button onclick="adminDeleteTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold shadow-xs">🗑️ 刪除</button>
             </td>
           </tr>
         `).join('');
@@ -2118,6 +2119,39 @@
 
     function adminEditTeam(targetTeamName) {
       openAdminTeamEditModal(targetTeamName);
+    }
+
+    function adminDeleteTeam(teamName) {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+      if (!confirm(`確定要刪除團隊「${teamName}」嗎？此操作將從 Google Sheet 徹底移除該隊伍紀錄。`)) return;
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'deleteTeam',
+          operatorEmail: currentEmail,
+          teamName: teamName
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && res.success) {
+          alert(res.message || "團隊已成功刪除！");
+          const savedAll = localStorage.getItem('north_all_teams');
+          if (savedAll) {
+            try {
+              const parsed = JSON.parse(savedAll).filter(t => t && t.teamName !== teamName);
+              localStorage.setItem('north_all_teams', JSON.stringify(parsed));
+            } catch(e){}
+          }
+          fetchData();
+        } else {
+          alert("刪除失敗: " + (res.message || "未知錯誤"));
+        }
+      })
+      .catch(err => {
+        alert("網路異常，刪除失敗");
+      });
     }
 
     function adminPromptNewTeam() {
