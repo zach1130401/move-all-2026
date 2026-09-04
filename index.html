@@ -1432,13 +1432,13 @@
           if (item && item.counts) {
             localStorage.setItem('north_reactions_' + msgId, JSON.stringify(item.counts));
           }
-          if (item && item.userReacted && Array.isArray(item.userReacted)) {
-            ['like', 'cheer', 'agree', 'kneel', 'boba'].forEach(t => {
-              if (item.userReacted.includes(t)) {
-                localStorage.setItem('north_user_reacted_' + msgId + '_' + t, 'true');
-              }
-            });
-          }
+          ['like', 'cheer', 'agree', 'kneel', 'boba'].forEach(t => {
+            if (item && item.userReacted && Array.isArray(item.userReacted) && item.userReacted.includes(t)) {
+              localStorage.setItem('north_user_reacted_' + msgId + '_' + t, 'true');
+            } else {
+              localStorage.removeItem('north_user_reacted_' + msgId + '_' + t);
+            }
+          });
         });
       }
       
@@ -1640,6 +1640,14 @@
             localStorage.setItem(reactionKey, JSON.stringify(updated.counts));
             if (countEl) countEl.innerText = updated.counts[type] || 0;
           }
+          ['like', 'cheer', 'agree', 'kneel', 'boba'].forEach(t => {
+            const key = 'north_user_reacted_' + msgId + '_' + t;
+            if (updated.userReacted && Array.isArray(updated.userReacted) && updated.userReacted.includes(t)) {
+              localStorage.setItem(key, 'true');
+            } else {
+              localStorage.removeItem(key);
+            }
+          });
         }
       })
       .catch(err => console.error("Reaction sync error:", err));

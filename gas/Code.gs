@@ -721,6 +721,7 @@ function getChatMessages(ss) {
     const row = data[i];
     if (row && row[1]) {
       list.push({
+        id: "chat_row_" + (i + 1),
         time: row[0] ? Utilities.formatDate(new Date(row[0]), "Asia/Taipei", "MM/dd HH:mm") : "",
         email: String(row[1]).trim(),
         name: String(row[2] || "諾思夥伴").trim(),
