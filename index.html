@@ -1130,7 +1130,7 @@
       if (elFormName) elFormName.value = cleanName;
 
       const elAvatar = document.getElementById('userAvatarText');
-      if (elAvatar) elAvatar.innerText = (cleanName || "諾")[0].toUpperCase();
+      if (elAvatar) elAvatar.innerText = getFirstChar(cleanName);
     }
 
     // Google 登入初始化 (附帶單次保護鎖)
@@ -1459,7 +1459,7 @@
       if (elFormName) elFormName.value = currentNickname;
 
       const elAvatar = document.getElementById('userAvatarText');
-      if (elAvatar) elAvatar.innerText = (currentNickname || "諾")[0].toUpperCase();
+      if (elAvatar) elAvatar.innerText = getFirstChar(currentNickname);
 
       let userTeamName = "未組隊";
 
@@ -1676,7 +1676,7 @@
 
       container.innerHTML = sortedList.map((item, idx) => {
         const info = cleanUserInfo(item);
-        const initial = (info.name || "諾")[0].toUpperCase();
+        const initial = getFirstChar(info.name);
         const rawId = item.id || item.timestamp || (info.email + '_' + idx);
         const cleanId = String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
         const msgId = cleanId.startsWith('chat_') ? cleanId : 'chat_' + cleanId;
@@ -1787,7 +1787,7 @@
           currentNickname = res.nickname;
           document.getElementById('userNicknameDisplay').innerText = currentNickname;
           document.getElementById('formName').value = currentNickname;
-          document.getElementById('userAvatarText').innerText = (currentNickname || "諾")[0];
+          document.getElementById('userAvatarText').innerText = getFirstChar(currentNickname);
 
           const savedUser = JSON.parse(localStorage.getItem('north_user') || '{}');
           savedUser.name = currentNickname;
@@ -2112,6 +2112,14 @@
       if (!str || typeof str !== 'string') return '';
       const match = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
       return match ? match[1].toLowerCase().trim() : str.toLowerCase().trim();
+    }
+
+    function getFirstChar(str) {
+      if (!str || typeof str !== 'string') return "諾";
+      const trimmed = str.trim();
+      if (!trimmed) return "諾";
+      const arr = Array.from(trimmed);
+      return (arr[0] || "諾").toUpperCase();
     }
 
     function getFormattedUserLabel(email) {
