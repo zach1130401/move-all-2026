@@ -1209,6 +1209,32 @@
       fetchData();
     }
 
+    const FUN_NICKNAME_SUFFIXES = [
+      "⚡ 飛天小獵豹",
+      "🏃 追風步數王",
+      "🔋 健走發電機",
+      "🚴 飆風神行者",
+      "🏆 熱血馬拉松",
+      "🍳 運動小當家",
+      "🌟 活力滿電星",
+      "🎨 企鵝神畫手",
+      "💥 爆發力達人",
+      "🥳 歡樂勁跑家",
+      "🦸 閃電健走俠",
+      "🔥 卡路里殺手"
+    ];
+
+    function getRandomFunNickname(email) {
+      let hash = 0;
+      const str = String(email || Math.random()).toLowerCase();
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const idx = Math.abs(hash) % FUN_NICKNAME_SUFFIXES.length;
+      return `諾思夥伴 · ${FUN_NICKNAME_SUFFIXES[idx]}`;
+    }
+
     // 接收 Google 官方登入成功憑證 (綁定全域 window 確保 100% 觸發)
     function handleCredentialResponse(response) {
       console.log("Google Credential Response:", response);
@@ -1231,7 +1257,7 @@
         }
 
         currentEmail = String(payload.email).toLowerCase().trim();
-        const userName = payload.name || currentEmail.split('@')[0] || "諾思夥伴";
+        const userName = (payload.name && payload.name.trim() && payload.name !== "諾思夥伴") ? payload.name.trim() : getRandomFunNickname(currentEmail);
 
         localStorage.setItem('north_user', JSON.stringify({
           email: currentEmail,
@@ -1652,8 +1678,9 @@
 
       email = email.trim();
       name = name.trim();
-      if (!name && email) name = email.split("@")[0];
-      if (!name) name = "諾思夥伴";
+      if (!name || name === "諾思夥伴") {
+        name = getRandomFunNickname(email);
+      }
 
       return { email, name };
     }
