@@ -67,7 +67,8 @@
         <a href="#calc" class="hover:text-oceanDark transition">點數試算</a>
         <a href="#gpsart" class="hover:text-oceanDark transition">GPS ART</a>
         <a href="#leaderboard" class="hover:text-oceanDark transition font-semibold text-appleDark">即時排行</a>
-        <a href="#interactionSection" class="hover:text-oceanDark transition">交流與回報</a>
+        <a href="#feedSection" class="hover:text-oceanDark transition">運動回報牆</a>
+        <a href="#chatSection" class="hover:text-oceanDark transition">同仁聊天室</a>
         <button id="adminNavLink" onclick="openAdminModal()" class="hidden text-rose-600 font-bold hover:text-rose-700 transition">
           管理員控制台
         </button>
@@ -503,21 +504,31 @@
       </div>
     </section>
 
-    <!-- 互動雙分頁：【運動回報牆】與【同仁交流聊天室】 -->
-    <section id="interactionSection" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6 pb-20">
-      
-      <div class="flex items-center justify-between border-b border-stone/20 pb-2">
-        <div class="flex gap-4">
-          <button id="tabBtnFeed" onclick="switchTab('feed')" class="pb-2 text-base font-bold border-b-2 border-ocean text-appleDark transition">
-            運動回報紀錄牆
+    <!-- 獨立主題切換導覽條 (打卡牆 vs 聊天室) -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-8 pt-6 pb-2">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-stone/5 p-2 rounded-2xl border border-stone/15">
+        <div class="flex items-center gap-2">
+          <button id="tabBtnFeed" onclick="switchSectionTab('feed')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-white text-appleDark shadow-xs border border-stone/20">
+            <span>📸</span> 運動打卡牆
           </button>
-          <button id="tabBtnChat" onclick="switchTab('chat')" class="pb-2 text-base font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
-            同仁交流聊天室
+          <button id="tabBtnChat" onclick="switchSectionTab('chat')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 text-stone hover:text-appleDark hover:bg-white/60">
+            <span>💬</span> 同仁交流聊天室
+            <span id="chatCountBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] bg-ocean/15 text-oceanDark font-bold">0</span>
           </button>
         </div>
+        <span class="text-xs text-stone font-medium px-2 hidden sm:inline">💡 可點擊頁籤快速切換，或直接向下滾動瀏覽各主題單元</span>
+      </div>
+    </div>
+
+    <!-- 區塊 1：運動打卡與回報動態牆 -->
+    <section id="feedSection" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6 pb-12">
+      <div class="flex items-center justify-between border-b border-stone/20 pb-2">
+        <h2 class="text-xl font-bold text-appleDark flex items-center gap-2">
+          <span class="text-2xl">📸</span> 運動打卡與回報動態牆
+        </h2>
+        <span class="text-xs text-stone font-medium">即時打卡與審核動態</span>
       </div>
 
-      <!-- 分頁 1：運動回報牆 + 表單 -->
       <div id="tabContentFeed" class="grid md:grid-cols-12 gap-8">
         
         <div class="md:col-span-5 bg-white/95 backdrop-blur-md p-6 rounded-[28px] border border-stone/20 shadow-xs space-y-4 h-fit">
@@ -556,7 +567,7 @@
               <input id="formFile" type="file" accept="image/*" required onchange="previewFormImage(event)" class="w-full text-xs text-stone file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-oceanLight file:text-oceanDark hover:file:bg-ocean/20 cursor-pointer">
               
               <!-- 圖片即時預覽與一鍵清除區 -->
-              <div id="formImagePreviewBox" class="hidden mt-2 relative.inline-block group w-fit">
+              <div id="formImagePreviewBox" class="hidden mt-2 relative inline-block group w-fit">
                 <img id="formImagePreview" src="" class="max-h-36 rounded-xl border border-stone/20 object-cover shadow-2xs">
                 <button type="button" onclick="clearFormImage()" class="absolute -top-2 -right-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md transition" title="清除已選圖片">✕</button>
               </div>
@@ -586,26 +597,42 @@
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- 分頁 2：同仁交流聊天室 -->
-      <div id="tabContentChat" class="hidden bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[28px] border border-stone/20 shadow-xs space-y-6">
-        <div>
-          <h3 class="text-lg font-bold text-appleDark">同仁健康交流討論區</h3>
-          <p class="text-xs text-stone mt-0.5">可以在此自由留言、相約慢跑健走、揪團運動或討論 GPS ART 創作。</p>
+    <!-- 區塊 2：同仁健康交流討論區 (獨立主題單元區塊) -->
+    <section id="chatSection" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-6 pb-20">
+      <div class="flex items-center justify-between border-b border-stone/20 pb-2">
+        <h2 class="text-xl font-bold text-appleDark flex items-center gap-2">
+          <span class="text-2xl">💬</span> 同仁健康交流討論區
+        </h2>
+        <span class="text-xs text-stone font-medium">獨立主題單元 · 自由留言與揪團運動</span>
+      </div>
+
+      <div id="tabContentChat" class="bg-gradient-to-br from-white via-white to-oceanLight/20 backdrop-blur-md p-6 sm:p-8 rounded-[28px] border border-stone/20 shadow-xs space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-stone/10 pb-4">
+          <div>
+            <h3 class="text-lg font-bold text-appleDark flex items-center gap-2">
+              社群互動與經驗分享區
+              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-oceanLight text-oceanDark border border-ocean/20">開放交流</span>
+            </h3>
+            <p class="text-xs text-stone mt-0.5">可在這裡自由交流運動心得、揪團慢跑健走、或討論 GPS ART 繪製路線。</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-stone bg-white px-3 py-1.5 rounded-xl border border-stone/15 shadow-2xs">
+            <span>💬 最新社群留言</span>
+          </div>
         </div>
 
-        <div id="chatMessageList" class="space-y-3.5 max-h-[460px] overflow-y-auto p-4 rounded-2xl bg-cloud border border-stone/15">
+        <div id="chatMessageList" class="space-y-3.5 max-h-[460px] overflow-y-auto p-4 rounded-2xl bg-cloud/80 border border-stone/15">
           <div class="text-center py-10 text-stone text-sm">目前還沒有留言，快來發出第一則交流訊息！</div>
         </div>
 
         <form onsubmit="handleSendChat(event)" class="flex gap-2">
-          <input id="chatInputText" type="text" required placeholder="分享運動心得、找夥伴跑步..." class="w-full border border-stone/20 rounded-full px-5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean">
+          <input id="chatInputText" type="text" required placeholder="分享運動心得、找夥伴跑步..." class="w-full border border-stone/20 rounded-full px-5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean bg-white shadow-2xs">
           <button type="submit" class="px-6 py-2.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-sm font-bold whitespace-nowrap transition shadow-xs">
             發布留言
           </button>
         </form>
       </div>
-
     </section>
 
     <!-- (管理員後台控制台改為獨立彈窗控制台，一般用戶完全看不到) -->
@@ -624,7 +651,10 @@
             <p class="text-xs text-stone">資料維護、步數審核與團隊隊名調整專區</p>
           </div>
         </div>
-        <button onclick="closeAdminModal()" class="text-stone hover:text-appleDark font-bold text-xl px-2 py-1">✕ 關閉控制台</button>
+        <div class="flex items-center gap-2">
+          <button onclick="adminClearSystemCache()" title="當手動刪除 Drive 圖片或直接修改試算表時，可點擊此按鈕即時刷新全系統快取" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1">⚡ 強制清空快取</button>
+          <button onclick="closeAdminModal()" class="text-stone hover:text-appleDark font-bold text-xl px-2 py-1">✕ 關閉控制台</button>
+        </div>
       </div>
 
       <!-- 管理分頁按鈕 -->
@@ -874,6 +904,68 @@
     </div>
   </div>
 
+  <!-- 管理員單筆建立/修改團隊 Modal -->
+  <div id="adminTeamEditModal" class="hidden fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-stone/20">
+      <div class="flex justify-between items-center border-b border-stone/15 pb-3">
+        <h3 id="adminTeamModalTitle" class="text-lg font-bold text-appleDark">管理員單筆新增 / 調整團隊</h3>
+        <button onclick="closeAdminTeamEditModal()" class="text-stone hover:text-appleDark font-bold text-xl">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <!-- 既有團隊選單 (可選) -->
+        <div>
+          <label class="block text-stone font-semibold mb-1">
+            快速選擇既存團隊 (選填)
+          </label>
+          <select id="adminTeamSelectDropdown" onchange="onAdminTeamDropdownSelect(this.value)" class="w-full border border-stone/20 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-rose-500 text-xs font-semibold text-appleDark bg-cloud/50">
+            <option value="">-- 請選擇既有團隊 (或於下方自訂新隊名) --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-stone font-semibold mb-1">團隊隊名 <span class="text-rose-500 font-bold">* (必填)</span></label>
+          <input id="adminTeamNameInput" type="text" placeholder="例如：飛越極限隊 (或由上方選單挑選既存團隊)" class="w-full border border-stone/20 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-rose-500 text-sm font-bold text-appleDark">
+        </div>
+
+        <div>
+          <label class="block text-stone font-semibold mb-1">隊長 (主要發起同仁) <span class="text-rose-500 font-bold">* (下拉圈選)</span></label>
+          <select id="adminTeamCaptainSelect" class="w-full border border-stone/20 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-rose-500 text-xs font-semibold text-appleDark bg-cloud/50">
+            <option value="">-- 請選擇隊長 Email --</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone font-semibold mb-1">隊員 2 (可選填)</label>
+            <select id="adminTeamMember2Select" class="w-full border border-stone/20 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-rose-500 text-xs font-semibold text-appleDark bg-cloud/50">
+              <option value="">-- 無 / 請選擇隊員 2 (選填) --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-stone font-semibold mb-1">隊員 3 (可選填)</label>
+            <select id="adminTeamMember3Select" class="w-full border border-stone/20 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-rose-500 text-xs font-semibold text-appleDark bg-cloud/50">
+              <option value="">-- 無 / 請選擇隊員 3 (選填) --</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-stone bg-rose-50/70 p-2.5 rounded-xl border border-rose-200/80">
+          💡 提示：您可從下拉選單直接選擇既有團隊進行成員調整，或輸入新隊名並圈選成員。隊員 2 與隊員 3 為可選填項目。
+        </p>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="saveAdminTeamForm()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-full text-xs transition shadow-xs">
+          💾 儲存團隊設定
+        </button>
+        <button onclick="closeAdminTeamEditModal()" class="px-5 py-3 bg-stone/10 hover:bg-stone/20 text-stone font-bold rounded-full text-xs transition">
+          取消
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbywDSzb2oTVhU5CXzd8SbxBkwxG_CWEwcqxr4YhbOTcJQdNQpEYJszwK04YKIEZltCp/exec";
     // 你的真實 Google Client ID
@@ -1091,87 +1183,123 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function applyRenderData(data) {
+      if (!data) return;
+      isCurrentAdmin = !!data.isAdmin;
+      const rawNick = data.userNickname || currentNickname || "諾思夥伴";
+      const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
+      currentNickname = nickInfo.name || currentEmail.split('@')[0] || "諾思夥伴";
+      window.latestTeamsData = data.teams || [];
+      window.latestLeaderboardData = data.leaderboard || [];
+      window.latestRecordsData = data.records || [];
+      window.latestNicknameMap = data.nicknameMap || {};
+      
+      const elNameDisp = document.getElementById('userNicknameDisplay');
+      if (elNameDisp) elNameDisp.innerText = currentNickname;
+
+      const elFormName = document.getElementById('formName');
+      if (elFormName) elFormName.value = currentNickname;
+
+      const elAvatar = document.getElementById('userAvatarText');
+      if (elAvatar) elAvatar.innerText = (currentNickname || "諾")[0].toUpperCase();
+
+      let userTeamName = "未組隊";
+
+      if (data.teams && Array.isArray(data.teams)) {
+        const userE = currentEmail.toLowerCase().trim();
+        const userN = currentNickname.toLowerCase().trim();
+        const foundTeam = data.teams.find(t => {
+          if (!t) return false;
+          const capt = (t.captainEmail || "").toLowerCase().trim();
+          const mems = (t.members || []).map(m => String(m || "").toLowerCase().trim());
+          if (capt && capt === userE) return true;
+          return mems.some(m => m && (m.includes(userE) || userE.includes(m) || (userN && m.includes(userN))));
+        });
+        if (foundTeam && foundTeam.teamName) {
+          userTeamName = foundTeam.teamName;
+        }
+      }
+
+      if (userTeamName === "未組隊") {
+        const localTeam = localStorage.getItem('north_team_' + currentEmail);
+        if (localTeam) {
+          try {
+            const parsed = JSON.parse(localTeam);
+            if (parsed && parsed.teamName) userTeamName = parsed.teamName;
+          } catch(e){}
+        }
+      }
+
+      const badgeEl = document.getElementById('userTeamBadgeDisplay');
+      if (badgeEl) badgeEl.innerText = userTeamName;
+
+      const adminNavLink = document.getElementById('adminNavLink');
+      const adminCapsuleBtn = document.getElementById('adminCapsuleBtn');
+      if (data.isAdmin) {
+        if (adminNavLink) adminNavLink.classList.remove('hidden');
+        if (adminCapsuleBtn) adminCapsuleBtn.classList.remove('hidden');
+        const adminListDisp = document.getElementById('currentAdminListDisplay');
+        if (adminListDisp && data.adminList) adminListDisp.innerText = data.adminList.join(', ');
+        renderAuditTable(data.records);
+        renderAdminTeamTable(data.teams, data.leaderboard);
+        renderPacerLogs(data.pacerLogs);
+      } else {
+        if (adminNavLink) adminNavLink.classList.add('hidden');
+        if (adminCapsuleBtn) adminCapsuleBtn.classList.add('hidden');
+      }
+      renderLeaderboard(data.leaderboard);
+      renderTeamLeaderboard(data.leaderboard, data.teams);
+      renderFeed(data.records);
+      renderChatMessages(data.chatMessages);
+    }
+
     function fetchData() {
+      // 1. 秒載本機快取 (0ms 零感知渲染)
+      const cached = localStorage.getItem('north_cache_data_' + currentEmail);
+      if (cached) {
+        try {
+          applyRenderData(JSON.parse(cached));
+        } catch(e){}
+      }
+
+      // 2. 背景請求最新資料 (由 Apps Script 5分鐘記憶體快取加速)
       const url = `${API_URL}?action=getData&email=${encodeURIComponent(currentEmail)}&_t=${Date.now()}`;
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          isCurrentAdmin = data.isAdmin;
-          const rawNick = data.userNickname || currentNickname || "諾思夥伴";
-          const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
-          currentNickname = nickInfo.name || currentEmail.split('@')[0] || "諾思夥伴";
-          window.latestTeamsData = data.teams || [];
-          window.latestLeaderboardData = data.leaderboard || [];
-          window.latestRecordsData = data.records || [];
-          
-          const elNameDisp = document.getElementById('userNicknameDisplay');
-          if (elNameDisp) elNameDisp.innerText = currentNickname;
-
-          const elFormName = document.getElementById('formName');
-          if (elFormName) elFormName.value = currentNickname;
-
-          const elAvatar = document.getElementById('userAvatarText');
-          if (elAvatar) elAvatar.innerText = (currentNickname || "諾")[0].toUpperCase();
-
-          let userTeamName = "未組隊";
-
-          if (data.teams && Array.isArray(data.teams)) {
-            const foundTeam = data.teams.find(t => {
-              if (!t || !t.members) return false;
-              return t.members.some(m => 
-                (m && typeof m === 'string') && 
-                (m.toLowerCase().includes(currentEmail.toLowerCase()) || 
-                 currentEmail.toLowerCase().includes(m.toLowerCase()) ||
-                 (currentNickname && m.toLowerCase().includes(currentNickname.toLowerCase())))
-              );
-            });
-            if (foundTeam && foundTeam.teamName) {
-              userTeamName = foundTeam.teamName;
-            }
+          if (data && !data.error) {
+            localStorage.setItem('north_cache_data_' + currentEmail, JSON.stringify(data));
+            applyRenderData(data);
           }
-
-          if (userTeamName === "未組隊") {
-            const localTeam = localStorage.getItem('north_team_' + currentEmail);
-            if (localTeam) {
-              try {
-                const parsed = JSON.parse(localTeam);
-                if (parsed && parsed.teamName) userTeamName = parsed.teamName;
-              } catch(e){}
-            }
-          }
-
-          const badgeEl = document.getElementById('userTeamBadgeDisplay');
-          if (badgeEl) badgeEl.innerText = userTeamName;
-
-          if (data.isAdmin) {
-            document.getElementById('adminNavLink').classList.remove('hidden');
-            document.getElementById('currentAdminListDisplay').innerText = data.adminList.join(', ');
-            renderAuditTable(data.records);
-            renderAdminTeamTable(data.teams, data.leaderboard);
-            renderPacerLogs(data.pacerLogs);
-          } else {
-            document.getElementById('adminNavLink').classList.add('hidden');
-          }
-          renderLeaderboard(data.leaderboard);
-          renderTeamLeaderboard(data.leaderboard, data.teams);
-          renderFeed(data.records);
-          renderChatMessages(data.chatMessages);
         })
-        .catch(err => console.error("API 載入失敗:", err));
+        .catch(err => {
+          console.error("API 載入失敗:", err);
+          const tbody = document.getElementById('teamLeaderboardBody');
+          if (tbody && (!window.latestTeamsData || window.latestTeamsData.length === 0)) {
+            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-rose-600 font-bold">團隊排行載入失敗，請檢查網路連線或稍後再試</td></tr>';
+          }
+        });
+    }
+
+    function switchSectionTab(section) {
+      const btnFeed = document.getElementById('tabBtnFeed');
+      const btnChat = document.getElementById('tabBtnChat');
+      const feedSec = document.getElementById('feedSection');
+      const chatSec = document.getElementById('chatSection');
+
+      if (section === 'feed') {
+        if (btnFeed) btnFeed.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-white text-appleDark shadow-xs border border-stone/20";
+        if (btnChat) btnChat.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 text-stone hover:text-appleDark hover:bg-white/60";
+        if (feedSec) feedSec.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        if (btnChat) btnChat.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-white text-appleDark shadow-xs border border-stone/20";
+        if (btnFeed) btnFeed.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 text-stone hover:text-appleDark hover:bg-white/60";
+        if (chatSec) chatSec.scrollIntoView({ behavior: 'smooth' });
+      }
     }
 
     function switchTab(tab) {
-      if (tab === 'feed') {
-        document.getElementById('tabContentFeed').classList.remove('hidden');
-        document.getElementById('tabContentChat').classList.add('hidden');
-        document.getElementById('tabBtnFeed').className = "pb-2 text-base font-bold border-b-2 border-ocean text-appleDark transition";
-        document.getElementById('tabBtnChat').className = "pb-2 text-base font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
-      } else {
-        document.getElementById('tabContentFeed').classList.add('hidden');
-        document.getElementById('tabContentChat').classList.remove('hidden');
-        document.getElementById('tabBtnFeed').className = "pb-2 text-base font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
-        document.getElementById('tabBtnChat').className = "pb-2 text-base font-bold border-b-2 border-ocean text-appleDark transition";
-      }
+      switchSectionTab(tab);
     }
 
     function handleSendChat(e) {
@@ -1180,6 +1308,12 @@
       const input = document.getElementById('chatInputText');
       const msg = input.value.trim();
       if (!msg) return;
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "發布中...";
+      }
 
       input.value = "";
       fetch(API_URL, {
@@ -1195,6 +1329,12 @@
       .then(res => {
         if (res.success) {
           renderChatMessages(res.chatMessages);
+        }
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "發布留言";
         }
       });
     }
@@ -1228,6 +1368,16 @@
     }
 
     function renderChatMessages(list) {
+      const badge = document.getElementById('chatCountBadge');
+      if (badge) {
+        if (list && list.length > 0) {
+          badge.innerText = list.length;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
       const container = document.getElementById('chatMessageList');
       if (!container) return;
       if (!list || list.length === 0) {
@@ -1321,6 +1471,12 @@
     }
     function saveNewNickname() {
       const newName = document.getElementById('modalNicknameInput').value.trim() || "諾思夥伴";
+      const btn = document.querySelector('#nicknameModal button[onclick="saveNewNickname()"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "儲存中...";
+      }
+
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -1343,6 +1499,12 @@
 
           closeNicknameModal();
           fetchData();
+        }
+      })
+      .finally(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "儲存暱稱";
         }
       });
     }
@@ -1543,12 +1705,17 @@
       let isCaptain = true;
       let captainEmail = currentEmail;
       let existingTeam = null;
+      const userE = currentEmail.toLowerCase().trim();
+      const userN = (currentNickname || "").toLowerCase().trim();
 
       if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
-        existingTeam = window.latestTeamsData.find(t => t.members && t.members.some(m => 
-          (m && typeof m === 'string') && 
-          (m.toLowerCase().includes(currentEmail.toLowerCase()) || currentEmail.toLowerCase().includes(m.toLowerCase()))
-        ));
+        existingTeam = window.latestTeamsData.find(t => {
+          if (!t) return false;
+          const capt = (t.captainEmail || "").toLowerCase().trim();
+          const mems = (t.members || []).map(m => String(m || "").toLowerCase().trim());
+          if (capt && capt === userE) return true;
+          return mems.some(m => m && (m.includes(userE) || userE.includes(m) || (userN && m.includes(userN))));
+        });
       }
 
       if (!existingTeam) {
@@ -1576,13 +1743,24 @@
         });
       }
 
-      // 動態彙整所有已登入/已回報之同仁名單供隊長選擇
+      // 動態彙整所有已登入/已註冊/已回報之同仁名單供隊長選擇
       const userMap = new Map();
+      if (window.latestNicknameMap && typeof window.latestNicknameMap === 'object') {
+        Object.keys(window.latestNicknameMap).forEach(email => {
+          const cleanE = (email || '').toLowerCase().trim();
+          if (cleanE && cleanE !== currentEmail.toLowerCase().trim()) {
+            const nick = window.latestNicknameMap[email];
+            userMap.set(cleanE, `${nick} (${email})`);
+          }
+        });
+      }
       if (window.latestLeaderboardData && Array.isArray(window.latestLeaderboardData)) {
         window.latestLeaderboardData.forEach(u => {
           const info = cleanUserInfo(u);
           if (info.email && info.email.toLowerCase() !== currentEmail.toLowerCase()) {
-            userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+            if (!userMap.has(info.email.toLowerCase())) {
+              userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+            }
           }
         });
       }
@@ -1600,8 +1778,6 @@
       // 備用示範選單名單
       if (!userMap.has('jerri0912@gmail.com') && currentEmail !== 'jerri0912@gmail.com') userMap.set('jerri0912@gmail.com', 'Jerri (jerri0912@gmail.com)');
       if (!userMap.has('fongyum080501@gmail.com') && currentEmail !== 'fongyum080501@gmail.com') userMap.set('fongyum080501@gmail.com', 'Fong (fongyum080501@gmail.com)');
-      if (!userMap.has('test1@example.com')) userMap.set('test1@example.com', 'Alice (test1@example.com)');
-      if (!userMap.has('test2@example.com')) userMap.set('test2@example.com', 'Bob (test2@example.com)');
 
       const m2Selected = existingTeam && existingTeam.members ? existingTeam.members[1] || '' : '';
       const m3Selected = existingTeam && existingTeam.members ? existingTeam.members[2] || '' : '';
@@ -1732,6 +1908,29 @@
       document.getElementById('adminDashboardModal').classList.add('hidden');
     }
 
+    function adminClearSystemCache() {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+      if (!confirm("確定要強制清空全系統記憶體快取與本機暫存嗎？\n清空後下一次連線將直接讀取 Google Sheets 最新原始資料。")) return;
+
+      localStorage.removeItem('north_cache_data_' + currentEmail);
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'clearCache',
+          operatorEmail: currentEmail
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        alert(res.message || "全系統快取已成功強制清空！");
+        fetchData();
+      })
+      .catch(() => {
+        alert("快取清空完成！");
+        fetchData();
+      });
+    }
+
     function switchAdminTab(tab) {
       document.getElementById('adminTabContentAudit').classList.add('hidden');
       document.getElementById('adminTabContentTeams').classList.add('hidden');
@@ -1828,126 +2027,244 @@
       const tbody = document.getElementById('adminTeamTableBody');
       if (!tbody) return;
 
-      let teams = [];
+      try {
+        let teams = serverTeams ? [...serverTeams] : [];
 
-      // 1. 伺服器團隊
-      if (serverTeams && Array.isArray(serverTeams)) {
-        teams = [...serverTeams];
-      }
+        // 批次匯入與本地團隊名單
+        const savedAll = localStorage.getItem('north_all_teams');
+        if (savedAll) {
+          try {
+            const parsed = JSON.parse(savedAll);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(t => {
+                if (t && t.teamName && !teams.find(x => x.teamName === t.teamName)) {
+                  teams.push(t);
+                }
+              });
+            }
+          } catch(e){}
+        }
 
-      // 2. 批次匯入與本地團隊名單
-      const savedAll = localStorage.getItem('north_all_teams');
-      if (savedAll) {
-        try {
-          const parsed = JSON.parse(savedAll);
-          if (Array.isArray(parsed)) {
-            parsed.forEach(t => {
-              if (t && t.teamName && !teams.find(x => x.teamName === t.teamName)) {
-                teams.push(t);
+        // 個人本機團隊
+        const localTeam = localStorage.getItem('north_team_' + currentEmail);
+        if (localTeam) {
+          try {
+            const parsed = JSON.parse(localTeam);
+            if (parsed && parsed.teamName && !teams.find(x => x.teamName === parsed.teamName)) {
+              teams.push(parsed);
+            }
+          } catch(e){}
+        }
+
+        if (teams.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，請於上方點擊按鈕新增或匯入團隊</td></tr>';
+          return;
+        }
+
+        const processedTeams = teams.map(t => {
+          let teamSteps = 0;
+          let teamPoints = t.teamPoints || 0;
+          const membersList = (t.members || []).filter(Boolean);
+          if (t.captainEmail && !membersList.map(m => String(m).toLowerCase()).includes(t.captainEmail.toLowerCase())) {
+            membersList.unshift(t.captainEmail);
+          }
+
+          if (individualList && individualList.length > 0) {
+            individualList.forEach(user => {
+              const info = cleanUserInfo(user);
+              const uEmail = (info.email || "").toLowerCase().trim();
+              const uName = (info.name || "").toLowerCase().trim();
+
+              const isMember = membersList.some(m => {
+                const memStr = String(m || "").toLowerCase().trim();
+                if (!memStr) return false;
+                return (uEmail && (memStr.includes(uEmail) || uEmail.includes(memStr))) ||
+                       (uName && memStr.includes(uName));
+              });
+
+              if (isMember) {
+                const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
+                const sports = user.sportCount || user.sports || 0;
+                teamSteps += (user.totalSteps || user.steps || 0);
+                teamPoints += (user.points || user.totalPoints || (days + sports));
               }
             });
           }
-        } catch(e){}
+
+          return {
+            ...t,
+            membersStr: membersList.join(', '),
+            teamSteps: teamSteps,
+            teamPoints: teamPoints
+          };
+        });
+
+        tbody.innerHTML = processedTeams.map((team, idx) => `
+          <tr class="hover:bg-rose-50/30 transition text-xs">
+            <td class="p-3 text-center font-bold">${idx + 1}</td>
+            <td class="p-3 font-bold text-appleDark">${team.teamName}</td>
+            <td class="p-3 font-semibold text-rose-700 font-mono">${team.captainEmail || (team.members ? team.members[0] : '未設定')}</td>
+            <td class="p-3 text-stone font-medium">${team.membersStr || '無'}</td>
+            <td class="p-3 text-center font-bold text-sunrise text-sm">${team.teamPoints || 0} 點</td>
+            <td class="p-3 text-right">
+              <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改隊名/成員</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("renderAdminTeamTable error:", err);
       }
-
-      // 3. 個人本機團隊
-      const localTeam = localStorage.getItem('north_team_' + currentEmail);
-      if (localTeam) {
-        try {
-          const parsed = JSON.parse(localTeam);
-          if (parsed && parsed.teamName && !teams.find(x => x.teamName === parsed.teamName)) {
-            teams.push(parsed);
-          }
-        } catch(e){}
-      }
-
-      if (teams.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無團隊資料，請於上方點擊按鈕新增或匯入團隊</td></tr>';
-        return;
-      }
-
-      const processedTeams = teams.map(t => {
-        let teamSteps = 0;
-        let teamPoints = t.teamPoints || 0;
-
-        if (individualList && individualList.length > 0) {
-          individualList.forEach(user => {
-            const info = cleanUserInfo(user);
-            const isMember = t.members && t.members.some(m => 
-              (m && typeof m === 'string') && 
-              (m.toLowerCase().includes(info.email.toLowerCase()) || 
-               info.name.toLowerCase().includes(m.toLowerCase()) || 
-               m.toLowerCase().includes(info.name.toLowerCase()))
-            );
-            if (isMember) {
-              const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
-              const sports = user.sportCount || user.sports || 0;
-              teamSteps += (user.totalSteps || user.steps || 0);
-              teamPoints += (user.points || user.totalPoints || (days + sports));
-            }
-          });
-        }
-
-        return {
-          ...t,
-          teamSteps: teamSteps,
-          teamPoints: teamPoints
-        };
-      });
-
-      tbody.innerHTML = processedTeams.map((team, idx) => `
-        <tr class="hover:bg-rose-50/30 transition text-xs">
-          <td class="p-3 text-center font-bold">${idx + 1}</td>
-          <td class="p-3 font-bold text-appleDark">${team.teamName}</td>
-          <td class="p-3 font-semibold text-rose-700 font-mono">${team.captainEmail || (team.members ? team.members[0] : '未設定')}</td>
-          <td class="p-3 text-stone font-medium">${team.members ? team.members.join(', ') : '無'}</td>
-          <td class="p-3 text-center font-bold text-sunrise text-sm">${team.teamPoints || 0} 點</td>
-          <td class="p-3 text-right">
-            <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改隊名/成員</button>
-          </td>
-        </tr>
-      `).join('');
     }
 
     function adminEditTeam(targetTeamName) {
-      const newName = prompt(`管理員修改團隊「${targetTeamName}」的隊名：`, targetTeamName);
-      if (!newName) return;
-
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'adminEditTeam',
-          operatorEmail: currentEmail,
-          oldTeamName: targetTeamName,
-          newTeamName: newName
-        })
-      })
-      .then(() => {
-        alert(`團隊隊名已成功修改為「${newName}」！`);
-        fetchData();
-      });
+      openAdminTeamEditModal(targetTeamName);
     }
 
     function adminPromptNewTeam() {
-      const teamName = prompt("管理員建立新團隊 - 請輸入團隊隊名：");
-      if (!teamName) return;
-      const m1 = prompt("請輸入隊長 Email (主要發起人)：");
-      if (!m1) return;
-      const m2 = prompt("請輸入隊員 2 Email 或暱稱：");
-      const m3 = prompt("請輸入隊員 3 Email 或暱稱：");
+      openAdminTeamEditModal("");
+    }
+
+    function onAdminTeamDropdownSelect(teamName) {
+      openAdminTeamEditModal(teamName);
+    }
+
+    function openAdminTeamEditModal(targetTeamName) {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+
+      const modal = document.getElementById('adminTeamEditModal');
+      const titleEl = document.getElementById('adminTeamModalTitle');
+      const nameInput = document.getElementById('adminTeamNameInput');
+      const teamDropdown = document.getElementById('adminTeamSelectDropdown');
+      const captSelect = document.getElementById('adminTeamCaptainSelect');
+      const m2Select = document.getElementById('adminTeamMember2Select');
+      const m3Select = document.getElementById('adminTeamMember3Select');
+
+      // 載入既存團隊選單供選填/快速調整
+      if (teamDropdown) {
+        let opts = '<option value="">-- 請選擇既有團隊 (或於下方自訂新隊名) --</option>';
+        if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
+          window.latestTeamsData.forEach(t => {
+            if (t && t.teamName) {
+              const isSel = (targetTeamName && t.teamName === targetTeamName) ? 'selected' : '';
+              opts += `<option value="${t.teamName}" ${isSel}>${t.teamName} (隊長: ${t.captainEmail || '未設'})</option>`;
+            }
+          });
+        }
+        teamDropdown.innerHTML = opts;
+      }
+
+      if (targetTeamName) {
+        titleEl.innerText = `管理員編輯團隊「${targetTeamName}」`;
+        nameInput.value = targetTeamName;
+      } else {
+        titleEl.innerText = "管理員單筆新增 / 調整團隊";
+        nameInput.value = "";
+      }
+
+      // 找出既存團隊
+      let existingTeam = null;
+      if (targetTeamName && window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
+        existingTeam = window.latestTeamsData.find(t => t && t.teamName === targetTeamName);
+      }
+
+      // 彙整所有可選同仁清單
+      const userMap = new Map();
+      if (window.latestNicknameMap && typeof window.latestNicknameMap === 'object') {
+        Object.keys(window.latestNicknameMap).forEach(email => {
+          const cleanE = (email || '').toLowerCase().trim();
+          if (cleanE) {
+            const nick = window.latestNicknameMap[email];
+            userMap.set(cleanE, `${nick} (${email})`);
+          }
+        });
+      }
+      if (window.latestLeaderboardData && Array.isArray(window.latestLeaderboardData)) {
+        window.latestLeaderboardData.forEach(u => {
+          const info = cleanUserInfo(u);
+          if (info.email && !userMap.has(info.email.toLowerCase())) {
+            userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+          }
+        });
+      }
+      if (window.latestRecordsData && Array.isArray(window.latestRecordsData)) {
+        window.latestRecordsData.forEach(r => {
+          const info = cleanUserInfo(r);
+          if (info.email && !userMap.has(info.email.toLowerCase())) {
+            userMap.set(info.email.toLowerCase(), `${info.name} (${info.email})`);
+          }
+        });
+      }
+
+      // 備用示範選單名單
+      if (!userMap.has('jerri0912@gmail.com')) userMap.set('jerri0912@gmail.com', 'Jerri (jerri0912@gmail.com)');
+      if (!userMap.has('fongyum080501@gmail.com')) userMap.set('fongyum080501@gmail.com', 'Fong (fongyum080501@gmail.com)');
+      if (!userMap.has('zach.yang@north.com.tw')) userMap.set('zach.yang@north.com.tw', 'Zach (zach.yang@north.com.tw)');
+
+      // 取出既存團隊成員
+      const existingMembers = existingTeam ? (existingTeam.members || []) : [];
+      const captVal = existingTeam ? (existingTeam.captainEmail || existingMembers[0] || "") : "";
+      const m2Val = existingMembers[1] || "";
+      const m3Val = existingMembers[2] || "";
+
+      const buildSelectOptions = (selectedVal, placeholder) => {
+        let opts = `<option value="">${placeholder}</option>`;
+        userMap.forEach((label, valEmail) => {
+          const isSelected = (selectedVal && selectedVal.toLowerCase().trim() === valEmail) ? 'selected' : '';
+          opts += `<option value="${valEmail}" ${isSelected}>${label}</option>`;
+        });
+        if (selectedVal && !userMap.has(selectedVal.toLowerCase().trim())) {
+          opts += `<option value="${selectedVal}" selected>${selectedVal}</option>`;
+        }
+        return opts;
+      };
+
+      captSelect.innerHTML = buildSelectOptions(captVal, "-- 請選擇隊長 Email (必填) --");
+      m2Select.innerHTML = buildSelectOptions(m2Val, "-- 無 / 請選擇隊員 2 (選填) --");
+      m3Select.innerHTML = buildSelectOptions(m3Val, "-- 無 / 請選擇隊員 3 (選填) --");
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAdminTeamEditModal() {
+      document.getElementById('adminTeamEditModal').classList.add('hidden');
+    }
+
+    function saveAdminTeamForm() {
+      const teamName = document.getElementById('adminTeamNameInput').value.trim();
+      const captEmail = document.getElementById('adminTeamCaptainSelect').value.trim();
+      const m2 = document.getElementById('adminTeamMember2Select').value.trim();
+      const m3 = document.getElementById('adminTeamMember3Select').value.trim();
+
+      if (!teamName) return alert("請輸入團隊隊名！");
+      if (!captEmail) return alert("請選擇隊長 Email！");
+
+      const members = [captEmail];
+      if (m2) members.push(m2);
+      if (m3) members.push(m3);
 
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
           action: 'setTeam',
           operatorEmail: currentEmail,
-          captainEmail: m1,
+          captainEmail: captEmail,
           teamName: teamName,
-          members: [m1, m2 || "", m3 || ""]
+          members: members
         })
       })
-      .then(() => {
-        alert(`管理員成功建立/更新團隊「${teamName}」！`);
+      .then(res => res.json().catch(() => ({ success: true })))
+      .then(res => {
+        if (res && res.success === false) {
+          alert("儲存失敗: " + (res.message || "同仁可能已歸屬其他團隊"));
+        } else {
+          alert(`管理員已成功儲存團隊「${teamName}」！`);
+          closeAdminTeamEditModal();
+          fetchData();
+        }
+      })
+      .catch(err => {
+        alert("團隊設定已送出！");
+        closeAdminTeamEditModal();
         fetchData();
       });
     }
@@ -1956,80 +2273,93 @@
       const tbody = document.getElementById('teamLeaderboardBody');
       if (!tbody) return;
 
-      const localTeam = localStorage.getItem('north_team_' + currentEmail);
-      let teams = serverTeams || [];
+      try {
+        const localTeam = localStorage.getItem('north_team_' + currentEmail);
+        let teams = serverTeams ? [...serverTeams] : [];
 
-      if (localTeam) {
-        try {
-          const parsed = JSON.parse(localTeam);
-          if (parsed && parsed.teamName) {
-            if (!teams.find(t => t.teamName === parsed.teamName)) {
-              teams.push(parsed);
+        if (localTeam) {
+          try {
+            const parsed = JSON.parse(localTeam);
+            if (parsed && parsed.teamName) {
+              if (!teams.find(t => t.teamName === parsed.teamName)) {
+                teams.push(parsed);
+              }
             }
+          } catch(e){}
+        }
+
+        if (!teams || teams.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">目前尚無團隊資料，請由隊長點擊右上角「組隊」完成 3 人團隊建立</td></tr>';
+          return;
+        }
+
+        const processedTeams = teams.map(t => {
+          let teamSteps = 0;
+          let teamPoints = 0;
+          const membersList = (t.members || []).filter(Boolean);
+          if (t.captainEmail && !membersList.map(m => String(m).toLowerCase()).includes(t.captainEmail.toLowerCase())) {
+            membersList.unshift(t.captainEmail);
           }
-        } catch(e){}
+
+          if (individualList && individualList.length > 0) {
+            individualList.forEach(user => {
+              const info = cleanUserInfo(user);
+              const uEmail = (info.email || "").toLowerCase().trim();
+              const uName = (info.name || "").toLowerCase().trim();
+
+              const isMember = membersList.some(m => {
+                const memStr = String(m || "").toLowerCase().trim();
+                if (!memStr) return false;
+                return (uEmail && (memStr.includes(uEmail) || uEmail.includes(memStr))) ||
+                       (uName && memStr.includes(uName));
+              });
+
+              if (isMember) {
+                const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
+                const sports = user.sportCount || user.sports || 0;
+                teamSteps += (user.totalSteps || user.steps || 0);
+                teamPoints += (user.points || user.totalPoints || (days + sports));
+              }
+            });
+          }
+
+          if (t.extraPoints) teamPoints += t.extraPoints;
+
+          let statusBadge = "尚未達標";
+          let rewardText = "參加獎 (公益禮盒)";
+          if (teamPoints >= 15) {
+            statusBadge = "🏆 解鎖最高門檻 (≥15點)";
+            rewardText = "NT$ 6,000";
+          } else if (teamPoints >= 10) {
+            statusBadge = "🎯 解鎖第一門檻 (≥10點)";
+            rewardText = "NT$ 4,800";
+          }
+
+          return {
+            teamName: t.teamName,
+            membersStr: membersList.join(', '),
+            teamSteps: teamSteps,
+            teamPoints: teamPoints,
+            statusBadge: statusBadge,
+            rewardText: rewardText
+          };
+        }).sort((a, b) => b.teamPoints - a.teamPoints);
+
+        tbody.innerHTML = processedTeams.map((team, idx) => `
+          <tr class="hover:bg-oceanLight/30 transition text-xs sm:text-sm">
+            <td class="p-3.5 text-center font-bold">${idx + 1}</td>
+            <td class="p-3.5 font-bold text-appleDark">${team.teamName}</td>
+            <td class="p-3.5 font-medium text-stone">${team.membersStr}</td>
+            <td class="p-3.5 text-right font-mono font-bold text-appleDark">${team.teamSteps.toLocaleString()} 步</td>
+            <td class="p-3.5 text-center font-mono font-black text-sunrise text-base">${team.teamPoints} 點</td>
+            <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${team.teamPoints >= 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-stone/10 text-stone'}">${team.statusBadge}</span></td>
+            <td class="p-3.5 text-right font-black text-oceanDark">${team.rewardText}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("renderTeamLeaderboard error:", err);
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-600 font-bold">團隊排行載入發生錯誤：${err.message}</td></tr>`;
       }
-
-      if (!teams || teams.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-stone">目前尚無團隊資料，請由隊長點擊右上角「組隊」完成 3 人團隊建立</td></tr>';
-        return;
-      }
-
-      const processedTeams = teams.map(t => {
-        let teamSteps = 0;
-        let teamPoints = 0;
-
-        if (individualList && individualList.length > 0) {
-          individualList.forEach(user => {
-            const info = cleanUserInfo(user);
-            const isMember = t.members.some(m => 
-              (m && typeof m === 'string') && 
-              (m.toLowerCase().includes(info.email.toLowerCase()) || 
-               info.name.toLowerCase().includes(m.toLowerCase()) || 
-               m.toLowerCase().includes(info.name.toLowerCase()))
-            );
-            if (isMember) {
-              const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
-              const sports = user.sportCount || user.sports || 0;
-              teamSteps += (user.totalSteps || user.steps || 0);
-              teamPoints += (user.points || user.totalPoints || (days + sports));
-            }
-          });
-        }
-
-        if (t.extraPoints) teamPoints += t.extraPoints;
-
-        let statusBadge = "尚未達標";
-        let rewardText = "參加獎 (公益禮盒)";
-        if (teamPoints >= 15) {
-          statusBadge = "🏆 解鎖最高門檻 (≥15點)";
-          rewardText = "NT$ 6,000";
-        } else if (teamPoints >= 10) {
-          statusBadge = "🎯 解鎖第一門檻 (≥10點)";
-          rewardText = "NT$ 4,800";
-        }
-
-        return {
-          teamName: t.teamName,
-          membersStr: t.members.join(', '),
-          teamSteps: teamSteps,
-          teamPoints: teamPoints,
-          statusBadge: statusBadge,
-          rewardText: rewardText
-        };
-      }).sort((a, b) => b.teamPoints - a.teamPoints);
-
-      tbody.innerHTML = processedTeams.map((team, idx) => `
-        <tr class="hover:bg-oceanLight/30 transition text-xs sm:text-sm">
-          <td class="p-3.5 text-center font-bold">${idx + 1}</td>
-          <td class="p-3.5 font-bold text-appleDark">${team.teamName}</td>
-          <td class="p-3.5 font-medium text-stone">${team.membersStr}</td>
-          <td class="p-3.5 text-right font-mono font-bold text-appleDark">${team.teamSteps.toLocaleString()} 步</td>
-          <td class="p-3.5 text-center font-mono font-black text-sunrise text-base">${team.teamPoints} 點</td>
-          <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${team.teamPoints >= 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-stone/10 text-stone'}">${team.statusBadge}</span></td>
-          <td class="p-3.5 text-right font-black text-oceanDark">${team.rewardText}</td>
-        </tr>
-      `).join('');
     }
 
     function renderFeed(records) {
@@ -2158,11 +2488,11 @@
         })
       })
       .then(() => {
-        setTimeout(fetchData, 1000);
+        fetchData();
       })
       .catch(err => {
         console.error("審核寫入失敗:", err);
-        setTimeout(fetchData, 1000);
+        fetchData();
       });
     }
 
@@ -2189,19 +2519,50 @@
       });
     }
 
+    function compressImage(file, maxWidth, maxHeight, quality, callback) {
+      if (!file) return callback("");
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth || height > maxHeight) {
+            if (width / height > maxWidth / maxHeight) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = function() { callback(""); };
+        img.src = e.target.result;
+      };
+      reader.onerror = function() { callback(""); };
+      reader.readAsDataURL(file);
+    }
+
     function handleCheckIn(e) {
       e.preventDefault();
       if (!currentEmail) return alert("請先完成 Google 登入！");
 
       const btn = document.getElementById('formSubmitBtn');
       btn.disabled = true;
-      btn.innerText = "資料上傳中...";
+      btn.innerHTML = `<span class="inline-block animate-pulse">⏳ 處理圖片與上傳中...</span>`;
 
       const file = document.getElementById('formFile').files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = evt => sendCheckIn(evt.target.result);
-        reader.readAsDataURL(file);
+        compressImage(file, 1200, 1200, 0.75, function(compressedBase64) {
+          sendCheckIn(compressedBase64);
+        });
       } else {
         sendCheckIn("");
       }
@@ -2239,14 +2600,14 @@
         }
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
-        setTimeout(fetchData, 1000);
+        fetchData();
       })
       .catch(err => {
         alert("回報成功！已寫入試算表待審核。");
         resetCheckInForm();
         document.getElementById('formSubmitBtn').disabled = false;
         document.getElementById('formSubmitBtn').innerText = "送出回報";
-        setTimeout(fetchData, 1000);
+        fetchData();
       });
     }
 
