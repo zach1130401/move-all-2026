@@ -1920,7 +1920,9 @@
       if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
       if (!confirm("確定要強制清空全系統記憶體快取與本機暫存嗎？\n清空後下一次連線將直接讀取 Google Sheets 最新原始資料。")) return;
 
-      localStorage.removeItem('north_cache_data_' + currentEmail);
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('north_')) localStorage.removeItem(k);
+      });
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -2314,15 +2316,13 @@
 
       try {
         const localTeam = localStorage.getItem('north_team_' + currentEmail);
-        let teams = serverTeams ? [...serverTeams] : [];
+        let teams = (serverTeams && serverTeams.length > 0) ? [...serverTeams] : [];
 
-        if (localTeam) {
+        if (teams.length === 0 && localTeam) {
           try {
             const parsed = JSON.parse(localTeam);
             if (parsed && parsed.teamName) {
-              if (!teams.find(t => t.teamName === parsed.teamName)) {
-                teams.push(parsed);
-              }
+              teams.push(parsed);
             }
           } catch(e){}
         }

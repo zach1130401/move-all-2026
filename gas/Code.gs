@@ -389,15 +389,29 @@ function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
     rawMembers.unshift(captain);
   }
 
-  // 1. 檢查同仁是否已加入其他團隊 (嚴格執行：一人只能參加一個團隊)
-  for (let i = 1; i < data.length; i++) {
+  // 1. 若隊長先前已建立過其他名稱的舊團隊，自動刪除舊團隊資料列，防止產生幽靈雙團隊
+  for (let i = data.length - 1; i >= 1; i--) {
     const rowTName = String(data[i][0]).trim();
     if (rowTName.toLowerCase() !== tName.toLowerCase()) {
+      const rowCapt = String(data[i][1]).trim().toLowerCase();
+      if (rowCapt === captain) {
+        sheet.deleteRow(i + 1);
+      }
+    }
+  }
+
+  // 重新獲取最新試算表資料
+  const freshData = sheet.getDataRange().getValues();
+
+  // 2. 檢查同仁是否已加入其他團隊 (嚴格執行：一人只能參加一個團隊)
+  for (let i = 1; i < freshData.length; i++) {
+    const rowTName = String(freshData[i][0]).trim();
+    if (rowTName.toLowerCase() !== tName.toLowerCase()) {
       const rowMembers = [
-        String(data[i][1]).trim().toLowerCase(),
-        String(data[i][2]).trim().toLowerCase(),
-        String(data[i][3]).trim().toLowerCase(),
-        String(data[i][4]).trim().toLowerCase()
+        String(freshData[i][1]).trim().toLowerCase(),
+        String(freshData[i][2]).trim().toLowerCase(),
+        String(freshData[i][3]).trim().toLowerCase(),
+        String(freshData[i][4]).trim().toLowerCase()
       ].filter(Boolean);
 
       for (let m of rawMembers) {
