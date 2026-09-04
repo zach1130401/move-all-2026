@@ -53,7 +53,7 @@ function getChatSheet(ss) {
   let sheet = ss.getSheetByName("Chat_Messages");
   if (!sheet) {
     sheet = ss.insertSheet("Chat_Messages");
-    sheet.appendRow(["時間", "Email", "暱稱", "訊息內容"]);
+    sheet.appendRow(["時間", "Email", "暱稱", "訊息內容", "圖片URL"]);
   }
   return sheet;
 }
@@ -525,14 +525,42 @@ function doPost(e) {
     const admins = getAdminList(ss);
     const isOperatorAdmin = admins.includes(operatorEmail);
 
-    // 1. 發布聊天訊息
+    // 1. 發布聊天訊息 (發送文字與討論區照片)
     if (action === "sendChat" || action === "chat") {
       const chatSheet = getChatSheet(ss);
+      let fileUrl = "";
+
+      if (payload.base64Image) {
+        try {
+          const folderIterator = DriveApp.getFoldersByName("MOVE_ALL_2026_討論區截圖");
+          let folder = folderIterator.hasNext() ? folderIterator.next() : DriveApp.createFolder("MOVE_ALL_2026_討論區截圖");
+          folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+          let base64Data = payload.base64Image;
+          if (base64Data.includes(",")) base64Data = base64Data.split(",")[1];
+          const decodedData = Utilities.base64Decode(base64Data);
+
+          const cleanName = String(payload.name || "諾思夥伴").replace(/[^\w\u4e00-\u9fa5]/g, "");
+          const emailPrefix = String(payload.email || "user").split("@")[0];
+          const dateStr = Utilities.formatDate(new Date(), "Asia/Taipei", "yyyyMMdd_HHmmss");
+
+          const fileName = `Chat_${dateStr}_${cleanName}_${emailPrefix}.png`;
+
+          const blob = Utilities.newBlob(decodedData, "image/png", fileName);
+          const file = folder.createFile(blob);
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          fileUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
+        } catch (err) {
+          fileUrl = payload.imageUrl || ("上傳失敗: " + err.message);
+        }
+      }
+
       chatSheet.appendRow([
         new Date(),
         payload.email,
         payload.name || "諾思夥伴",
-        payload.message
+        payload.message || "",
+        fileUrl
       ]);
       clearCache();
       return createJsonResponse({ success: true, chatMessages: getChatMessages(ss) });
@@ -891,7 +919,8 @@ function getChatMessages(ss) {
         time: row[0] ? Utilities.formatDate(new Date(row[0]), "Asia/Taipei", "MM/dd HH:mm") : "",
         email: String(row[1]).trim(),
         name: String(row[2] || "諾思夥伴").trim(),
-        message: String(row[3] || "").trim()
+        message: String(row[3] || "").trim(),
+        imageUrl: String(row[4] || "").trim()
       });
     }
   }

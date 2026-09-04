@@ -674,11 +674,23 @@
           <div class="text-center py-10 text-stone text-sm">目前還沒有留言，快來發出第一則交流訊息！</div>
         </div>
 
-        <form onsubmit="handleSendChat(event)" class="flex gap-2">
-          <input id="chatInputText" type="text" required placeholder="分享運動心得、找夥伴跑步..." class="w-full border border-stone/20 rounded-full px-5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean bg-white shadow-2xs">
-          <button type="submit" class="px-6 py-2.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-sm font-bold whitespace-nowrap transition shadow-xs">
-            發布留言
-          </button>
+        <form onsubmit="handleSendChat(event)" class="space-y-2">
+          <!-- 圖片即時預覽與清除區 -->
+          <div id="chatImagePreviewBox" class="hidden relative inline-block group w-fit">
+            <img id="chatImagePreview" src="" class="max-h-28 rounded-xl border border-stone/20 object-cover shadow-2xs">
+            <button type="button" onclick="clearChatImage()" class="absolute -top-2 -right-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md transition" title="清除圖片">✕</button>
+          </div>
+
+          <div class="flex gap-2 items-center">
+            <label for="chatFileInput" class="cursor-pointer p-2.5 rounded-full bg-cloud hover:bg-oceanLight/60 text-oceanDark transition border border-stone/20 shrink-0 flex items-center justify-center" title="上傳照片/圖片">
+              <span class="text-base">📷</span>
+              <input id="chatFileInput" type="file" accept="image/*" onchange="previewChatImage(event)" class="hidden">
+            </label>
+            <input id="chatInputText" type="text" placeholder="分享運動心得、附上照片或找夥伴跑步..." class="w-full border border-stone/20 rounded-full px-5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ocean bg-white shadow-2xs">
+            <button type="submit" id="chatSubmitBtn" class="px-6 py-2.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-sm font-bold whitespace-nowrap transition shadow-xs">
+              發布留言
+            </button>
+          </div>
         </form>
       </div>
     </section>
@@ -1573,34 +1585,71 @@
       switchSectionTab(tab);
     }
 
+    let currentChatBase64 = "";
+
+    function previewChatImage(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      compressImage(file, 1024, 1024, 0.7, function(base64) {
+        if (!base64) {
+          alert("圖片讀取或壓縮失敗，請重試");
+          return;
+        }
+        currentChatBase64 = base64;
+        const previewImg = document.getElementById('chatImagePreview');
+        const previewBox = document.getElementById('chatImagePreviewBox');
+        if (previewImg) previewImg.src = base64;
+        if (previewBox) previewBox.classList.remove('hidden');
+      });
+    }
+
+    function clearChatImage() {
+      currentChatBase64 = "";
+      const fileInput = document.getElementById('chatFileInput');
+      if (fileInput) fileInput.value = "";
+      const previewImg = document.getElementById('chatImagePreview');
+      const previewBox = document.getElementById('chatImagePreviewBox');
+      if (previewImg) previewImg.src = "";
+      if (previewBox) previewBox.classList.add('hidden');
+    }
+
     function handleSendChat(e) {
       e.preventDefault();
       if (!currentEmail) return alert("請先登入帳號！");
       const input = document.getElementById('chatInputText');
       const msg = input.value.trim();
-      if (!msg) return;
+      if (!msg && !currentChatBase64) return alert("請輸入留言內容或選擇圖片！");
 
-      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const submitBtn = e.target.querySelector('button[type="submit"]') || document.getElementById('chatSubmitBtn');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "發布中...";
       }
 
-      input.value = "";
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
           action: 'sendChat',
           email: currentEmail,
           name: currentNickname,
-          message: msg
+          message: msg,
+          base64Image: currentChatBase64 || ""
         })
       })
       .then(res => res.json())
       .then(res => {
         if (res.success) {
+          input.value = "";
+          clearChatImage();
           renderChatMessages(res.chatMessages);
+        } else {
+          alert("發布失敗：" + (res.error || "未知錯誤"));
         }
+      })
+      .catch(err => {
+        console.error("發布留言失敗:", err);
+        alert("發布留言失敗，請稍後再試");
       })
       .finally(() => {
         if (submitBtn) {
@@ -1722,6 +1771,11 @@
             <div class="pl-10 text-xs sm:text-sm text-slate-800 leading-relaxed font-normal whitespace-pre-line">
               ${item.message || ''}
             </div>
+            ${item.imageUrl ? `
+              <div class="pl-10 pt-1">
+                <img src="${formatImageUrl(item.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none';" onclick="openLightbox('${formatImageUrl(item.imageUrl)}')" class="max-h-60 rounded-xl border border-stone/20 object-cover cursor-zoom-in hover:opacity-95 transition shadow-2xs" alt="交流照片" title="點擊放大預覽">
+              </div>
+            ` : ''}
 
             <div class="pl-10 pt-1 flex items-center flex-wrap gap-2 text-[11px] text-stone border-t border-stone/10">
               <button onclick="toggleReaction('${msgId}', 'like', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasLike ? 'bg-rose-50 text-rose-600 border-rose-200' : 'hover:border-rose-300 hover:text-rose-600'}">
