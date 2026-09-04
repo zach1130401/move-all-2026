@@ -818,17 +818,21 @@ function getEventData(ss, nicknameMap) {
       userStatsMap[cleanEmail] = { email: email, name: currentName, validDays: 0, totalSteps: 0, sportCount: 0 };
     }
     if (status === "通過") {
-      userStatsMap[cleanEmail].validDays += 1;
+      const msg = String(row[6] || "").trim();
+      if (msg.includes("規律運動") || reportedSteps === 0) {
+        userStatsMap[cleanEmail].sportCount += 1;
+      } else {
+        userStatsMap[cleanEmail].validDays += 1;
+      }
       userStatsMap[cleanEmail].totalSteps += approvedSteps;
-      userStatsMap[cleanEmail].sportCount += 1;
     }
   }
 
   const leaderboard = Object.values(userStatsMap).map(user => {
     const cleanE = user.email.toLowerCase().trim();
-    const pacerPts = pacerMap[cleanE];
+    const pacerPts = Number(pacerMap[cleanE]) || 0;
     const calculatedPts = user.validDays + user.sportCount;
-    const finalPoints = (pacerPts !== undefined) ? pacerPts : calculatedPts;
+    const finalPoints = calculatedPts + pacerPts;
 
     let tier = "尚未達標", reward = 0;
     if (finalPoints >= 20) { tier = "Gold"; reward = 6000; }

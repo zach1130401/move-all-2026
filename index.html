@@ -581,19 +581,19 @@
             </div>
             <div>
               <label class="block text-stone text-xs font-semibold uppercase mb-1">回報類型 <span class="text-rose-500 font-bold">*</span></label>
-              <select id="formCategory" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm font-semibold text-appleDark bg-cloud/50">
+              <select id="formCategory" onchange="toggleStepsInputVisibility()" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm font-semibold text-appleDark bg-cloud/50">
                 <option value="【每日步數】8,000 步達標">🏃【每日步數】Pacer / 手環 8,000 步達標</option>
                 <option value="【規律運動】30 分鐘以上自主運動">🚴【規律運動】30分鐘以上運動 (慢跑/健走/瑜伽/GPS ART等)</option>
               </select>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-stone text-xs font-semibold uppercase mb-1">運動 / 步數日期 <span class="text-rose-500 font-bold">*</span></label>
                 <input id="formDate" type="date" required class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
               </div>
-              <div>
-                <label class="block text-stone text-xs font-semibold uppercase mb-1">當日精確步數 (可填 0)</label>
-                <input id="formSteps" type="number" step="1" min="0" value="8000" placeholder="步數如 8421 (純運動可填0)" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
+              <div id="stepsInputBox">
+                <label class="block text-stone text-xs font-semibold uppercase mb-1">當日精確步數</label>
+                <input id="formSteps" type="number" step="1" min="0" value="8000" placeholder="步數如 8421" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm">
               </div>
             </div>
             <div>
@@ -772,7 +772,7 @@
                     <th class="p-3">日期</th>
                     <th class="p-3">同仁 Email</th>
                     <th class="p-3">自報步數 / 內容</th>
-                    <th class="p-3 text-center">Pacer 累計點數</th>
+                    <th class="p-3 text-center">可獲點數</th>
                     <th class="p-3">截圖證明 (點擊放大)</th>
                     <th class="p-3">狀態</th>
                     <th class="p-3">操作</th>
@@ -3244,20 +3244,18 @@
       }
 
       tbody.innerHTML = validRecords.map(item => {
-        let pacerBadge = '<span class="text-stone font-normal text-xs">-</span>';
-        if (item.cleanEmail) {
-          const savedPts = localStorage.getItem('north_pacer_points_' + item.cleanEmail.toLowerCase());
-          if (savedPts !== null) {
-            pacerBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-oceanLight text-oceanDark border border-ocean/30">${savedPts} 點</span>`;
-          }
-        }
+        const isSport = (item.message && item.message.includes("規律運動")) || item.steps === 0;
+        const stepsDisplay = isSport
+          ? '<span class="px-2.5 py-1 rounded-lg bg-oceanLight text-oceanDark font-bold text-xs inline-block">🚴 規律運動 (免填步數)</span>'
+          : `<span class="font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()} 步</span>`;
+        const auditPtsBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">+1 點</span>`;
 
         return `
         <tr class="hover:bg-oceanLight/20 transition">
           <td class="p-3 text-xs">${item.date}</td>
           <td class="p-3 text-xs font-semibold">${item.cleanName} <span class="text-stone font-normal">(${item.cleanEmail})</span></td>
-          <td class="p-3 font-mono font-bold text-appleDark">${(item.steps || 0).toLocaleString()} 步</td>
-          <td class="p-3 text-center font-mono font-bold">${pacerBadge}</td>
+          <td class="p-3">${stepsDisplay}</td>
+          <td class="p-3 text-center">${auditPtsBadge}</td>
           <td class="p-3">
             ${item.imageUrl ? `
               <div class="flex items-center gap-2">
@@ -3273,7 +3271,7 @@
             }">${item.status || '待審核'}</span>
           </td>
           <td class="p-3 space-x-1">
-            <button onclick="auditRecord(this, ${item.rowId}, '通過', ${item.steps})" class="px-2.5 py-1 bg-ocean hover:bg-oceanDark text-white rounded-md text-xs font-semibold transition shadow-xs">通過</button>
+            <button onclick="auditRecord(this, ${item.rowId}, '通過', ${isSport ? 0 : (item.steps || 8000)})" class="px-2.5 py-1 bg-ocean hover:bg-oceanDark text-white rounded-md text-xs font-semibold transition shadow-xs">通過</button>
             <button onclick="auditRecord(this, ${item.rowId}, '駁回', 0)" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold transition shadow-xs">駁回</button>
           </td>
         </tr>
@@ -3490,10 +3488,25 @@
       if (clearBtn) clearBtn.classList.add('hidden');
     }
 
+    function toggleStepsInputVisibility() {
+      const cat = document.getElementById('formCategory')?.value || "";
+      const stepsBox = document.getElementById('stepsInputBox');
+      const stepsInput = document.getElementById('formSteps');
+      if (cat.includes("規律運動")) {
+        if (stepsBox) stepsBox.classList.add('hidden');
+        if (stepsInput) stepsInput.value = "0";
+      } else {
+        if (stepsBox) stepsBox.classList.remove('hidden');
+        if (stepsInput && (!stepsInput.value || stepsInput.value === "0")) stepsInput.value = "8000";
+      }
+    }
+
     function resetCheckInForm() {
       clearFormImage();
       document.getElementById('formMessage').value = "";
-      document.getElementById('formSteps').value = "8000";
+      const catEl = document.getElementById('formCategory');
+      if (catEl) catEl.value = "【每日步數】8,000 步達標";
+      toggleStepsInputVisibility();
     }
   </script>
 </body>
