@@ -1383,6 +1383,18 @@
 
     function applyRenderData(data) {
       if (!data) return;
+
+      // 檢查當前登入者帳號是否已被管理員刪除/註銷 (若是則執行強制登出)
+      if (currentEmail && data.nicknameMap && typeof data.nicknameMap === 'object' && Object.keys(data.nicknameMap).length > 0) {
+        const userCleanE = currentEmail.toLowerCase().trim();
+        if (!data.nicknameMap[userCleanE]) {
+          console.warn("帳號已被管理員刪除，執行強制登出");
+          alert("⚠️ 您的帳號已被管理員從系統中刪除/註銷！即刻為您執行強制登出。");
+          logoutUser();
+          return;
+        }
+      }
+
       isCurrentAdmin = !!data.isAdmin;
       const rawNick = data.userNickname || currentNickname || "諾思夥伴";
       const nickInfo = cleanUserInfo({ email: currentEmail, name: rawNick });
@@ -2510,12 +2522,17 @@
       if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
       if (!email) return;
 
-      if (!confirm(`⚠️ 確定要從系統與參賽名單中刪除同仁「${email}」嗎？\n\n注意：刪除後該同仁將自動從所在團隊移除，且其試算表註冊紀錄將被清除。`)) return;
+      const cleanTarget = email.toLowerCase().trim();
+      const cleanCurrent = (currentEmail || "").toLowerCase().trim();
+      if (cleanTarget === cleanCurrent) {
+        return alert("⚠️ 存取受限：管理員不可以刪除您自己正在使用的帳號！如需離職/交接請由其他管理員操作。");
+      }
 
-      const cleanE = email.toLowerCase().trim();
-      if (window.latestNicknameMap) delete window.latestNicknameMap[cleanE];
+      if (!confirm(`⚠️ 確定要從系統與參賽名單中刪除同仁「${email}」嗎？\n\n注意：刪除後該同仁將自動從所在團隊移除，且系統將強制註銷該帳號。`)) return;
+
+      if (window.latestNicknameMap) delete window.latestNicknameMap[cleanTarget];
       if (window.latestRosterDataList) {
-        window.latestRosterDataList = window.latestRosterDataList.filter(u => u.email !== cleanE);
+        window.latestRosterDataList = window.latestRosterDataList.filter(u => u.email !== cleanTarget);
       }
       filterAdminRosterTable();
 
@@ -2531,13 +2548,14 @@
       .then(res => {
         if (res && res.success === false) {
           showToast("刪除失敗: " + (res.message || "未知錯誤"), "error");
+          fetchData();
         } else {
-          showToast(`已成功刪除同仁 (${email})`, "success");
+          showToast(`✅ 已成功刪除同仁 (${email})！`, "success");
           fetchData();
         }
       })
       .catch(() => {
-        showToast(`已成功刪除同仁 (${email})`, "success");
+        showToast(`✅ 已成功刪除同仁 (${email})`, "success");
         fetchData();
       });
     }

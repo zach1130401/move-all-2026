@@ -459,6 +459,9 @@ function doPost(e) {
     if (action === "deleteUser") {
       if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
       const targetEmail = (payload.targetEmail || "").trim().toLowerCase();
+      if (targetEmail && operatorEmail && targetEmail === operatorEmail.trim().toLowerCase()) {
+        return createJsonResponse({ success: false, message: "⚠️ 存取拒絕：管理員不可刪除您自身正在使用中的帳號！" });
+      }
       const err = deleteUser(targetEmail, ss);
       if (err) return createJsonResponse({ success: false, message: err });
       clearCache();
