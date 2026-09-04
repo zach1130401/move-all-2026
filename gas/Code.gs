@@ -395,6 +395,19 @@ function doPost(e) {
       return createJsonResponse({ success: true, message: `已成功刪除同仁 (${targetEmail})` });
     }
 
+    // 12. 管理員手動新增同仁 (addUser / adminAddUser)
+    if (action === "addUser" || action === "adminAddUser") {
+      if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
+      const targetE = String(payload.targetEmail || payload.email || "").trim().toLowerCase();
+      const nick = String(payload.nickname || payload.name || "諾思夥伴").trim();
+      if (targetE) {
+        updateUserNickname(targetE, nick, ss);
+        clearCache();
+        return createJsonResponse({ success: true, message: `已成功新增同仁 (${nick})` });
+      }
+      return createJsonResponse({ success: false, message: "無效的 Email" });
+    }
+
     // 8. 管理員更新 Pacer 點數 (updatePacerPoints)
     if (action === "updatePacerPoints") {
       if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });

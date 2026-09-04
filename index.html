@@ -792,8 +792,11 @@
               <span class="font-bold block text-sm text-appleDark">👥 全系統參賽與註冊同仁總覽名單</span>
               <span class="text-stone text-xs">即時彙整 Google Sheet「User_Profiles」所有已登入/已註冊夥伴與團隊歸屬狀態。</span>
             </div>
-            <div class="w-full sm:w-64 shrink-0">
-              <input id="adminRosterSearchInput" type="text" oninput="filterAdminRosterTable()" placeholder="🔍 搜尋同仁 Email 或 暱稱..." class="w-full text-xs border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-rose-500 bg-white shadow-2xs">
+            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+              <input id="adminRosterSearchInput" type="text" oninput="filterAdminRosterTable()" placeholder="🔍 搜尋 Email 或 暱稱..." class="w-full sm:w-56 text-xs border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-rose-500 bg-white shadow-2xs">
+              <button onclick="adminPromptAddUser()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-xs transition shrink-0 whitespace-nowrap">
+                ➕ 手動新增同仁
+              </button>
             </div>
           </div>
 
@@ -2382,11 +2385,61 @@
       `).join('');
     }
 
+    function adminPromptAddUser() {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+      const email = prompt("請輸入手動新增同仁的 Google Email 帳號 (例如: user@company.com)：");
+      if (!email || !email.trim()) return;
+      const cleanE = email.trim().toLowerCase();
+      if (!cleanE.includes('@')) return alert("請輸入有效的 Email 格式！");
+
+      const defaultNick = getRandomFunNickname(cleanE);
+      const nickInput = prompt(`請輸入同仁暱稱 (預設建議如下，亦可自行修改)：`, defaultNick);
+      if (nickInput === null) return;
+      const finalNick = nickInput.trim() || defaultNick;
+
+      // 1. 本地快取立即寫入與 0ms UI 渲染
+      if (!window.latestNicknameMap) window.latestNicknameMap = {};
+      window.latestNicknameMap[cleanE] = finalNick;
+      renderAdminRosterTable();
+
+      // 2. Apps Script 同步儲存至 Sheet User_Profiles
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'addUser',
+          operatorEmail: currentEmail,
+          targetEmail: cleanE,
+          nickname: finalNick
+        })
+      })
+      .then(res => res.json().catch(() => ({ success: true })))
+      .then(res => {
+        if (res && res.success === false) {
+          showToast("新增失敗: " + (res.message || "未知錯誤"), "error");
+        } else {
+          showToast(`✅ 已成功新增同仁「${finalNick} (${cleanE})」！`, "success");
+          fetchData();
+        }
+      })
+      .catch(err => {
+        console.error("Add user error:", err);
+        showToast(`✅ 已於本地新增同仁「${finalNick}」`, "success");
+        fetchData();
+      });
+    }
+
     function adminDeleteUser(email) {
       if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
       if (!email) return;
 
       if (!confirm(`⚠️ 確定要從系統與參賽名單中刪除同仁「${email}」嗎？\n\n注意：刪除後該同仁將自動從所在團隊移除，且其試算表註冊紀錄將被清除。`)) return;
+
+      const cleanE = email.toLowerCase().trim();
+      if (window.latestNicknameMap) delete window.latestNicknameMap[cleanE];
+      if (window.latestRosterDataList) {
+        window.latestRosterDataList = window.latestRosterDataList.filter(u => u.email !== cleanE);
+      }
+      filterAdminRosterTable();
 
       fetch(API_URL, {
         method: 'POST',
@@ -2402,13 +2455,11 @@
           showToast("刪除失敗: " + (res.message || "未知錯誤"), "error");
         } else {
           showToast(`已成功刪除同仁 (${email})`, "success");
-          if (window.latestNicknameMap) delete window.latestNicknameMap[email.toLowerCase().trim()];
           fetchData();
         }
       })
       .catch(() => {
         showToast(`已成功刪除同仁 (${email})`, "success");
-        if (window.latestNicknameMap) delete window.latestNicknameMap[email.toLowerCase().trim()];
         fetchData();
       });
     }
