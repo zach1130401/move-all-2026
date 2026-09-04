@@ -2284,9 +2284,18 @@
       const saveBtn = document.getElementById('teamSaveBtn');
       const nameInput = document.getElementById('teamNameInput');
 
-      if (!isCaptain) {
+      if (!existingTeam && !isCurrentAdmin) {
         if (noticeEl) {
-          noticeEl.innerText = `🔒 您正在檢視團隊資訊。隊名與成員設定僅限隊長 (${captainEmail}) 具備修改權限。`;
+          noticeEl.innerText = `🔒 團隊建立統一由管理員 (Admin) 配對與建置。如需新建團隊請聯繫管理員！`;
+          noticeEl.classList.remove('hidden');
+        }
+        if (saveBtn) saveBtn.classList.add('hidden');
+        nameInput.readOnly = true;
+        if (m2Select) m2Select.disabled = true;
+        if (m3Select) m3Select.disabled = true;
+      } else if (!isCaptain && !isCurrentAdmin) {
+        if (noticeEl) {
+          noticeEl.innerText = `🔒 您正在檢視團隊資訊。隊名與成員設定僅限隊長 (${captainEmail}) 或管理員具備修改權限。`;
           noticeEl.classList.remove('hidden');
         }
         if (saveBtn) saveBtn.classList.add('hidden');

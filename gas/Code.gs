@@ -574,6 +574,12 @@ function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
   // 重新獲取最新試算表資料
   const freshData = sheet.getDataRange().getValues();
 
+  // 1.5 檢查是否為全新團隊建立 (僅限管理員權限才可新建團隊)
+  const isExistingTeam = freshData.some((row, rIdx) => rIdx >= 1 && String(row[0]).trim().toLowerCase() === tName.toLowerCase());
+  if (!isExistingTeam && !isAdmin) {
+    return "權限受限：團隊建立統一僅限管理員 (Admin) 配對與建置！如需新建團隊請聯繫管理員。";
+  }
+
   // 2. 檢查同仁是否已加入其他團隊 (嚴格執行：一人只能參加一個團隊)
   for (let i = 1; i < freshData.length; i++) {
     const rowTName = String(freshData[i][0]).trim();
