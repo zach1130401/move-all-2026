@@ -1947,9 +1947,6 @@
       if (!email) return alert("請輸入同仁 Email");
       if (isNaN(points) || points < 0) return alert("請輸入有效的 Pacer 累計點數");
 
-      const localKey = 'north_pacer_points_' + email.toLowerCase();
-      localStorage.setItem(localKey, points);
-
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -1958,12 +1955,17 @@
           targetEmail: email,
           points: points
         })
+      })
+      .then(res => res.json())
+      .then(res => {
+        alert(`成功將 ${email} 的 Pacer 累計點數更新為 ${points} 點！已同步至 3 人團隊總榜。`);
+        document.getElementById('pacerUserEmailInput').value = "";
+        document.getElementById('pacerUserPointsInput').value = "";
+        fetchData();
+      })
+      .catch(err => {
+        alert("更新失敗：" + err.message);
       });
-
-      alert(`成功將 ${email} 的 Pacer 累計點數更新為 ${points} 點！已同步至 3 人團隊總榜。`);
-      document.getElementById('pacerUserEmailInput').value = "";
-      document.getElementById('pacerUserPointsInput').value = "";
-      fetchData();
     }
 
     function renderPacerLogs(logs) {
@@ -2007,15 +2009,7 @@
         const info = cleanUserInfo(item);
         const validDays = item.validDays || item.days || Math.min(30, Math.floor((item.totalSteps || 0) / 8000));
         const sportCount = item.sportCount || item.sports || (item.sportsCount || 0);
-        let points = item.points || item.totalPoints || (validDays + sportCount);
-
-        // 檢查是否有 Pacer 手動填報累計覆蓋點數
-        if (info.email) {
-          const pacerOverride = localStorage.getItem('north_pacer_points_' + info.email.toLowerCase());
-          if (pacerOverride !== null) {
-            points = parseInt(pacerOverride, 10);
-          }
-        }
+        let points = (item.points !== undefined && item.points !== null) ? Number(item.points) : (validDays + sportCount);
 
         return {
           ...item,
