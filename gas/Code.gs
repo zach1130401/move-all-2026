@@ -388,30 +388,40 @@ function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
     rawMembers.unshift(captain);
   }
 
-  // 1. 檢查同仁是否已加入其他團隊 (非管理員操作時硬性禁止重複歸屬)
-  if (!isAdmin) {
-    for (let i = 1; i < data.length; i++) {
-      const rowTName = String(data[i][0]).trim();
-      if (rowTName.toLowerCase() !== tName.toLowerCase()) {
-        const rowMembers = [
-          String(data[i][1]).trim().toLowerCase(),
-          String(data[i][2]).trim().toLowerCase(),
-          String(data[i][3]).trim().toLowerCase(),
-          String(data[i][4]).trim().toLowerCase()
-        ].filter(Boolean);
+  // 1. 檢查同仁是否已加入其他團隊 (嚴格執行：一人只能參加一個團隊)
+  for (let i = 1; i < data.length; i++) {
+    const rowTName = String(data[i][0]).trim();
+    if (rowTName.toLowerCase() !== tName.toLowerCase()) {
+      const rowMembers = [
+        String(data[i][1]).trim().toLowerCase(),
+        String(data[i][2]).trim().toLowerCase(),
+        String(data[i][3]).trim().toLowerCase(),
+        String(data[i][4]).trim().toLowerCase()
+      ].filter(Boolean);
 
-        for (let m of rawMembers) {
-          if (m && rowMembers.some(rm => rm && (rm.includes(m) || m.includes(rm)))) {
+      for (let m of rawMembers) {
+        if (m && rowMembers.some(rm => rm && (rm === m || rm.includes(m) || m.includes(rm)))) {
+          if (!isAdmin) {
             return "同仁 (" + m + ") 已加入團隊「" + rowTName + "」，每位同仁只能歸屬一個團隊！如需更換團隊請聯繫管理員。";
+          } else {
+            // 管理員操作：自動從原舊團隊將該同仁移除，徹底防止一人跨多隊
+            for (let col = 1; col <= 4; col++) {
+              const cellVal = String(data[i][col] || "").trim().toLowerCase();
+              if (cellVal && (cellVal === m || cellVal.includes(m) || m.includes(cellVal))) {
+                sheet.getRange(i + 1, col + 1).setValue("");
+              }
+            }
           }
         }
       }
     }
   }
 
+  // 重新獲取最新的試算表列位
+  const updatedData = sheet.getDataRange().getValues();
   let foundRow = -1;
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim().toLowerCase() === tName.toLowerCase()) {
+  for (let i = 1; i < updatedData.length; i++) {
+    if (String(updatedData[i][0]).trim().toLowerCase() === tName.toLowerCase()) {
       foundRow = i + 1;
       break;
     }
