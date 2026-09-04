@@ -560,6 +560,8 @@ function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
     rawMembers.unshift(captain);
   }
 
+  const isCaptainOfExistingTeam = data.some((row, rIdx) => rIdx >= 1 && String(row[1]).trim().toLowerCase() === captain);
+
   // 1. 若隊長先前已建立過其他名稱的舊團隊，自動刪除舊團隊資料列，防止產生幽靈雙團隊
   for (let i = data.length - 1; i >= 1; i--) {
     const rowTName = String(data[i][0]).trim();
@@ -574,9 +576,9 @@ function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
   // 重新獲取最新試算表資料
   const freshData = sheet.getDataRange().getValues();
 
-  // 1.5 檢查是否為全新團隊建立 (僅限管理員權限才可新建團隊)
+  // 1.5 檢查是否為全新團隊建立 (僅限管理員權限或既有隊長修改隊名)
   const isExistingTeam = freshData.some((row, rIdx) => rIdx >= 1 && String(row[0]).trim().toLowerCase() === tName.toLowerCase());
-  if (!isExistingTeam && !isAdmin) {
+  if (!isExistingTeam && !isCaptainOfExistingTeam && !isAdmin) {
     return "權限受限：團隊建立統一僅限管理員 (Admin) 配對與建置！如需新建團隊請聯繫管理員。";
   }
 
