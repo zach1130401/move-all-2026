@@ -1668,7 +1668,8 @@
         const info = cleanUserInfo(item);
         const initial = (info.name || "諾")[0].toUpperCase();
         const rawId = item.id || item.timestamp || (info.email + '_' + idx);
-        const msgId = 'chat_' + String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const cleanId = String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const msgId = cleanId.startsWith('chat_') ? cleanId : 'chat_' + cleanId;
         const reactionKey = 'north_reactions_' + msgId;
         let counts = { like: 0, cheer: 0, agree: 0, kneel: 0, boba: 0 };
         try {
