@@ -243,9 +243,15 @@ function doGet(e) {
     const mainData = getCachedMainData(ss);
     const chatMessages = getCachedChatMessages(ss);
 
+    const nicknameMap = mainData.nicknameMap || {};
+    if (userEmail && userEmail.includes("@") && !nicknameMap[userEmail]) {
+      const savedNick = updateUserNickname(userEmail, "諾思夥伴", ss);
+      nicknameMap[userEmail] = savedNick;
+      clearCache();
+    }
+
     const admins = mainData.adminList || [];
     const isAdmin = admins.includes(userEmail);
-    const nicknameMap = mainData.nicknameMap || {};
     const userNickname = nicknameMap[userEmail] || "諾思夥伴";
 
     return createJsonResponse({
@@ -288,9 +294,9 @@ function doPost(e) {
       return createJsonResponse({ success: true, chatMessages: getChatMessages(ss) });
     }
 
-    // 2. 修改暱稱
-    if (action === "updateNickname" || action === "setNickname") {
-      const updated = updateUserNickname(operatorEmail, payload.nickname, ss);
+    // 2. 修改與註冊暱稱 (registerUser / updateNickname / setNickname)
+    if (action === "updateNickname" || action === "setNickname" || action === "registerUser") {
+      const updated = updateUserNickname(operatorEmail || payload.email, payload.nickname || payload.name, ss);
       clearCache();
       return createJsonResponse({ success: true, nickname: updated });
     }
