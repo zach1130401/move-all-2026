@@ -93,9 +93,42 @@ function getUserNicknameMap(ss) {
   return map;
 }
 
+const FUN_NICKNAME_SUFFIXES = [
+  "⚡ 獅子總裁", "🏃 雙子畫手", "🔋 水瓶速跑", "🚴 天蠍勁跑", "🏆 牡羊極限",
+  "🍳 射手派對", "🌟 金牛慢活", "🎨 摩羯畫家", "💥 天秤運動", "🥳 巨蟹加油",
+  "🦸 處女規律", "🔥 雙魚跑者", "🚀 ENFJ 隊長", "🎯 ISTP 獵人", "🌈 INFP 繪師",
+  "💫 ESTJ 指揮", "🦁 ENTJ 領航", "🦊 ENFP 冒險", "🦉 INTP 演算", "🐆 ESTP 獵豹",
+  "🦄 ISFP 健走", "🐻 ISFJ 神行", "🐬 ENFJ 發電", "🦅 INTJ 策劃", "🧋 珍奶去冰",
+  "🍟 薯條加大", "☕ 雙倍濃縮", "🍕 起司熱量", "🥐 可頌甜心", "🍧 冰淇淋控",
+  "🍔 雙層漢堡", "🍣 鮭魚大腹", "🍜 拉麵加麵", "🍩 甜甜圈控", "🥤 汽水加冰",
+  "🍰 起司蛋糕", "🥑 酪梨吐司", "🍱 精致便當", "🥩 熟成牛排", "🌮 塔可狂人",
+  "💻 跑步換腦", "📊 步數大師", "☕ 諾思咖啡", "🎯 達標八千", "🍳 諾思當家",
+  "🏆 戰術大師", "⌨️ 零Bug跑者", "🚀 程式神手", "📈 點數飆升", "📂 檔案歸檔",
+  "💾 隨時存檔", "🔍 邏輯天才", "📑 簡報神人", "💡 創意源泉", "⏱️ 效率之王",
+  "🧠 超級大腦", "🐧 企鵝畫手", "🐕 柴犬衝鋒", "🐈 輕功大師", "🦥 達標專家",
+  "🦩 紅鶴健走", "🐬 鯨豚長跑", "🦅 鷹眼路跑", "🐯 猛虎下山", "🐼 功夫熊貓",
+  "🐰 閃電兔兔", "🐺 孤狼跑者", "🐎 飆風奔馬", "⚔️ 步數呼吸", "🦸 超級賽亞",
+  "🥷 飆風忍者", "🔮 萬步魔法", "🏴‍☠️ 尋寶船長", "🤖 鋼鐵心臟", "🥊 拳擊熱血",
+  "🎾 網球抽球", "🏀 灌籃高手", "⚽ 勁爆射門", "⛳ 一桿進洞", "🧗 攀岩達人"
+];
+
+function getRandomFunNickname(email) {
+  let hash = 0;
+  const str = String(email || Math.random()).toLowerCase();
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const idx = Math.abs(hash) % FUN_NICKNAME_SUFFIXES.length;
+  return `諾思夥伴 · ${FUN_NICKNAME_SUFFIXES[idx]}`;
+}
+
 function updateUserNickname(email, nickname, ss) {
   const cleanEmail = String(email || "").trim().toLowerCase();
-  const cleanName = String(nickname || "").trim() || "諾思夥伴";
+  let cleanName = String(nickname || "").trim();
+  if (!cleanName || cleanName === "諾思夥伴") {
+    cleanName = getRandomFunNickname(cleanEmail);
+  }
   if (!cleanEmail) return cleanName;
 
   const sheet = getUserProfilesSheet(ss);
