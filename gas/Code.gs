@@ -462,13 +462,6 @@ function doPost(e) {
       return createJsonResponse({ success: true, teams: getTeams(ss) });
     }
 
-    // 10. 管理員刪除團隊 (deleteTeam)
-    if (action === "deleteTeam") {
-      if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
-      deleteTeam(payload.teamName, ss);
-      clearCache();
-      return createJsonResponse({ success: true, teams: getTeams(ss) });
-    }
 
     // 11. 管理員刪除同仁 (deleteUser)
     if (action === "deleteUser") {
@@ -524,13 +517,24 @@ function doPost(e) {
       return createJsonResponse({ success: true, message: "全系統快取已成功強制清空！" });
     }
 
-    // 10. 管理員刪除團隊 (deleteTeam)
+    // 10. 管理員 / 隊長刪除團隊 (deleteTeam)
     if (action === "deleteTeam") {
-      if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
       const targetTeamName = String(payload.teamName || "").trim();
       if (!targetTeamName) return createJsonResponse({ success: false, message: "未提供刪除之團隊名稱" });
       const sheet = getTeamsSheet(ss);
       const data = sheet.getDataRange().getValues();
+      let isCaptain = false;
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toLowerCase() === targetTeamName.toLowerCase()) {
+          const capt = String(data[i][1] || "").trim().toLowerCase();
+          if (capt && capt === operatorEmail.trim().toLowerCase()) {
+            isCaptain = true;
+          }
+        }
+      }
+      if (!isOperatorAdmin && !isCaptain) {
+        return createJsonResponse({ success: false, message: `403 權限不足：您必須是團隊隊長或管理員才能刪除團隊` });
+      }
       for (let i = data.length - 1; i >= 1; i--) {
         if (String(data[i][0]).trim().toLowerCase() === targetTeamName.toLowerCase()) {
           sheet.deleteRow(i + 1);
