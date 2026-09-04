@@ -255,6 +255,7 @@ function doGet(e) {
       records: mainData.records,
       teams: mainData.teams,
       chatMessages: chatMessages,
+      nicknameMap: nicknameMap,
       pacerLogs: isAdmin ? getPacerLogs(ss, nicknameMap) : [],
       adminList: isAdmin ? admins : []
     });
