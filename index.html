@@ -76,7 +76,11 @@
       
       <!-- 右上角登入狀態膠囊 -->
       <div class="flex items-center gap-2.5 shrink-0">
-        <div id="headerLoggedOutArea" class="hidden"></div>
+        <div id="headerLoggedOutArea" class="hidden">
+          <button onclick="promptFallbackEmailLogin()" class="px-4 py-1.5 rounded-full bg-ocean hover:bg-oceanDark text-white text-xs font-bold transition shadow-xs">
+            Google / Email 登入
+          </button>
+        </div>
         <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3.5 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
           <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0 cursor-pointer" id="userAvatarText" onclick="toggleHeaderEmail()" title="點擊顯示/隱藏個人 Email">N</div>
           <span id="userNicknameDisplay" onclick="toggleHeaderEmail()" class="font-bold text-appleDark max-w-[120px] sm:max-w-[200px] truncate inline-block align-bottom cursor-pointer hover:text-ocean transition" title="點擊顯示/隱藏個人 Email">諾思夥伴</span>
@@ -132,6 +136,12 @@
                data-width="280"
                data-logo_alignment="left">
           </div>
+        </div>
+
+        <div>
+          <button type="button" onclick="promptFallbackEmailLogin()" class="text-xs text-stone hover:text-oceanDark font-medium transition underline py-1">
+            無法顯示 Google 登入按鈕？點此輸入 Email 快速登入
+          </button>
         </div>
 
         <div id="loginLoadingHint" class="hidden text-xs text-oceanDark font-semibold animate-pulse">
@@ -1095,17 +1105,10 @@
       if (savedUser) {
         try {
           const user = JSON.parse(savedUser);
-          const cleaned = cleanUserInfo({ email: user.email, name: user.name });
-          currentEmail = cleaned.email || user.email || "";
-          if (currentEmail) {
-            window.latestNicknameMap = window.latestNicknameMap || {};
-            window.latestNicknameMap[currentEmail] = cleaned.name;
-            localStorage.setItem('north_user', JSON.stringify({
-              email: currentEmail,
-              name: cleaned.name,
-              picture: user.picture || ""
-            }));
-            showLoggedInUI(cleaned.name);
+          if (user && user.email) {
+            currentEmail = String(user.email).toLowerCase().trim();
+            currentNickname = user.name || currentEmail.split('@')[0] || "諾思夥伴";
+            showLoggedInUI(currentNickname);
             fetchData();
           } else {
             showLoggedOutUI();
