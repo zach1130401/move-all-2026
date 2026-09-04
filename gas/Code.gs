@@ -120,7 +120,7 @@ function getRandomFunNickname(email) {
     hash |= 0;
   }
   const idx = Math.abs(hash) % FUN_NICKNAME_SUFFIXES.length;
-  return `諾思夥伴 · ${FUN_NICKNAME_SUFFIXES[idx]}`;
+  return `諾思 · ${FUN_NICKNAME_SUFFIXES[idx]}`;
 }
 
 function updateUserNickname(email, nickname, ss) {
