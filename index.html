@@ -79,7 +79,8 @@
         <div id="headerLoggedOutArea" class="hidden"></div>
         <div id="headerLoggedInArea" class="hidden flex items-center gap-2 bg-white/95 px-3.5 py-1.5 rounded-full border border-stone/20 shadow-xs text-xs sm:text-sm">
           <div class="w-6 h-6 rounded-full bg-ocean text-white font-bold flex items-center justify-center text-xs shrink-0" id="userAvatarText">N</div>
-          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[160px] sm:max-w-[260px] truncate inline-block align-bottom" title="您的專屬暱稱">諾思夥伴</span>
+          <span id="userNicknameDisplay" class="font-bold text-appleDark max-w-[120px] sm:max-w-[200px] truncate inline-block align-bottom" title="您的專屬暱稱">諾思夥伴</span>
+          <span id="userEmailDisplay" class="text-xs text-stone font-mono font-normal max-w-[150px] sm:max-w-[220px] truncate inline-block align-bottom" title="您的登入 Email"></span>
           <span id="userTeamBadgeDisplay" onclick="openTeamModal()" title="點擊檢視/設定團隊" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0 cursor-pointer hover:bg-amber-200 transition">未組隊</span>
           <button onclick="openNicknameModal()" class="text-oceanDark hover:underline font-semibold ml-0.5 shrink-0">改暱稱</button>
           <span class="text-slate-300">|</span>
@@ -1119,6 +1120,9 @@
       const elNameDisp = document.getElementById('userNicknameDisplay');
       if (elNameDisp) elNameDisp.innerText = cleanName;
 
+      const elEmailDisp = document.getElementById('userEmailDisplay');
+      if (elEmailDisp) elEmailDisp.innerText = `(${currentEmail})`;
+
       const elFormName = document.getElementById('formName');
       if (elFormName) elFormName.value = cleanName;
 
@@ -1444,6 +1448,9 @@
       
       const elNameDisp = document.getElementById('userNicknameDisplay');
       if (elNameDisp) elNameDisp.innerText = currentNickname;
+
+      const elEmailDisp = document.getElementById('userEmailDisplay');
+      if (elEmailDisp) elEmailDisp.innerText = `(${currentEmail})`;
 
       const elFormName = document.getElementById('formName');
       if (elFormName) elFormName.value = currentNickname;
