@@ -2754,32 +2754,16 @@
       if (!tbody) return;
 
       try {
-        let teams = serverTeams ? [...serverTeams] : [];
+        let teams = (serverTeams && serverTeams.length > 0) ? [...serverTeams] : [];
 
-        // 批次匯入與本地團隊名單
-        const savedAll = localStorage.getItem('north_all_teams');
-        if (savedAll) {
-          try {
-            const parsed = JSON.parse(savedAll);
-            if (Array.isArray(parsed)) {
-              parsed.forEach(t => {
-                if (t && t.teamName && !teams.find(x => x.teamName === t.teamName)) {
-                  teams.push(t);
-                }
-              });
-            }
-          } catch(e){}
-        }
-
-        // 個人本機團隊
-        const localTeam = localStorage.getItem('north_team_' + currentEmail);
-        if (localTeam) {
-          try {
-            const parsed = JSON.parse(localTeam);
-            if (parsed && parsed.teamName && !teams.find(x => x.teamName === parsed.teamName)) {
-              teams.push(parsed);
-            }
-          } catch(e){}
+        if (teams.length === 0) {
+          const savedAll = localStorage.getItem('north_all_teams');
+          if (savedAll) {
+            try {
+              const parsed = JSON.parse(savedAll);
+              if (Array.isArray(parsed)) teams = parsed;
+            } catch(e){}
+          }
         }
 
         if (teams.length === 0) {

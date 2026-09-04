@@ -552,25 +552,35 @@ function doPost(e) {
   }
 }
 
+function extractEmailFromStr(str) {
+  if (!str || typeof str !== 'string') return '';
+  const match = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  return match ? match[1].toLowerCase().trim() : str.toLowerCase().trim();
+}
+
 function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
   ss = ss || getSpreadsheet();
   const sheet = getTeamsSheet(ss);
-  const data = sheet.getDataRange().getValues();
   const tName = String(teamName).trim();
-  const captain = String(captainEmail).trim().toLowerCase();
-  const rawMembers = (members || [captain, "", ""]).map(x => String(x).trim().toLowerCase()).filter(Boolean);
+  const captain = extractEmailFromStr(captainEmail);
   
-  if (captain && !rawMembers.includes(captain)) {
+  if (!tName) return "未提供團隊名稱";
+  if (!captain) return "未提供隊長 Email";
+
+  let rawMembers = (members || []).map(x => extractEmailFromStr(x)).filter(Boolean);
+  if (!rawMembers.includes(captain)) {
     rawMembers.unshift(captain);
   }
+  rawMembers = rawMembers.filter((m, idx) => rawMembers.indexOf(m) === idx);
 
-  const isCaptainOfExistingTeam = data.some((row, rIdx) => rIdx >= 1 && String(row[1]).trim().toLowerCase() === captain);
+  let data = sheet.getDataRange().getValues();
+  const isCaptainOfExistingTeam = data.some((row, rIdx) => rIdx >= 1 && extractEmailFromStr(row[1]) === captain);
 
   // 1. 若隊長先前已建立過其他名稱的舊團隊，自動刪除舊團隊資料列，防止產生幽靈雙團隊
   for (let i = data.length - 1; i >= 1; i--) {
     const rowTName = String(data[i][0]).trim();
     if (rowTName.toLowerCase() !== tName.toLowerCase()) {
-      const rowCapt = String(data[i][1]).trim().toLowerCase();
+      const rowCapt = extractEmailFromStr(data[i][1]);
       if (rowCapt === captain) {
         sheet.deleteRow(i + 1);
       }
@@ -578,44 +588,46 @@ function saveTeam(teamName, captainEmail, members, isAdmin, ss) {
   }
 
   // 重新獲取最新試算表資料
-  const freshData = sheet.getDataRange().getValues();
+  let freshData = sheet.getDataRange().getValues();
 
-  // 1.5 檢查是否為全新團隊建立 (僅限管理員權限或既有隊長修改隊名)
+  // 1.5 檢查權限 (全新團隊建立僅限管理員權限或既有隊長修改隊名)
   const isExistingTeam = freshData.some((row, rIdx) => rIdx >= 1 && String(row[0]).trim().toLowerCase() === tName.toLowerCase());
   if (!isExistingTeam && !isCaptainOfExistingTeam && !isAdmin) {
     return "權限受限：團隊建立統一僅限管理員 (Admin) 配對與建置！如需新建團隊請聯繫管理員。";
   }
 
   // 2. 檢查同仁是否已加入其他團隊 (嚴格執行：一人只能參加一個團隊)
-  for (let i = 1; i < freshData.length; i++) {
+  for (let i = freshData.length - 1; i >= 1; i--) {
     const rowTName = String(freshData[i][0]).trim();
     if (rowTName.toLowerCase() !== tName.toLowerCase()) {
-      const rowMembers = [
-        String(freshData[i][1]).trim().toLowerCase(),
-        String(freshData[i][2]).trim().toLowerCase(),
-        String(freshData[i][3]).trim().toLowerCase(),
-        String(freshData[i][4]).trim().toLowerCase()
+      let rowMembers = [
+        extractEmailFromStr(freshData[i][1]),
+        extractEmailFromStr(freshData[i][2]),
+        extractEmailFromStr(freshData[i][3]),
+        extractEmailFromStr(freshData[i][4])
       ].filter(Boolean);
 
-      for (let m of rawMembers) {
-        if (m && rowMembers.some(rm => rm && (rm === m || rm.includes(m) || m.includes(rm)))) {
-          if (!isAdmin) {
-            return "同仁 (" + m + ") 已加入團隊「" + rowTName + "」，每位同仁只能歸屬一個團隊！如需更換團隊請聯繫管理員。";
-          } else {
-            // 管理員操作：自動從原舊團隊將該同仁移除，徹底防止一人跨多隊
-            for (let col = 1; col <= 4; col++) {
-              const cellVal = String(data[i][col] || "").trim().toLowerCase();
-              if (cellVal && (cellVal === m || cellVal.includes(m) || m.includes(cellVal))) {
-                sheet.getRange(i + 1, col + 1).setValue("");
-              }
-            }
-          }
+      const overlap = rowMembers.filter(m => rawMembers.includes(m));
+      if (overlap.length > 0) {
+        if (!isAdmin) {
+          return "同仁 (" + overlap.join(", ") + ") 已加入團隊「" + rowTName + "」，每位同仁只能歸屬一個團隊！";
+        }
+        // 管理員操作：自動從原舊團隊將重複的同仁移除，徹底防止一人跨多隊
+        rowMembers = rowMembers.filter(m => !rawMembers.includes(m));
+        if (rowMembers.length === 0) {
+          sheet.deleteRow(i + 1);
+        } else {
+          const newCapt = rowMembers[0];
+          const newM1 = rowMembers[0] || "";
+          const newM2 = rowMembers[1] || "";
+          const newM3 = rowMembers[2] || "";
+          sheet.getRange(i + 1, 2, 1, 4).setValues([[newCapt, newM1, newM2, newM3]]);
         }
       }
     }
   }
 
-  // 重新獲取最新的試算表列位
+  // 重新獲取最新的試算表列位並更新/新增目標團隊列
   const updatedData = sheet.getDataRange().getValues();
   let foundRow = -1;
   for (let i = 1; i < updatedData.length; i++) {
