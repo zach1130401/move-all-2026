@@ -2751,49 +2751,6 @@
       closeImportTeamsModal();
       document.getElementById('importTeamsTextarea').value = "";
       fetchData();
-    function getTeamCoSportPoints(teamMembers, records) {
-      const cleanMembers = (teamMembers || []).map(m => extractEmail(m)).filter(Boolean);
-      if (cleanMembers.length === 0) return 0;
-
-      const validRecords = (records || window.latestRecordsData || []).filter(r => r && r.status === '通過' && r.message && r.message.includes('一起動起來'));
-      const uniqueDates = new Set();
-
-      validRecords.forEach(r => {
-        const rEmail = extractEmail(r.email);
-        if (rEmail && cleanMembers.includes(rEmail) && r.date) {
-          uniqueDates.add(r.date.trim());
-        }
-      });
-
-      return uniqueDates.size;
-    }
-
-    function analyzeTeamWeeklyCompliance(teamMembers) {
-      const validRecords = (window.latestRecordsData || []).filter(r => r && r.status === '通過');
-      const cleanMembers = (teamMembers || []).map(m => extractEmail(m)).filter(Boolean);
-
-      if (cleanMembers.length === 0) return [];
-
-      return [1, 2, 3, 4].map(wNum => {
-        const memberCompleted = cleanMembers.map(mEmail => {
-          return validRecords.some(r => {
-            const rEmail = extractEmail(r.email);
-            if (!rEmail || rEmail !== mEmail) return false;
-            if (!r.date) return false;
-            const dt = new Date(r.date.replace(/-/g, '/'));
-            const dayOfMonth = dt.getDate();
-            if (wNum === 1 && dayOfMonth >= 1 && dayOfMonth <= 7) return true;
-            if (wNum === 2 && dayOfMonth >= 8 && dayOfMonth <= 14) return true;
-            if (wNum === 3 && dayOfMonth >= 15 && dayOfMonth <= 21) return true;
-            if (wNum === 4 && dayOfMonth >= 22 && dayOfMonth <= 31) return true;
-            return false;
-          });
-        });
-
-        const completedCount = memberCompleted.filter(Boolean).length;
-        const isAllCompleted = cleanMembers.length > 0 && completedCount === cleanMembers.length;
-        return { week: wNum, completedCount, totalMembers: cleanMembers.length, isAllCompleted };
-      });
     }
 
     function adminUpdateTeamExtraPoints(teamName, currentExtra, delta) {
@@ -2849,56 +2806,12 @@
           return;
         }
 
-        const processedTeams = teams.map(t => {
-          let teamSteps = 0;
-          let teamPoints = 0;
-          const membersList = (t.members || []).filter(Boolean);
-          if (t.captainEmail && !membersList.map(m => String(m).toLowerCase()).includes(t.captainEmail.toLowerCase())) {
-            membersList.unshift(t.captainEmail);
-          }
+        tbody.innerHTML = teams.map((team, idx) => {
+          const membersList = (team.members || []).filter(Boolean);
+          const membersStr = membersList.map(m => getFormattedUserLabel(m)).join(', ');
+          const teamPoints = Number(team.teamPoints) || 0;
+          const extraPoints = Number(team.extraPoints) || 0;
 
-          if (individualList && individualList.length > 0) {
-            individualList.forEach(user => {
-              const info = cleanUserInfo(user);
-              const uEmail = (info.email || "").toLowerCase().trim();
-              const uName = (info.name || "").toLowerCase().trim();
-
-              const isMember = membersList.some(m => {
-                const memStr = String(m || "").toLowerCase().trim();
-                if (!memStr) return false;
-                return (uEmail && (memStr.includes(uEmail) || uEmail.includes(memStr))) ||
-                       (uName && memStr.includes(uName));
-              });
-
-              if (isMember) {
-                const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
-                const sports = user.sportCount || user.sports || 0;
-                teamSteps += (user.totalSteps || user.steps || 0);
-                teamPoints += (days + sports);
-              }
-            });
-          }
-
-          // 團隊【一起動起來】依日期去重計算（同日同隊多次/多人上傳，團隊當日僅發放 +1 點）
-          const coSportPoints = getTeamCoSportPoints(membersList, window.latestRecordsData);
-          teamPoints += coSportPoints;
-
-          const extra = Number(t.extraPoints) || 0;
-          teamPoints += extra;
-
-          const weeklyCompliance = analyzeTeamWeeklyCompliance(membersList);
-
-          return {
-            ...t,
-            extraPoints: extra,
-            membersStr: membersList.map(m => getFormattedUserLabel(m)).join(', '),
-            teamSteps: teamSteps,
-            teamPoints: teamPoints,
-            weeklyCompliance: weeklyCompliance
-          };
-        });
-
-        tbody.innerHTML = processedTeams.map((team, idx) => {
           const weeklyBadgesHtml = (team.weeklyCompliance || []).map(w => {
             if (w.isAllCompleted) {
               return `<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 shadow-2xs" title="當週 3 位隊員皆完成任務，符合【持續達標】">🎉 W${w.week} 全員達標</span>`;
@@ -2914,14 +2827,14 @@
               <div class="flex gap-1 mt-1 flex-wrap items-center">${weeklyBadgesHtml}</div>
             </td>
             <td class="p-3 font-semibold text-rose-700 font-mono">${getFormattedUserLabel(team.captainEmail || (team.members ? team.members[0] : '')) || '未設定'}</td>
-            <td class="p-3 text-stone font-medium">${team.membersStr || '無'}</td>
+            <td class="p-3 text-stone font-medium">${membersStr || '無'}</td>
             <td class="p-3 text-center font-bold text-sunrise text-sm">
-              <div>${team.teamPoints || 0} 點</div>
-              <div class="text-[10px] text-stone font-normal">（含加碼 ${team.extraPoints || 0} 點）</div>
+              <div>${teamPoints} 點</div>
+              <div class="text-[10px] text-stone font-normal">（含加碼 ${extraPoints} 點）</div>
             </td>
             <td class="p-3 text-right flex justify-end gap-1 items-center flex-wrap">
-              <button onclick="adminUpdateTeamExtraPoints('${team.teamName}', ${team.extraPoints || 0}, 1)" title="福委/管理員核發持續達標或共同運動加碼 +1 點" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-bold shadow-xs transition">➕ 加碼 +1 點</button>
-              <button onclick="adminUpdateTeamExtraPoints('${team.teamName}', ${team.extraPoints || 0}, -1)" title="扣回 1 點" class="px-2 py-1 bg-stone/10 hover:bg-stone/20 text-stone rounded-md text-xs font-semibold">扣 1 點</button>
+              <button onclick="adminUpdateTeamExtraPoints('${team.teamName}', ${extraPoints}, 1)" title="福委/管理員核發持續達標或共同運動加碼 +1 點" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-bold shadow-xs transition">➕ 加碼 +1 點</button>
+              <button onclick="adminUpdateTeamExtraPoints('${team.teamName}', ${extraPoints}, -1)" title="扣回 1 點" class="px-2 py-1 bg-stone/10 hover:bg-stone/20 text-stone rounded-md text-xs font-semibold">扣 1 點</button>
               <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改成員</button>
               <button onclick="adminDeleteTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold shadow-xs">🗑️</button>
             </td>
@@ -3186,73 +3099,26 @@
           return;
         }
 
-        const processedTeams = teams.map(t => {
-          let teamSteps = 0;
-          let teamPoints = 0;
-          const membersList = (t.members || []).filter(Boolean);
-          if (t.captainEmail && !membersList.map(m => String(m).toLowerCase()).includes(t.captainEmail.toLowerCase())) {
-            membersList.unshift(t.captainEmail);
-          }
+        tbody.innerHTML = teams.map((team, idx) => {
+          const membersList = (team.members || []).filter(Boolean);
+          const membersStr = membersList.map(m => getFormattedUserLabel(m)).join(', ');
+          const teamSteps = Number(team.teamSteps) || 0;
+          const teamPoints = Number(team.teamPoints) || 0;
+          const statusBadge = team.statusBadge || (teamPoints >= 15 ? "🏆 解鎖最高門檻 (≥15點)" : teamPoints >= 10 ? "🎯 解鎖第一門檻 (≥10點)" : "尚未達標");
+          const rewardText = team.rewardText || (teamPoints >= 15 ? "NT$ 6,000" : teamPoints >= 10 ? "NT$ 4,800" : "參加獎 (公益禮盒)");
 
-          if (individualList && individualList.length > 0) {
-            individualList.forEach(user => {
-              const info = cleanUserInfo(user);
-              const uEmail = (info.email || "").toLowerCase().trim();
-              const uName = (info.name || "").toLowerCase().trim();
-
-              const isMember = membersList.some(m => {
-                const memStr = String(m || "").toLowerCase().trim();
-                if (!memStr) return false;
-                return (uEmail && (memStr.includes(uEmail) || uEmail.includes(memStr))) ||
-                       (uName && memStr.includes(uName));
-              });
-
-              if (isMember) {
-                const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
-                const sports = user.sportCount || user.sports || 0;
-                teamSteps += (user.totalSteps || user.steps || 0);
-                teamPoints += (days + sports);
-              }
-            });
-          }
-
-          // 團隊【一起動起來】依日期去重計算（同日同隊多次/多人上傳，團隊當日僅發放 +1 點）
-          const coSportPoints = getTeamCoSportPoints(membersList, window.latestRecordsData);
-          teamPoints += coSportPoints;
-
-          if (t.extraPoints) teamPoints += Number(t.extraPoints) || 0;
-
-          let statusBadge = "尚未達標";
-          let rewardText = "參加獎 (公益禮盒)";
-          if (teamPoints >= 15) {
-            statusBadge = "🏆 解鎖最高門檻 (≥15點)";
-            rewardText = "NT$ 6,000";
-          } else if (teamPoints >= 10) {
-            statusBadge = "🎯 解鎖第一門檻 (≥10點)";
-            rewardText = "NT$ 4,800";
-          }
-
-          return {
-            teamName: t.teamName,
-            membersStr: membersList.map(m => getFormattedUserLabel(m)).join(', '),
-            teamSteps: teamSteps,
-            teamPoints: teamPoints,
-            statusBadge: statusBadge,
-            rewardText: rewardText
-          };
-        }).sort((a, b) => b.teamPoints - a.teamPoints);
-
-        tbody.innerHTML = processedTeams.map((team, idx) => `
+          return `
           <tr class="hover:bg-oceanLight/30 transition text-xs sm:text-sm">
             <td class="p-3.5 text-center font-bold">${idx + 1}</td>
             <td class="p-3.5 font-bold text-appleDark">${team.teamName}</td>
-            <td class="p-3.5 font-medium text-stone">${team.membersStr}</td>
-            <td class="p-3.5 text-right font-mono font-bold text-appleDark">${team.teamSteps.toLocaleString()} 步</td>
-            <td class="p-3.5 text-center font-mono font-black text-sunrise text-base">${team.teamPoints} 點</td>
-            <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${team.teamPoints >= 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-stone/10 text-stone'}">${team.statusBadge}</span></td>
-            <td class="p-3.5 text-right font-black text-oceanDark">${team.rewardText}</td>
+            <td class="p-3.5 font-medium text-stone">${membersStr}</td>
+            <td class="p-3.5 text-right font-mono font-bold text-appleDark">${teamSteps.toLocaleString()} 步</td>
+            <td class="p-3.5 text-center font-mono font-black text-sunrise text-base">${teamPoints} 點</td>
+            <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${teamPoints >= 10 ? 'bg-emerald-100 text-emerald-800' : 'bg-stone/10 text-stone'}">${statusBadge}</span></td>
+            <td class="p-3.5 text-right font-black text-oceanDark">${rewardText}</td>
           </tr>
-        `).join('');
+          `;
+        }).join('');
       } catch (err) {
         console.error("renderTeamLeaderboard error:", err);
         tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-600 font-bold">團隊排行載入發生錯誤：${err.message}</td></tr>`;
