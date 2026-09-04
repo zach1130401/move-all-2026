@@ -2237,7 +2237,7 @@
 
           const selectedAttr = isSelected ? 'selected' : '';
           
-          // 檢查該同仁是否已歸屬其他團隊
+          // 檢查該同仁是否已歸屬其他團隊 (若已加入其他團隊且非當前選中，直接排除不顯示)
           let alreadyInTeam = "";
           assignedTeamsMap.forEach((tName, keyEmail) => {
             if (keyEmail && keyEmail.length > 2) {
@@ -2247,13 +2247,11 @@
             }
           });
 
-          if (alreadyInTeam && !isSelected && !isCurrentAdmin) {
-            opts += `<option value="${valEmail}" disabled>${label} (🔒 已加入「${alreadyInTeam}」)</option>`;
-          } else if (alreadyInTeam && !isSelected && isCurrentAdmin) {
-            opts += `<option value="${valEmail}" ${selectedAttr}>${label} (原「${alreadyInTeam}」)</option>`;
-          } else {
-            opts += `<option value="${valEmail}" ${selectedAttr}>${label}</option>`;
+          if (alreadyInTeam && !isSelected) {
+            return; // 直接排除已有團隊的同仁
           }
+
+          opts += `<option value="${valEmail}" ${selectedAttr}>${label}</option>`;
         });
         if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
           opts += `<option value="${selectedVal}" selected>${getFormattedUserLabel(selectedVal)}</option>`;
@@ -2897,6 +2895,24 @@
       const m2Val = nonCaptAdminMembers[0] || "";
       const m3Val = nonCaptAdminMembers[1] || "";
 
+      // 彙整已加入其他團隊之成員對照表 (每人只能歸屬一隊)
+      const assignedTeamsMap = new Map();
+      if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
+        window.latestTeamsData.forEach(t => {
+          if (t && t.teamName && t.members && Array.isArray(t.members)) {
+            const isCurrentTeam = existingTeam && (existingTeam.teamName === t.teamName);
+            if (!isCurrentTeam) {
+              t.members.forEach(m => {
+                const cleanM = String(m || "").toLowerCase().trim();
+                if (cleanM && cleanM.length > 2) {
+                  assignedTeamsMap.set(cleanM, t.teamName);
+                }
+              });
+            }
+          }
+        });
+      }
+
       const buildSelectOptions = (selectedVal, placeholder, excludeVals = []) => {
         let opts = `<option value="">${placeholder}</option>`;
         const cleanSelected = String(selectedVal || "").toLowerCase().trim();
@@ -2909,6 +2925,20 @@
           // 排除其他選單中已被選中的成員 (防止同一人在隊長/隊員2/隊員3重複被選)
           if (!isSelected && cleanExcludes.some(ex => ex && (ex === cleanEmail || ex.includes(cleanEmail) || cleanEmail.includes(ex)))) {
             return;
+          }
+
+          // 檢查該同仁是否已歸屬其他團隊 (若已在其他團隊且非當前選中，直接排除不顯示)
+          let alreadyInTeam = "";
+          assignedTeamsMap.forEach((tName, keyEmail) => {
+            if (keyEmail && keyEmail.length > 2) {
+              if (cleanEmail === keyEmail || cleanEmail.includes(keyEmail) || keyEmail.includes(cleanEmail)) {
+                alreadyInTeam = tName;
+              }
+            }
+          });
+
+          if (alreadyInTeam && !isSelected) {
+            return; // 直接排除已有團隊的同仁
           }
 
           const selectedAttr = isSelected ? 'selected' : '';
