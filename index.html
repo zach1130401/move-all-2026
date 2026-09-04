@@ -65,7 +65,6 @@
         <a href="#mission" class="hover:text-oceanDark transition">任務機制</a>
         <a href="#rewards" class="hover:text-oceanDark transition">獎金與公益</a>
         <a href="#calc" class="hover:text-oceanDark transition">點數試算</a>
-        <a href="#gpsart" class="hover:text-oceanDark transition">GPS ART</a>
         <a href="#leaderboard" class="hover:text-oceanDark transition font-semibold text-appleDark">即時排行</a>
         <a href="#feedSection" class="hover:text-oceanDark transition">運動回報牆</a>
         <a href="#chatSection" class="hover:text-oceanDark transition">同仁聊天室</a>
@@ -327,91 +326,59 @@
       </div>
     </section>
 
-    <!-- GPS ART 創意路跑專區 -->
-    <section id="gpsart" class="max-w-6xl mx-auto px-4 sm:px-8 space-y-8">
-      <div class="text-center max-w-2xl mx-auto space-y-2">
-        <h2 class="text-3xl sm:text-4xl font-black text-appleDark tracking-tight">GPS ART 創意路跑挑戰</h2>
-        <p class="text-appleGray text-base">使用 Strava、Relive 或 Map My Run 走出圖案，全體票選最佳創意獎！</p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs space-y-2">
-          <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟一</div>
-          <h4 class="text-lg font-bold text-appleDark">繪製軌跡並上傳</h4>
-          <p class="text-appleGray text-sm leading-relaxed">使用 Strava、Relive 或 Map My Run 走出圖像，上傳 GPS 路線圖截圖、步數與創作理念。</p>
-        </div>
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-stone/20 shadow-xs space-y-2">
-          <div class="text-xs font-bold text-oceanDark uppercase tracking-wider">步驟二</div>
-          <h4 class="text-lg font-bold text-appleDark">全體同仁點讚票選</h4>
-          <p class="text-appleGray text-sm leading-relaxed">個人參加或自由找夥伴協作，活動期間開放全體同仁票選最佳創意大獎。</p>
-        </div>
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-[32px] border border-sunrise/40 shadow-xs space-y-2">
-          <div class="text-xs font-bold text-sunrise uppercase tracking-wider">步驟三</div>
-          <h4 class="text-lg font-bold text-appleDark">公司提撥相對應捐款</h4>
-          <p class="text-appleGray text-sm leading-relaxed">每一步都有價值！公司將依同仁 GPS 創作成果提撥相對應公益基金回饋社會。</p>
-        </div>
-      </div>
-
-      <div class="text-center pt-2">
-        <span class="text-xs text-stone">參考優秀 GPS ART 作品展覽：</span>
-        <a href="https://www.instagram.com/p/DYwsk9sIEJF/?img_index=1" target="_blank" class="text-xs text-oceanDark font-bold hover:underline mx-2">Instagram 創意路線範例 1 ↗</a>
-        <a href="https://www.instagram.com/reel/DX6D9hZJgqN/?igsh=MWNsMWU3dGl0dGU5eQ==" target="_blank" class="text-xs text-oceanDark font-bold hover:underline mx-2">Instagram 創意路線範例 2 ↗</a>
-      </div>
-    </section>
-
     <!-- 互動式團隊點數計算機 -->
     <section id="calc" class="max-w-5xl mx-auto px-4 sm:px-8 space-y-6">
       <div class="text-center max-w-lg mx-auto space-y-2">
         <h2 class="text-3xl font-black text-appleDark tracking-tight">團隊點數試算</h2>
-        <p class="text-appleGray text-sm">即時試算 3 位隊員在活動期間 (4 週共 28 天) 之達標進度與獎勵等級</p>
+        <p class="text-appleGray text-sm">即時試算 3 位隊員在活動期間 (30 天) 之達標進度與獎勵等級</p>
       </div>
 
       <div class="bg-white/95 backdrop-blur-md p-8 sm:p-12 rounded-[32px] border border-stone/20 shadow-sm grid md:grid-cols-12 gap-8 items-center">
         <div class="md:col-span-7 space-y-4 text-base">
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
-              <div class="font-bold text-appleDark text-sm">【每日步數】達標總人次</div>
-              <div class="text-xs text-stone">每人當週 4 天達 8,000 步 (每人次 1 點，全期最高 12 人次)</div>
+              <div class="font-bold text-appleDark text-sm">【每日步行】8,000 步達標天數</div>
+              <div class="text-xs text-stone">全隊 3 人完成 8,000 步之總天數 (+1 點/天/人，全隊最高 90 點)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('stepPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcStepPoints" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">8</span>
+              <span id="calcStepPoints" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">10</span>
               <button onclick="changeCalc('stepPoints', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
             </div>
           </div>
 
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
-              <div class="font-bold text-appleDark text-sm">【規律運動】達標總人次</div>
-              <div class="text-xs text-stone">每人每週 2 次 30 分鐘運動 (每人次 1 點，全期最高 12 人次)</div>
-            </div>
-            <div class="flex items-center gap-3">
-              <button onclick="changeCalc('sportPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcSportPoints" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">6</span>
-              <button onclick="changeCalc('sportPoints', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
-            <div>
-              <div class="font-bold text-appleDark text-sm">【持續達標】加碼週數</div>
-              <div class="text-xs text-stone">當週全員皆完成至少 1 項任務 (每週加碼 1 點，全期最高 4 週)</div>
+              <div class="font-bold text-appleDark text-sm">【階段里程加碼】檢核人數</div>
+              <div class="text-xs text-stone">第 15 天(≥10天+2點) / 第 30 天(≥20天+3點) 達成人數 (全隊最高 15 點)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('teamExtra', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcTeamExtra" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">3</span>
+              <span id="calcTeamExtra" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">4</span>
               <button onclick="changeCalc('teamExtra', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
             </div>
           </div>
 
           <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
             <div>
-              <div class="font-bold text-appleDark text-sm">【一起動起來】共同運動合照</div>
-              <div class="text-xs text-stone">團隊成員運動合照記錄 (每次加碼 1 點，全期最高 4 次)</div>
+              <div class="font-bold text-appleDark text-sm">【自主規律運動】30 分鐘運動次數</div>
+              <div class="text-xs text-stone">全隊 3 人完成 30 分鐘運動之總次數 (+1 點/次，全隊最高 24 點)</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="changeCalc('sportPoints', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
+              <span id="calcSportPoints" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">4</span>
+              <button onclick="changeCalc('sportPoints', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center p-4 rounded-2xl bg-cloud border border-stone/15">
+            <div>
+              <div class="font-bold text-appleDark text-sm">【一起動起來】團隊合照回報次數</div>
+              <div class="text-xs text-stone">同仁相約共同運動並合照回報加碼 (+1 點/次)</div>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="changeCalc('coSport', -1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">-</button>
-              <span id="calcCoSport" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">3</span>
+              <span id="calcCoSport" class="font-mono font-bold text-lg w-8 text-center text-oceanDark">2</span>
               <button onclick="changeCalc('coSport', 1)" class="w-9 h-9 rounded-full bg-white border border-stone/20 font-bold hover:bg-oceanLight shadow-xs">+</button>
             </div>
           </div>
@@ -419,7 +386,7 @@
 
         <div class="md:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8 rounded-[28px] space-y-6 text-center shadow-lg border border-white/10">
           <div class="space-y-1">
-            <span class="text-xs text-stone uppercase font-semibold tracking-wider">團隊 4 週累計總點數</span>
+            <span class="text-xs text-stone uppercase font-semibold tracking-wider">團隊 30 天累計總點數</span>
             <div id="calcTotalPoints" class="text-6xl font-black text-ocean font-mono">20 點</div>
           </div>
           <div class="pt-4 border-t border-slate-700 space-y-2.5 text-left text-sm text-slate-300">
@@ -569,7 +536,7 @@
       <div id="tabContentFeed" class="grid md:grid-cols-12 gap-8">
         
         <div class="md:col-span-5 bg-white/95 backdrop-blur-md p-6 rounded-[28px] border border-stone/20 shadow-xs space-y-4 h-fit">
-          <h3 class="text-lg font-bold text-appleDark">每日運動與 GPS 打卡</h3>
+          <h3 class="text-lg font-bold text-appleDark">每日運動與步數打卡</h3>
           <form onsubmit="handleCheckIn(event)" class="space-y-3.5">
             <div>
               <label class="block text-stone text-xs font-semibold uppercase mb-1">同仁姓名 / 暱稱</label>
@@ -583,7 +550,7 @@
               <label class="block text-stone text-xs font-semibold uppercase mb-1">回報類型 <span class="text-rose-500 font-bold">*</span></label>
               <select id="formCategory" onchange="toggleStepsInputVisibility()" class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm font-semibold text-appleDark bg-cloud/50">
                 <option value="【每日步數】8,000 步達標">🏃【每日步數】Pacer / 手環 8,000 步達標</option>
-                <option value="【規律運動】30 分鐘以上自主運動">🚴【規律運動】30分鐘以上運動 (慢跑/健走/瑜伽/GPS ART等)</option>
+                <option value="【規律運動】30 分鐘以上自主運動">🚴【規律運動】30分鐘以上運動 (慢跑/健走/瑜伽等)</option>
               </select>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -598,7 +565,7 @@
             </div>
             <div>
               <div class="flex justify-between items-center mb-1">
-                <label class="block text-stone text-xs font-semibold uppercase">證明截圖 / GPS 路線圖 <span class="text-rose-500 font-bold">* (必填圖片)</span></label>
+                <label class="block text-stone text-xs font-semibold uppercase">證明截圖 <span class="text-rose-500 font-bold">* (必填圖片)</span></label>
                 <button type="button" id="clearImgBtn" onclick="clearFormImage()" class="text-xs text-rose-600 hover:text-rose-700 font-bold hidden flex items-center gap-1">✕ 清除圖片</button>
               </div>
               <input id="formFile" type="file" accept="image/*" required onchange="previewFormImage(event)" class="w-full text-xs text-stone file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-oceanLight file:text-oceanDark hover:file:bg-ocean/20 cursor-pointer">
@@ -610,8 +577,8 @@
               </div>
             </div>
             <div>
-              <label class="block text-stone text-xs font-semibold uppercase mb-1">運動項目 / 心得 / GPS 路線理念</label>
-              <textarea id="formMessage" rows="2" placeholder="例如：慢跑 35 分鐘、健身房核心訓練、或繪製 GPS 企鵝圖案..." class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm"></textarea>
+              <label class="block text-stone text-xs font-semibold uppercase mb-1">運動項目 / 心得感言</label>
+              <textarea id="formMessage" rows="2" placeholder="例如：慢跑 35 分鐘、健身房核心訓練..." class="w-full border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-ocean text-sm"></textarea>
             </div>
             <div class="flex gap-2">
               <button id="formSubmitBtn" type="submit" class="flex-1 bg-ocean hover:bg-oceanDark text-white font-bold py-3 rounded-full transition shadow-xs text-sm">
@@ -652,7 +619,7 @@
               社群互動與經驗分享區
               <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-oceanLight text-oceanDark border border-ocean/20">開放交流</span>
             </h3>
-            <p class="text-xs text-stone mt-0.5">可在這裡自由交流運動心得、揪團慢跑健走、或討論 GPS ART 繪製路線。</p>
+            <p class="text-xs text-stone mt-0.5">可在這裡自由交流運動心得或揪團慢跑健走。</p>
           </div>
           <div class="flex items-center gap-2 text-xs text-stone bg-white px-3 py-1.5 rounded-xl border border-stone/15 shadow-2xs">
             <span>💬 最新社群留言</span>
@@ -1057,7 +1024,7 @@
     let currentNickname = "諾思夥伴";
     let isCurrentAdmin = false;
     let isGsiInitialized = false; // 單次執行保護鎖
-    let calcState = { stepPoints: 8, sportPoints: 6, teamExtra: 3, coSport: 3 };
+    let calcState = { stepPoints: 10, teamExtra: 4, sportPoints: 4, coSport: 2 };
 
     window.onload = function() {
       document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
@@ -1801,10 +1768,10 @@
     }
 
     const calcLimits = {
-      stepPoints: 12,
-      sportPoints: 12,
-      teamExtra: 4,
-      coSport: 4
+      stepPoints: 90,
+      sportPoints: 24,
+      teamExtra: 15,
+      coSport: 20
     };
 
     function changeCalc(field, diff) {
@@ -1822,9 +1789,9 @@
       document.getElementById('calcTotalPoints').innerText = totalPoints + " 點";
 
       let reward = 0;
-      let badge = "未達標門檻 (參加獎)";
+      let badge = "未達 10 點門檻 (參加獎)";
       if (totalPoints >= 20) { reward = 6000; badge = "達成 20 點最高門檻"; }
-      else if (totalPoints >= 15) { reward = 4500; badge = "達成 15 點門檻"; }
+      else if (totalPoints >= 15) { reward = 4800; badge = "達成 15 點門檻"; }
       else if (totalPoints >= 10) { reward = 3000; badge = "達成 10 點門檻"; }
 
       document.getElementById('calcTeamReward').innerText = "NT$ " + reward.toLocaleString();
