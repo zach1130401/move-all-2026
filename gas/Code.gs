@@ -575,6 +575,30 @@ function doPost(e) {
       return createJsonResponse({ success: true, message: `已成功刪除團隊「${targetTeamName}」`, teams: getTeams(ss) });
     }
 
+    // 14. 管理員更新團隊加碼點數 (updateTeamExtraPoints)
+    if (action === "updateTeamExtraPoints") {
+      if (!isOperatorAdmin) return createJsonResponse({ success: false, message: `403 權限不足：帳號 (${operatorEmail}) 不在管理員名單中` });
+      const targetTeamName = String(payload.teamName || "").trim();
+      const extraPts = Number(payload.extraPoints || 0);
+
+      const sheet = getTeamsSheet(ss);
+      const data = sheet.getDataRange().getValues();
+      let foundRow = -1;
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toLowerCase() === targetTeamName.toLowerCase()) {
+          foundRow = i + 1;
+          break;
+        }
+      }
+      if (foundRow > 0) {
+        sheet.getRange(foundRow, 6).setValue(extraPts);
+        sheet.getRange(foundRow, 7).setValue(new Date());
+        clearCache();
+        return createJsonResponse({ success: true, message: `團隊「${targetTeamName}」加碼點數已更新為 ${extraPts} 點`, teams: getTeams(ss) });
+      }
+      return createJsonResponse({ success: false, message: `找不到團隊「${targetTeamName}」` });
+    }
+
     return createJsonResponse({ success: false, message: "未知動作" });
   } catch (err) {
     return createJsonResponse({ success: false, error: err.message });

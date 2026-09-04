@@ -836,15 +836,20 @@
 
         <!-- 分頁 2: 團隊與隊名總管理 (Admin 調整) -->
         <div id="adminTabContentTeams" class="hidden space-y-4">
-          <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <span>💡 管理員具備所有團隊隊名修正、成員圈選與 CSV 批次匯入權限。</span>
-            <div class="flex gap-2 shrink-0">
-              <button onclick="openImportTeamsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-xs transition">
-                📥 批次匯入團隊 (CSV/文字)
-              </button>
-              <button onclick="adminPromptNewTeam()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-xs transition">
-                + 單筆新增/調整隊伍
-              </button>
+          <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 space-y-2">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <span class="font-bold text-rose-900">💡 團隊管理與【持續達標】福委檢核控制台</span>
+                <p class="text-[11px] text-rose-700 mt-0.5">系統自動檢核每週隊員完成紀錄，若當週 3 人皆有通過紀錄會顯示 <span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">🎉 W1 全員達標</span>。點擊「➕ 加碼 +1 點」即可直接核發【持續達標】點數！</p>
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <button onclick="openImportTeamsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-xs transition">
+                  📥 批次匯入團隊 (CSV/文字)
+                </button>
+                <button onclick="adminPromptNewTeam()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-xs transition">
+                  + 單筆新增/調整隊伍
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2748,6 +2753,65 @@
       fetchData();
     }
 
+    function analyzeTeamWeeklyCompliance(teamMembers) {
+      const validRecords = (window.latestRecordsData || []).filter(r => r && r.status === '通過');
+      const cleanMembers = (teamMembers || []).map(m => extractEmail(m)).filter(Boolean);
+
+      if (cleanMembers.length === 0) return [];
+
+      return [1, 2, 3, 4].map(wNum => {
+        const memberCompleted = cleanMembers.map(mEmail => {
+          return validRecords.some(r => {
+            const rEmail = extractEmail(r.email);
+            if (!rEmail || rEmail !== mEmail) return false;
+            if (!r.date) return false;
+            const dt = new Date(r.date.replace(/-/g, '/'));
+            const dayOfMonth = dt.getDate();
+            if (wNum === 1 && dayOfMonth >= 1 && dayOfMonth <= 7) return true;
+            if (wNum === 2 && dayOfMonth >= 8 && dayOfMonth <= 14) return true;
+            if (wNum === 3 && dayOfMonth >= 15 && dayOfMonth <= 21) return true;
+            if (wNum === 4 && dayOfMonth >= 22 && dayOfMonth <= 31) return true;
+            return false;
+          });
+        });
+
+        const completedCount = memberCompleted.filter(Boolean).length;
+        const isAllCompleted = cleanMembers.length > 0 && completedCount === cleanMembers.length;
+        return { week: wNum, completedCount, totalMembers: cleanMembers.length, isAllCompleted };
+      });
+    }
+
+    function adminUpdateTeamExtraPoints(teamName, currentExtra, delta) {
+      if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
+      const newPts = Math.max(0, (Number(currentExtra) || 0) + delta);
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'updateTeamExtraPoints',
+          operatorEmail: currentEmail,
+          teamName: teamName,
+          extraPoints: newPts
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && res.success) {
+          showToast(res.message || `🎉 團隊「${teamName}」加碼點數已調整為 ${newPts} 點！`, "success");
+          if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
+            const target = window.latestTeamsData.find(t => t && t.teamName === teamName);
+            if (target) target.extraPoints = newPts;
+          }
+          fetchData();
+        } else {
+          showToast("更新失敗: " + (res.message || "未知錯誤"), "error");
+        }
+      })
+      .catch(() => {
+        showToast("網路連線異常，更新加碼點數失敗", "error");
+      });
+    }
+
     function renderAdminTeamTable(serverTeams, individualList) {
       const tbody = document.getElementById('adminTeamTableBody');
       if (!tbody) return;
@@ -2772,7 +2836,7 @@
 
         const processedTeams = teams.map(t => {
           let teamSteps = 0;
-          let teamPoints = t.teamPoints || 0;
+          let teamPoints = 0;
           const membersList = (t.members || []).filter(Boolean);
           if (t.captainEmail && !membersList.map(m => String(m).toLowerCase()).includes(t.captainEmail.toLowerCase())) {
             membersList.unshift(t.captainEmail);
@@ -2800,27 +2864,51 @@
             });
           }
 
+          const extra = Number(t.extraPoints) || 0;
+          teamPoints += extra;
+
+          const weeklyCompliance = analyzeTeamWeeklyCompliance(membersList);
+
           return {
             ...t,
+            extraPoints: extra,
             membersStr: membersList.map(m => getFormattedUserLabel(m)).join(', '),
             teamSteps: teamSteps,
-            teamPoints: teamPoints
+            teamPoints: teamPoints,
+            weeklyCompliance: weeklyCompliance
           };
         });
 
-        tbody.innerHTML = processedTeams.map((team, idx) => `
+        tbody.innerHTML = processedTeams.map((team, idx) => {
+          const weeklyBadgesHtml = (team.weeklyCompliance || []).map(w => {
+            if (w.isAllCompleted) {
+              return `<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 shadow-2xs" title="當週 3 位隊員皆完成任務，符合【持續達標】">🎉 W${w.week} 全員達標</span>`;
+            }
+            return `<span class="px-1.5 py-0.5 rounded-full text-[10px] bg-stone/10 text-stone font-medium" title="當週成員完成度 ${w.completedCount}/${w.totalMembers}">W${w.week}: ${w.completedCount}/${w.totalMembers}人</span>`;
+          }).join(' ');
+
+          return `
           <tr class="hover:bg-rose-50/30 transition text-xs">
             <td class="p-3 text-center font-bold">${idx + 1}</td>
-            <td class="p-3 font-bold text-appleDark">${team.teamName}</td>
+            <td class="p-3">
+              <div class="font-bold text-appleDark">${team.teamName}</div>
+              <div class="flex gap-1 mt-1 flex-wrap items-center">${weeklyBadgesHtml}</div>
+            </td>
             <td class="p-3 font-semibold text-rose-700 font-mono">${getFormattedUserLabel(team.captainEmail || (team.members ? team.members[0] : '')) || '未設定'}</td>
             <td class="p-3 text-stone font-medium">${team.membersStr || '無'}</td>
-            <td class="p-3 text-center font-bold text-sunrise text-sm">${team.teamPoints || 0} 點</td>
-            <td class="p-3 text-right flex justify-end gap-1.5">
+            <td class="p-3 text-center font-bold text-sunrise text-sm">
+              <div>${team.teamPoints || 0} 點</div>
+              <div class="text-[10px] text-stone font-normal">（含加碼 ${team.extraPoints || 0} 點）</div>
+            </td>
+            <td class="p-3 text-right flex justify-end gap-1 items-center flex-wrap">
+              <button onclick="adminUpdateTeamExtraPoints('${team.teamName}', ${team.extraPoints || 0}, 1)" title="福委/管理員核發持續達標或共同運動加碼 +1 點" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-bold shadow-xs transition">➕ 加碼 +1 點</button>
+              <button onclick="adminUpdateTeamExtraPoints('${team.teamName}', ${team.extraPoints || 0}, -1)" title="扣回 1 點" class="px-2 py-1 bg-stone/10 hover:bg-stone/20 text-stone rounded-md text-xs font-semibold">扣 1 點</button>
               <button onclick="adminEditTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold shadow-xs">修改成員</button>
-              <button onclick="adminDeleteTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold shadow-xs">🗑️ 刪除</button>
+              <button onclick="adminDeleteTeam('${team.teamName}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold shadow-xs">🗑️</button>
             </td>
           </tr>
-        `).join('');
+          `;
+        }).join('');
       } catch (err) {
         console.error("renderAdminTeamTable error:", err);
       }
