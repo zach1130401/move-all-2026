@@ -660,9 +660,13 @@
       </div>
 
       <!-- 管理分頁按鈕 -->
-      <div class="flex gap-3 border-b border-stone/15 pb-2 shrink-0">
+      <div class="flex flex-wrap gap-3 border-b border-stone/15 pb-2 shrink-0">
         <button id="adminTabBtnAudit" onclick="switchAdminTab('audit')" class="pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition">
           運動步數與截圖審核
+        </button>
+        <button id="adminTabBtnRoster" onclick="switchAdminTab('roster')" class="pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition flex items-center gap-1.5">
+          👥 所有參賽與註冊同仁名單
+          <span id="adminRosterBadge" class="px-2 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-700 font-bold">0 人</span>
         </button>
         <button id="adminTabBtnTeams" onclick="switchAdminTab('teams')" class="pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition">
           所有團隊與隊名管理
@@ -738,6 +742,37 @@
                 </thead>
                 <tbody id="auditTableBody" class="divide-y divide-stone/10 text-appleDark">
                   <tr><td colspan="6" class="p-6 text-center text-stone">載入審核清單...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <!-- 分頁 : 所有參賽與註冊同仁總覽 -->
+        <div id="adminTabContentRoster" class="hidden space-y-4">
+          <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-200 text-xs text-rose-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <span class="font-bold block text-sm text-appleDark">👥 全系統參賽與註冊同仁總覽名單</span>
+              <span class="text-stone text-xs">即時彙整 Google Sheet「User_Profiles」所有已登入/已註冊夥伴與團隊歸屬狀態。</span>
+            </div>
+            <div class="w-full sm:w-64 shrink-0">
+              <input id="adminRosterSearchInput" type="text" oninput="filterAdminRosterTable()" placeholder="🔍 搜尋同仁 Email 或 暱稱..." class="w-full text-xs border border-stone/20 rounded-xl px-3.5 py-2 outline-none focus:ring-2 focus:ring-rose-500 bg-white shadow-2xs">
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-stone/20 overflow-hidden shadow-xs">
+            <div class="overflow-x-auto max-h-[450px]">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-cloud text-stone border-b border-stone/15 sticky top-0 z-10">
+                  <tr>
+                    <th class="p-3 w-12 text-center">No.</th>
+                    <th class="p-3">同仁姓名 / 設定暱稱</th>
+                    <th class="p-3">Google Email 帳號</th>
+                    <th class="p-3">當前歸屬團隊</th>
+                    <th class="p-3 text-center">歷史打卡次數</th>
+                    <th class="p-3 text-center">當前累計點數</th>
+                  </tr>
+                </thead>
+                <tbody id="adminRosterTableBody" class="divide-y divide-stone/10 text-appleDark">
+                  <tr><td colspan="6" class="p-6 text-center text-stone">載入參賽同仁名單...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1253,6 +1288,7 @@
       renderTeamLeaderboard(data.leaderboard, data.teams);
       renderFeed(data.records);
       renderChatMessages(data.chatMessages);
+      renderAdminRosterTable();
     }
 
     function fetchData() {
@@ -1910,6 +1946,7 @@
     function openAdminModal() {
       if (!isCurrentAdmin) return alert("存取遭拒：您不具備管理員權限！");
       document.getElementById('adminDashboardModal').classList.remove('hidden');
+      renderAdminRosterTable();
     }
 
     function closeAdminModal() {
@@ -1943,16 +1980,22 @@
 
     function switchAdminTab(tab) {
       document.getElementById('adminTabContentAudit').classList.add('hidden');
+      document.getElementById('adminTabContentRoster').classList.add('hidden');
       document.getElementById('adminTabContentTeams').classList.add('hidden');
       document.getElementById('adminTabContentUsers').classList.add('hidden');
 
       document.getElementById('adminTabBtnAudit').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
+      document.getElementById('adminTabBtnRoster').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition flex items-center gap-1.5";
       document.getElementById('adminTabBtnTeams').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
       document.getElementById('adminTabBtnUsers').className = "pb-2 text-sm font-bold border-b-2 border-transparent text-stone hover:text-appleDark transition";
 
       if (tab === 'audit') {
         document.getElementById('adminTabContentAudit').classList.remove('hidden');
         document.getElementById('adminTabBtnAudit').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition";
+      } else if (tab === 'roster') {
+        document.getElementById('adminTabContentRoster').classList.remove('hidden');
+        document.getElementById('adminTabBtnRoster').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition flex items-center gap-1.5";
+        renderAdminRosterTable();
       } else if (tab === 'teams') {
         document.getElementById('adminTabContentTeams').classList.remove('hidden');
         document.getElementById('adminTabBtnTeams').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition";
@@ -1960,6 +2003,105 @@
         document.getElementById('adminTabContentUsers').classList.remove('hidden');
         document.getElementById('adminTabBtnUsers').className = "pb-2 text-sm font-bold border-b-2 border-rose-600 text-rose-600 transition";
       }
+    }
+
+    function renderAdminRosterTable() {
+      const tbody = document.getElementById('adminRosterTableBody');
+      const badge = document.getElementById('adminRosterBadge');
+      if (!tbody) return;
+
+      const nicknameMap = window.latestNicknameMap || {};
+      const teams = window.latestTeamsData || [];
+      const leaderboard = window.latestLeaderboardData || [];
+      const records = window.latestRecordsData || [];
+
+      // 建立 Email -> 所屬團隊 對照
+      const userTeamMap = {};
+      teams.forEach(t => {
+        if (t && t.teamName && t.members) {
+          t.members.forEach(m => {
+            if (m && typeof m === 'string') {
+              userTeamMap[m.toLowerCase().trim()] = t.teamName;
+            }
+          });
+        }
+      });
+
+      // 建立 Email -> 打卡統計 對照
+      const userStats = {};
+      leaderboard.forEach(item => {
+        const info = cleanUserInfo(item);
+        if (info.email) {
+          userStats[info.email.toLowerCase().trim()] = item;
+        }
+      });
+
+      // 收集所有已知同仁 Email
+      const allEmailsSet = new Set();
+      Object.keys(nicknameMap).forEach(e => allEmailsSet.add(e.toLowerCase().trim()));
+      leaderboard.forEach(item => {
+        const info = cleanUserInfo(item);
+        if (info.email) allEmailsSet.add(info.email.toLowerCase().trim());
+      });
+      records.forEach(item => {
+        const info = cleanUserInfo(item);
+        if (info.email) allEmailsSet.add(info.email.toLowerCase().trim());
+      });
+
+      const emailsList = Array.from(allEmailsSet).filter(Boolean);
+
+      if (badge) badge.innerText = `${emailsList.length} 人`;
+
+      if (emailsList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">目前尚無已註冊同仁資料</td></tr>';
+        return;
+      }
+
+      window.latestRosterDataList = emailsList.map((email, idx) => {
+        const nick = nicknameMap[email] || (userStats[email] ? userStats[email].name : "") || email.split('@')[0];
+        const teamName = userTeamMap[email] || "未組隊";
+        const stats = userStats[email] || {};
+        const pts = stats.points || 0;
+        const recordCount = stats.sportCount || stats.validDays || 0;
+
+        return {
+          idx: idx + 1,
+          email: email,
+          nick: nick,
+          teamName: teamName,
+          pts: pts,
+          recordCount: recordCount
+        };
+      });
+
+      filterAdminRosterTable();
+    }
+
+    function filterAdminRosterTable() {
+      const tbody = document.getElementById('adminRosterTableBody');
+      if (!tbody || !window.latestRosterDataList) return;
+      const query = (document.getElementById('adminRosterSearchInput')?.value || "").toLowerCase().trim();
+
+      const filtered = window.latestRosterDataList.filter(u => {
+        if (!query) return true;
+        return u.email.includes(query) || u.nick.toLowerCase().includes(query) || u.teamName.toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-stone">查無符合搜尋條件的同仁</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((u, i) => `
+        <tr class="hover:bg-rose-50/30 transition text-xs">
+          <td class="p-3 text-center font-bold">${i + 1}</td>
+          <td class="p-3 font-bold text-appleDark">${u.nick}</td>
+          <td class="p-3 font-mono font-semibold text-rose-700">${u.email}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${u.teamName === '未組隊' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">${u.teamName}</span></td>
+          <td class="p-3 text-center font-mono">${u.recordCount} 次</td>
+          <td class="p-3 text-center font-mono font-bold text-sunrise">${u.pts} 點</td>
+        </tr>
+      `).join('');
     }
 
     function openImportTeamsModal() {
