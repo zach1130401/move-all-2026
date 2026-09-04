@@ -2110,6 +2110,7 @@
         userMap.forEach((label, valEmail) => {
           const cleanEmail = valEmail.toLowerCase().trim();
           const isSelected = cleanSelected && (cleanSelected === cleanEmail || cleanSelected.includes(cleanEmail) || cleanEmail.includes(cleanSelected));
+          const selectedAttr = isSelected ? 'selected' : '';
           
           // 檢查該同仁是否已歸屬其他團隊
           let alreadyInTeam = "";
@@ -2124,9 +2125,9 @@
           if (alreadyInTeam && !isSelected && !isCurrentAdmin) {
             opts += `<option value="${valEmail}" disabled>${label} (🔒 已加入「${alreadyInTeam}」)</option>`;
           } else if (alreadyInTeam && !isSelected && isCurrentAdmin) {
-            opts += `<option value="${valEmail}" ${isSelected}>${label} (原「${alreadyInTeam}」)</option>`;
+            opts += `<option value="${valEmail}" ${selectedAttr}>${label} (原「${alreadyInTeam}」)</option>`;
           } else {
-            opts += `<option value="${valEmail}" ${isSelected}>${label}</option>`;
+            opts += `<option value="${valEmail}" ${selectedAttr}>${label}</option>`;
           }
         });
         if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
