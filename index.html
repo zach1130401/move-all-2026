@@ -1394,6 +1394,22 @@
       if (currentEmail && currentNickname) {
         window.latestNicknameMap[currentEmail] = currentNickname;
       }
+      if (data.reactions) {
+        window.latestReactionsData = data.reactions;
+        Object.keys(data.reactions).forEach(msgId => {
+          const item = data.reactions[msgId];
+          if (item && item.counts) {
+            localStorage.setItem('north_reactions_' + msgId, JSON.stringify(item.counts));
+          }
+          if (item && item.userReacted && Array.isArray(item.userReacted)) {
+            ['like', 'cheer', 'agree', 'kneel', 'boba'].forEach(t => {
+              if (item.userReacted.includes(t)) {
+                localStorage.setItem('north_user_reacted_' + msgId + '_' + t, 'true');
+              }
+            });
+          }
+        });
+      }
       
       const elNameDisp = document.getElementById('userNicknameDisplay');
       if (elNameDisp) elNameDisp.innerText = currentNickname;
@@ -1574,6 +1590,28 @@
 
       const countEl = btn.querySelector('.reaction-count');
       if (countEl) countEl.innerText = counts[type];
+
+      // 背景發送 API 同步至 Google Sheets Reactions 試算表
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'toggleReaction',
+          msgId: msgId,
+          type: type,
+          operatorEmail: currentEmail
+        })
+      })
+      .then(res => res.json().catch(() => ({})))
+      .then(res => {
+        if (res && res.reactions && res.reactions[msgId]) {
+          const updated = res.reactions[msgId];
+          if (updated.counts) {
+            localStorage.setItem(reactionKey, JSON.stringify(updated.counts));
+            if (countEl) countEl.innerText = updated.counts[type] || 0;
+          }
+        }
+      })
+      .catch(err => console.error("Reaction sync error:", err));
     }
 
     function renderChatMessages(list) {

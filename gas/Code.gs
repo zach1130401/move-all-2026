@@ -78,6 +78,73 @@ function getPacerPointsSheet(ss) {
   return sheet;
 }
 
+function getReactionsSheet(ss) {
+  ss = ss || getSpreadsheet();
+  let sheet = ss.getSheetByName("Reactions");
+  if (!sheet) {
+    sheet = ss.insertSheet("Reactions");
+    sheet.appendRow(["msgId", "type", "userEmail", "timestamp"]);
+  }
+  return sheet;
+}
+
+function getReactionsData(ss, userEmail) {
+  const sheet = getReactionsSheet(ss);
+  const data = sheet.getDataRange().getValues();
+  const reactionsMap = {};
+  const cleanUser = String(userEmail || "").trim().toLowerCase();
+
+  for (let i = 1; i < data.length; i++) {
+    const msgId = String(data[i][0] || "").trim();
+    const type = String(data[i][1] || "").trim().toLowerCase();
+    const email = String(data[i][2] || "").trim().toLowerCase();
+
+    if (msgId && type) {
+      if (!reactionsMap[msgId]) {
+        reactionsMap[msgId] = {
+          counts: { like: 0, cheer: 0, agree: 0, kneel: 0, boba: 0 },
+          userReacted: []
+        };
+      }
+      reactionsMap[msgId].counts[type] = (reactionsMap[msgId].counts[type] || 0) + 1;
+      if (cleanUser && email === cleanUser && !reactionsMap[msgId].userReacted.includes(type)) {
+        reactionsMap[msgId].userReacted.push(type);
+      }
+    }
+  }
+  return reactionsMap;
+}
+
+function toggleReactionInSheet(msgId, type, userEmail, ss) {
+  ss = ss || getSpreadsheet();
+  const sheet = getReactionsSheet(ss);
+  const data = sheet.getDataRange().getValues();
+  const cleanMsgId = String(msgId || "").trim();
+  const cleanType = String(type || "").trim().toLowerCase();
+  const cleanEmail = String(userEmail || "").trim().toLowerCase();
+
+  if (!cleanMsgId || !cleanType || !cleanEmail) return "無效的訊息或使用者資訊";
+
+  let foundRow = -1;
+  for (let i = 1; i < data.length; i++) {
+    const rowMsgId = String(data[i][0] || "").trim();
+    const rowType = String(data[i][1] || "").trim().toLowerCase();
+    const rowEmail = String(data[i][2] || "").trim().toLowerCase();
+
+    if (rowMsgId === cleanMsgId && rowType === cleanType && rowEmail === cleanEmail) {
+      foundRow = i + 1;
+      break;
+    }
+  }
+
+  if (foundRow > 0) {
+    sheet.deleteRow(foundRow);
+  } else {
+    sheet.appendRow([cleanMsgId, cleanType, cleanEmail, new Date()]);
+  }
+  return null;
+}
+
 function getUserNicknameMap(ss) {
   const sheet = getUserProfilesSheet(ss);
   const data = sheet.getDataRange().getValues();
@@ -287,6 +354,8 @@ function doGet(e) {
     const isAdmin = admins.includes(userEmail);
     const userNickname = nicknameMap[userEmail] || "諾思夥伴";
 
+    const reactions = getReactionsData(ss, userEmail);
+
     return createJsonResponse({
       isAdmin: isAdmin,
       userNickname: userNickname,
@@ -295,6 +364,7 @@ function doGet(e) {
       teams: mainData.teams,
       chatMessages: chatMessages,
       nicknameMap: nicknameMap,
+      reactions: reactions,
       pacerLogs: isAdmin ? getPacerLogs(ss, nicknameMap) : [],
       adminList: isAdmin ? admins : []
     });
@@ -406,6 +476,19 @@ function doPost(e) {
         return createJsonResponse({ success: true, message: `已成功新增同仁 (${nick})` });
       }
       return createJsonResponse({ success: false, message: "無效的 Email" });
+    }
+
+    // 13. 表情貼圖按讚同步 (toggleReaction)
+    if (action === "toggleReaction" || action === "reaction") {
+      const msgId = payload.msgId;
+      const type = payload.type;
+      const email = payload.operatorEmail || payload.email || "";
+      toggleReactionInSheet(msgId, type, email, ss);
+      clearCache();
+      return createJsonResponse({
+        success: true,
+        reactions: getReactionsData(ss, email)
+      });
     }
 
     // 8. 管理員更新 Pacer 點數 (updatePacerPoints)
