@@ -1776,9 +1776,7 @@
         });
       }
 
-      // 備用示範選單名單
-      if (!userMap.has('jerri0912@gmail.com') && currentEmail !== 'jerri0912@gmail.com') userMap.set('jerri0912@gmail.com', 'Jerri (jerri0912@gmail.com)');
-      if (!userMap.has('fongyum080501@gmail.com') && currentEmail !== 'fongyum080501@gmail.com') userMap.set('fongyum080501@gmail.com', 'Fong (fongyum080501@gmail.com)');
+      // 選單名單完全由 User_Profiles (latestNicknameMap) 及動態數據自動產生
 
       const m2Selected = existingTeam && existingTeam.members ? existingTeam.members[1] || '' : '';
       const m3Selected = existingTeam && existingTeam.members ? existingTeam.members[2] || '' : '';
@@ -2237,10 +2235,7 @@
         });
       }
 
-      // 備用示範選單名單
-      if (!userMap.has('jerri0912@gmail.com')) userMap.set('jerri0912@gmail.com', 'Jerri (jerri0912@gmail.com)');
-      if (!userMap.has('fongyum080501@gmail.com')) userMap.set('fongyum080501@gmail.com', 'Fong (fongyum080501@gmail.com)');
-      if (!userMap.has('zach.yang@north.com.tw')) userMap.set('zach.yang@north.com.tw', 'Zach (zach.yang@north.com.tw)');
+      // 選單名單完全由 User_Profiles (latestNicknameMap) 及動態數據自動產生
 
       // 取出既存團隊成員
       const existingMembers = existingTeam ? (existingTeam.members || []) : [];
