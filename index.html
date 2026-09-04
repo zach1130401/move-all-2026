@@ -1544,10 +1544,10 @@
 
     function toggleReaction(msgId, type, btn) {
       const reactionKey = 'north_reactions_' + msgId;
-      let counts = { like: 0, cheer: 0, agree: 0 };
+      let counts = { like: 0, cheer: 0, agree: 0, kneel: 0, boba: 0 };
       try {
         const saved = localStorage.getItem(reactionKey);
-        if (saved) counts = JSON.parse(saved);
+        if (saved) counts = Object.assign(counts, JSON.parse(saved));
       } catch(e){}
 
       const userKey = 'north_user_reacted_' + msgId + '_' + type;
@@ -1559,12 +1559,16 @@
         if (type === 'like') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-rose-300 hover:text-rose-600";
         if (type === 'cheer') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-amber-300 hover:text-amber-700";
         if (type === 'agree') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-ocean/40 hover:text-oceanDark";
+        if (type === 'kneel') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-purple-300 hover:text-purple-700";
+        if (type === 'boba') btn.className = "px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition hover:border-emerald-300 hover:text-emerald-700";
       } else {
         counts[type] = (counts[type] || 0) + 1;
         localStorage.setItem(userKey, 'true');
         if (type === 'like') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-rose-50 text-rose-600 border-rose-200";
         if (type === 'cheer') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-amber-50 text-amber-700 border-amber-200";
         if (type === 'agree') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-oceanLight text-oceanDark border-ocean/30";
+        if (type === 'kneel') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-purple-50 text-purple-700 border-purple-200";
+        if (type === 'boba') btn.className = "px-2.5 py-1 rounded-full border font-semibold transition bg-emerald-50 text-emerald-700 border-emerald-200";
       }
       localStorage.setItem(reactionKey, JSON.stringify(counts));
 
@@ -1589,15 +1593,17 @@
         const rawId = item.id || item.timestamp || (info.email + '_' + idx);
         const msgId = 'chat_' + String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
         const reactionKey = 'north_reactions_' + msgId;
-        let counts = { like: 0, cheer: 0, agree: 0 };
+        let counts = { like: 0, cheer: 0, agree: 0, kneel: 0, boba: 0 };
         try {
           const saved = localStorage.getItem(reactionKey);
-          if (saved) counts = JSON.parse(saved);
+          if (saved) counts = Object.assign(counts, JSON.parse(saved));
         } catch(e){}
 
         const hasLike = localStorage.getItem('north_user_reacted_' + msgId + '_like') === 'true';
         const hasCheer = localStorage.getItem('north_user_reacted_' + msgId + '_cheer') === 'true';
         const hasAgree = localStorage.getItem('north_user_reacted_' + msgId + '_agree') === 'true';
+        const hasKneel = localStorage.getItem('north_user_reacted_' + msgId + '_kneel') === 'true';
+        const hasBoba = localStorage.getItem('north_user_reacted_' + msgId + '_boba') === 'true';
 
         return `
           <div class="p-4 rounded-2xl bg-white/95 border border-stone/15 shadow-2xs space-y-2 hover:border-ocean/40 transition">
@@ -1618,7 +1624,7 @@
               ${item.message || ''}
             </div>
 
-            <div class="pl-10 pt-1 flex items-center gap-2 text-[11px] text-stone border-t border-stone/10">
+            <div class="pl-10 pt-1 flex items-center flex-wrap gap-2 text-[11px] text-stone border-t border-stone/10">
               <button onclick="toggleReaction('${msgId}', 'like', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasLike ? 'bg-rose-50 text-rose-600 border-rose-200' : 'hover:border-rose-300 hover:text-rose-600'}">
                 👍 讚 <span class="reaction-count font-mono font-bold">${counts.like || 0}</span>
               </button>
@@ -1627,6 +1633,12 @@
               </button>
               <button onclick="toggleReaction('${msgId}', 'agree', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasAgree ? 'bg-oceanLight text-oceanDark border-ocean/30' : 'hover:border-ocean/40 hover:text-oceanDark'}">
                 👏 認同 <span class="reaction-count font-mono font-bold">${counts.agree || 0}</span>
+              </button>
+              <button onclick="toggleReaction('${msgId}', 'kneel', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasKneel ? 'bg-purple-50 text-purple-700 border-purple-200' : 'hover:border-purple-300 hover:text-purple-700'}">
+                🤯 跪了 <span class="reaction-count font-mono font-bold">${counts.kneel || 0}</span>
+              </button>
+              <button onclick="toggleReaction('${msgId}', 'boba', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasBoba ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'hover:border-emerald-300 hover:text-emerald-700'}">
+                🥤 珍奶 <span class="reaction-count font-mono font-bold">${counts.boba || 0}</span>
               </button>
             </div>
           </div>
@@ -2935,15 +2947,17 @@
         const rawId = item.rowId || item.timestamp || (item.cleanEmail + '_' + item.date + '_' + idx);
         const msgId = 'feed_' + String(rawId).replace(/[^a-zA-Z0-9_-]/g, '_');
         const reactionKey = 'north_reactions_' + msgId;
-        let counts = { like: 0, cheer: 0, agree: 0 };
+        let counts = { like: 0, cheer: 0, agree: 0, kneel: 0, boba: 0 };
         try {
           const saved = localStorage.getItem(reactionKey);
-          if (saved) counts = JSON.parse(saved);
+          if (saved) counts = Object.assign(counts, JSON.parse(saved));
         } catch(e){}
 
         const hasLike = localStorage.getItem('north_user_reacted_' + msgId + '_like') === 'true';
         const hasCheer = localStorage.getItem('north_user_reacted_' + msgId + '_cheer') === 'true';
         const hasAgree = localStorage.getItem('north_user_reacted_' + msgId + '_agree') === 'true';
+        const hasKneel = localStorage.getItem('north_user_reacted_' + msgId + '_kneel') === 'true';
+        const hasBoba = localStorage.getItem('north_user_reacted_' + msgId + '_boba') === 'true';
 
         return `
           <div class="bg-cloud p-4 rounded-2xl border border-stone/15 space-y-2">
@@ -2971,7 +2985,7 @@
               </div>
             ` : ''}
 
-            <div class="pt-2 flex items-center gap-2 text-[11px] text-stone border-t border-stone/10">
+            <div class="pt-2 flex items-center flex-wrap gap-2 text-[11px] text-stone border-t border-stone/10">
               <button onclick="toggleReaction('${msgId}', 'like', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasLike ? 'bg-rose-50 text-rose-600 border-rose-200' : 'hover:border-rose-300 hover:text-rose-600'}">
                 👍 讚 <span class="reaction-count font-mono font-bold">${counts.like || 0}</span>
               </button>
@@ -2980,6 +2994,12 @@
               </button>
               <button onclick="toggleReaction('${msgId}', 'agree', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasAgree ? 'bg-oceanLight text-oceanDark border-ocean/30' : 'hover:border-ocean/40 hover:text-oceanDark'}">
                 👏 認同 <span class="reaction-count font-mono font-bold">${counts.agree || 0}</span>
+              </button>
+              <button onclick="toggleReaction('${msgId}', 'kneel', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasKneel ? 'bg-purple-50 text-purple-700 border-purple-200' : 'hover:border-purple-300 hover:text-purple-700'}">
+                🤯 跪了 <span class="reaction-count font-mono font-bold">${counts.kneel || 0}</span>
+              </button>
+              <button onclick="toggleReaction('${msgId}', 'boba', this)" class="px-2.5 py-1 rounded-full border border-stone/15 font-semibold transition ${hasBoba ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'hover:border-emerald-300 hover:text-emerald-700'}">
+                🥤 珍奶 <span class="reaction-count font-mono font-bold">${counts.boba || 0}</span>
               </button>
             </div>
           </div>
