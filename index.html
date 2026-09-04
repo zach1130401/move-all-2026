@@ -1467,27 +1467,19 @@
       let userTeamName = "未組隊";
 
       if (data.teams && Array.isArray(data.teams)) {
-        const userE = currentEmail.toLowerCase().trim();
+        const userE = extractEmail(currentEmail);
         const userN = currentNickname.toLowerCase().trim();
         const foundTeam = data.teams.find(t => {
           if (!t) return false;
-          const capt = (t.captainEmail || "").toLowerCase().trim();
-          const mems = (t.members || []).map(m => String(m || "").toLowerCase().trim());
+          const capt = extractEmail(t.captainEmail || "");
+          const mems = (t.members || []).map(m => extractEmail(m));
           if (capt && capt === userE) return true;
-          return mems.some(m => m && (m.includes(userE) || userE.includes(m) || (userN && m.includes(userN))));
+          return mems.some(m => m && (m === userE || (userN && m.includes(userN))));
         });
         if (foundTeam && foundTeam.teamName) {
           userTeamName = foundTeam.teamName;
-        }
-      }
-
-      if (userTeamName === "未組隊") {
-        const localTeam = localStorage.getItem('north_team_' + currentEmail);
-        if (localTeam) {
-          try {
-            const parsed = JSON.parse(localTeam);
-            if (parsed && parsed.teamName) userTeamName = parsed.teamName;
-          } catch(e){}
+        } else {
+          localStorage.removeItem('north_team_' + currentEmail);
         }
       }
 
@@ -2166,18 +2158,11 @@
       if (window.latestTeamsData && Array.isArray(window.latestTeamsData)) {
         existingTeam = window.latestTeamsData.find(t => {
           if (!t) return false;
-          const capt = (t.captainEmail || "").toLowerCase().trim();
-          const mems = (t.members || []).map(m => String(m || "").toLowerCase().trim());
+          const capt = extractEmail(t.captainEmail || "");
+          const mems = (t.members || []).map(m => extractEmail(m));
           if (capt && capt === userE) return true;
-          return mems.some(m => m && (m.includes(userE) || userE.includes(m) || (userN && m.includes(userN))));
+          return mems.some(m => m && (m === userE || (userN && m.includes(userN))));
         });
-      }
-
-      if (!existingTeam) {
-        const saved = localStorage.getItem('north_team_' + currentEmail);
-        if (saved) {
-          try { existingTeam = JSON.parse(saved); } catch(e){}
-        }
       }
 
       // 彙整已加入其他團隊之成員對照表 (每人只能歸屬一隊)
