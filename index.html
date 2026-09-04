@@ -2751,6 +2751,21 @@
       closeImportTeamsModal();
       document.getElementById('importTeamsTextarea').value = "";
       fetchData();
+    function getTeamCoSportPoints(teamMembers, records) {
+      const cleanMembers = (teamMembers || []).map(m => extractEmail(m)).filter(Boolean);
+      if (cleanMembers.length === 0) return 0;
+
+      const validRecords = (records || window.latestRecordsData || []).filter(r => r && r.status === '通過' && r.message && r.message.includes('一起動起來'));
+      const uniqueDates = new Set();
+
+      validRecords.forEach(r => {
+        const rEmail = extractEmail(r.email);
+        if (rEmail && cleanMembers.includes(rEmail) && r.date) {
+          uniqueDates.add(r.date.trim());
+        }
+      });
+
+      return uniqueDates.size;
     }
 
     function analyzeTeamWeeklyCompliance(teamMembers) {
@@ -2859,10 +2874,14 @@
                 const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
                 const sports = user.sportCount || user.sports || 0;
                 teamSteps += (user.totalSteps || user.steps || 0);
-                teamPoints += (user.points || user.totalPoints || (days + sports));
+                teamPoints += (days + sports);
               }
             });
           }
+
+          // 團隊【一起動起來】依日期去重計算（同日同隊多次/多人上傳，團隊當日僅發放 +1 點）
+          const coSportPoints = getTeamCoSportPoints(membersList, window.latestRecordsData);
+          teamPoints += coSportPoints;
 
           const extra = Number(t.extraPoints) || 0;
           teamPoints += extra;
@@ -3192,12 +3211,16 @@
                 const days = user.validDays || user.days || Math.min(30, Math.floor((user.totalSteps || 0) / 8000));
                 const sports = user.sportCount || user.sports || 0;
                 teamSteps += (user.totalSteps || user.steps || 0);
-                teamPoints += (user.points || user.totalPoints || (days + sports));
+                teamPoints += (days + sports);
               }
             });
           }
 
-          if (t.extraPoints) teamPoints += t.extraPoints;
+          // 團隊【一起動起來】依日期去重計算（同日同隊多次/多人上傳，團隊當日僅發放 +1 點）
+          const coSportPoints = getTeamCoSportPoints(membersList, window.latestRecordsData);
+          teamPoints += coSportPoints;
+
+          if (t.extraPoints) teamPoints += Number(t.extraPoints) || 0;
 
           let statusBadge = "尚未達標";
           let rewardText = "參加獎 (公益禮盒)";

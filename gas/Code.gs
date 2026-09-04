@@ -839,12 +839,14 @@ function getEventData(ss, nicknameMap) {
     });
 
     if (!userStatsMap[cleanEmail]) {
-      userStatsMap[cleanEmail] = { email: email, name: currentName, validDays: 0, totalSteps: 0, sportCount: 0 };
+      userStatsMap[cleanEmail] = { email: email, name: currentName, validDays: 0, totalSteps: 0, sportCount: 0, coSportCount: 0 };
     }
     if (status === "通過") {
       const msg = String(row[6] || "").trim();
-      if (msg.includes("規律運動") || msg.includes("一起動起來") || reportedSteps === 0) {
+      if (msg.includes("規律運動") || (reportedSteps === 0 && !msg.includes("一起動起來"))) {
         userStatsMap[cleanEmail].sportCount += 1;
+      } else if (msg.includes("一起動起來")) {
+        userStatsMap[cleanEmail].coSportCount = (userStatsMap[cleanEmail].coSportCount || 0) + 1;
       } else {
         userStatsMap[cleanEmail].validDays += 1;
       }
@@ -855,7 +857,7 @@ function getEventData(ss, nicknameMap) {
   const leaderboard = Object.values(userStatsMap).map(user => {
     const cleanE = user.email.toLowerCase().trim();
     const pacerPts = Number(pacerMap[cleanE]) || 0;
-    const calculatedPts = user.validDays + user.sportCount;
+    const calculatedPts = user.validDays + user.sportCount + (user.coSportCount || 0);
     const finalPoints = calculatedPts + pacerPts;
 
     let tier = "尚未達標", reward = 0;
