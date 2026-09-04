@@ -1734,8 +1734,9 @@
             const isCurrentTeam = existingTeam && (existingTeam.teamName === t.teamName);
             if (!isCurrentTeam) {
               t.members.forEach(m => {
-                if (m && typeof m === 'string') {
-                  assignedTeamsMap.set(m.toLowerCase().trim(), t.teamName);
+                const cleanM = String(m || "").toLowerCase().trim();
+                if (cleanM && cleanM.length > 2) {
+                  assignedTeamsMap.set(cleanM, t.teamName);
                 }
               });
             }
@@ -1784,21 +1785,28 @@
 
       const buildOptions = (selectedVal) => {
         let opts = '<option value="">-- 請選擇同仁 --</option>';
-        userMap.forEach((label, val) => {
-          const isSelected = (selectedVal && (selectedVal.toLowerCase().includes(val) || val.includes(selectedVal.toLowerCase()))) ? 'selected' : '';
+        const cleanSelected = String(selectedVal || "").toLowerCase().trim();
+
+        userMap.forEach((label, valEmail) => {
+          const cleanEmail = valEmail.toLowerCase().trim();
+          const isSelected = cleanSelected && (cleanSelected === cleanEmail || cleanSelected.includes(cleanEmail) || cleanEmail.includes(cleanSelected));
           
           // 檢查該同仁是否已歸屬其他團隊
           let alreadyInTeam = "";
           assignedTeamsMap.forEach((tName, keyEmail) => {
-            if (val.includes(keyEmail) || keyEmail.includes(val)) {
-              alreadyInTeam = tName;
+            if (keyEmail && keyEmail.length > 2) {
+              if (cleanEmail === keyEmail || cleanEmail.includes(keyEmail) || keyEmail.includes(cleanEmail)) {
+                alreadyInTeam = tName;
+              }
             }
           });
 
-          if (alreadyInTeam && !isSelected) {
-            opts += `<option value="${val}" disabled>${label} (🔒 已加入「${alreadyInTeam}」)</option>`;
+          if (alreadyInTeam && !isSelected && !isCurrentAdmin) {
+            opts += `<option value="${valEmail}" disabled>${label} (🔒 已加入「${alreadyInTeam}」)</option>`;
+          } else if (alreadyInTeam && !isSelected && isCurrentAdmin) {
+            opts += `<option value="${valEmail}" ${isSelected}>${label} (原「${alreadyInTeam}」)</option>`;
           } else {
-            opts += `<option value="${val}" ${isSelected}>${label}</option>`;
+            opts += `<option value="${valEmail}" ${isSelected}>${label}</option>`;
           }
         });
         if (selectedVal && !Array.from(userMap.keys()).some(k => selectedVal.toLowerCase().includes(k))) {
